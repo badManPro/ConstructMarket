@@ -1,0 +1,256 @@
+.checkout-screen {
+  padding-bottom: 220rpx;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-card__title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.empty-card__desc {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.empty-card__actions {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 28rpx;
+}
+
+.empty-card__action {
+  display: inline-flex;
+  padding: 18rpx 28rpx;
+  border-radius: 999rpx;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.empty-card__action--ghost {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.trade-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.trade-row__main {
+  flex: 1;
+}
+
+.trade-row__label {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.trade-row__value {
+  margin-top: 12rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.trade-row__desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.trade-row__warn {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #b45309;
+}
+
+.trade-row__tag {
+  display: inline-flex;
+  margin-top: 14rpx;
+  padding: 10rpx 14rpx;
+  border-radius: 999rpx;
+  background: #e2e8f0;
+  font-size: 22rpx;
+  color: #334155;
+}
+
+.trade-row__arrow {
+  align-self: center;
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 22rpx;
+}
+
+.trade-action-row {
+  margin-top: 18rpx;
+}
+
+.checkout-item {
+  display: flex;
+  gap: 20rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #e2e8f0;
+}
+
+.checkout-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.checkout-item__cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #1e293b, #475569);
+  color: #ffffff;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.checkout-item__content {
+  flex: 1;
+}
+
+.checkout-item__name {
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.checkout-item__model {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #475569;
+}
+
+.checkout-item__meta {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.remark-input {
+  width: 100%;
+  min-height: 140rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  box-sizing: border-box;
+  background: #f8fafc;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.payment-card {
+  padding: 24rpx;
+  border: 2rpx solid transparent;
+  border-radius: 22rpx;
+  background: #f8fafc;
+}
+
+.payment-card--active {
+  border-color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.payment-card__title {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.payment-card__desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #e2e8f0;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summary-row__label {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.summary-row__value {
+  font-size: 24rpx;
+  color: #0f172a;
+}
+
+.summary-row--strong .summary-row__label,
+.summary-row--strong .summary-row__value {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.checkout-toolbar {
+  position: fixed;
+  right: 24rpx;
+  bottom: 24rpx;
+  left: 24rpx;
+  display: grid;
+  grid-template-columns: 1fr 220rpx;
+  gap: 12rpx;
+  align-items: center;
+  padding: 12rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24rpx 60rpx rgba(15, 23, 42, 0.14);
+}
+
+.checkout-toolbar__summary {
+  padding-left: 12rpx;
+}
+
+.checkout-toolbar__amount {
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.checkout-toolbar__desc {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.checkout-toolbar__submit {
+  padding: 22rpx 0;
+  border-radius: 20rpx;
+  background: #0f172a;
+  color: #ffffff;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 700;
+}

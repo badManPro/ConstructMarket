@@ -90,6 +90,35 @@ export type CartItem = {
   invalidReason?: string;
 };
 
+export type InvoiceDraft = {
+  type: "electronic" | "paper";
+  title: string;
+  taxNo: string;
+  email: string;
+};
+
+export type CartAmountSummary = {
+  lineCount: number;
+  selectedLineCount: number;
+  selectedQuantity: number;
+  invalidCount: number;
+  subtotal: number;
+  discount: number;
+  freight: number;
+  payable: number;
+};
+
+export type CheckoutDraft = {
+  source: "cart" | "buy_now";
+  selectedCartItemIds: string[];
+  buyNowItem: CartItem | null;
+  selectedAddressId: string | null;
+  selectedCouponId: string | null;
+  invoiceDraft: InvoiceDraft | null;
+  remark: string;
+  paymentMethod: "wechat" | "alipay" | "unionpay";
+};
+
 export type Order = {
   id: string;
   orderNo: string;

@@ -2,7 +2,7 @@ import { ROUTES } from "../../constants/routes";
 import { getProductDetail, getRecommendedProducts } from "../../mock/browse";
 import type { BrowseProductDetail, SearchProduct } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
-import { addCartItem, getCartCount, getFavoriteIds, toggleFavoriteId } from "../../utils/storage";
+import { addCartItem, getCartCount, getFavoriteIds, patchCheckoutDraft, toggleFavoriteId } from "../../utils/storage";
 
 Page({
   data: {
@@ -124,7 +124,29 @@ Page({
     });
   },
   handleBuyNow() {
-    if (!this.ensureSpecSelected()) return;
+    const product = this.data.product;
+    if (!product || !this.ensureSpecSelected()) return;
+
+    patchCheckoutDraft({
+      source: "buy_now",
+      selectedCartItemIds: [],
+      buyNowItem: {
+        id: `buy-now-${product.id}`,
+        productId: product.id,
+        skuId: `${product.skuId}-${this.data.selectedOptions.join("-")}`,
+        name: product.name,
+        cover: product.cover,
+        model: this.data.selectedSpecText,
+        price: product.price,
+        unit: product.unit,
+        quantity: this.data.quantity,
+        minOrderQty: product.minOrderQty,
+        checked: true,
+        invalid: false,
+      },
+      selectedCouponId: null,
+    });
+
     navigateWithParams(ROUTES.checkout, {
       source: "buy_now",
       productId: this.data.productId,

@@ -5,6 +5,7 @@
   "description": "ConstructMarket native WeChat mini program scaffold",
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "build:miniapp": "node ./scripts/build-miniapp.mjs",
     "install:skills": "bash ./scripts/install_project_skills.sh"
   },
   "dependencies": {

@@ -1,7 +1,8 @@
 {
   "description": "ConstructMarket native WeChat mini program project config",
   "packOptions": {
-    "ignore": []
+    "ignore": [],
+    "include": []
   },
   "setting": {
     "urlCheck": false,
@@ -16,13 +17,27 @@
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
-    }
+    },
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
   },
   "compileType": "miniprogram",
   "libVersion": "trial",
-  "appid": "touristappid",
+  "appid": "wx6c1d03992941a748",
   "projectname": "ConstructMarket",
   "srcMiniprogramRoot": "miniprogram/",
-  "miniprogramRoot": "miniprogram/",
-  "condition": {}
+  "miniprogramRoot": "dist/",
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
 }

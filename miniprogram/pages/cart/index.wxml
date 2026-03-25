@@ -1,33 +1,107 @@
-<view class="screen">
+<view class="screen cart-screen">
   <view class="hero">
     <view class="hero__eyebrow">Trade</view>
     <view class="hero__title">{{title}}</view>
     <view class="hero__subtitle">{{summary}}</view>
   </view>
 
-  <view class="section-card">
-    <view class="section-card__title">当前摘要</view>
-    <view class="state-grid">
-      <view wx:for="{{snapshot}}" wx:key="label" class="state-grid__item">
-        <view class="state-grid__value">{{item.value}}</view>
-        <view class="state-grid__label">{{item.label}}</view>
-      </view>
-    </view>
+  <view wx:if="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">购物车加载失败</view>
+    <view class="empty-card__desc">本地购物车读取异常，请重试当前页面。</view>
+    <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
   </view>
 
-  <view class="section-card">
-    <view class="section-card__title">继续验证</view>
-    <view class="link-list">
-      <view
-        wx:for="{{links}}"
-        wx:key="route"
-        class="link-card"
-        data-route="{{item.route}}"
-        bindtap="handleRouteTap"
-      >
-        <view class="link-card__title">{{item.label}}</view>
-        <view class="link-card__desc">{{item.description}}</view>
+  <block wx:elif="{{status === 'empty'}}">
+    <view class="section-card empty-card">
+      <view class="empty-card__title">购物车还是空的</view>
+      <view class="empty-card__desc">从商品详情页加入购物车后，这里会汇总待下单商品。</view>
+      <view class="empty-card__action" bindtap="handleGoHome">去首页逛逛</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="section-card">
+      <view class="section-card__title">当前摘要</view>
+      <view class="state-grid">
+        <view class="state-grid__item">
+          <view class="state-grid__value">{{amountSummary.lineCount}}</view>
+          <view class="state-grid__label">待结算行数</view>
+        </view>
+        <view class="state-grid__item">
+          <view class="state-grid__value">{{amountSummary.invalidCount}}</view>
+          <view class="state-grid__label">失效商品</view>
+        </view>
+        <view class="state-grid__item">
+          <view class="state-grid__value">¥{{amountSummary.payable}}</view>
+          <view class="state-grid__label">已选金额</view>
+        </view>
       </view>
     </view>
-  </view>
+
+    <view class="section-card">
+      <view class="section-card__title">待下单商品</view>
+      <view
+        wx:for="{{validItems}}"
+        wx:key="id"
+        class="cart-item"
+      >
+        <view
+          class="cart-item__check {{item.checked ? 'cart-item__check--active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="handleToggleItem"
+        >
+          {{item.checked ? '已选' : '未选'}}
+        </view>
+
+        <view class="cart-item__body">
+          <view class="cart-item__cover" data-id="{{item.productId}}" bindtap="handleProductTap">{{item.cover}}</view>
+
+          <view class="cart-item__content">
+            <view class="cart-item__header">
+              <view class="cart-item__name" data-id="{{item.productId}}" bindtap="handleProductTap">{{item.name}}</view>
+              <view class="cart-item__delete" data-id="{{item.id}}" bindtap="handleDelete">删除</view>
+            </view>
+
+            <view class="cart-item__model">{{item.model}}</view>
+            <view class="cart-item__meta">¥{{item.price}} / {{item.unit}} · 起订 {{item.minOrderQty}}{{item.unit}}</view>
+
+            <view class="cart-item__footer">
+              <view class="cart-item__qty-label">数量</view>
+              <view class="stepper">
+                <view class="stepper__btn" data-id="{{item.id}}" bindtap="handleDecrease">-</view>
+                <view class="stepper__value">{{item.quantity}}</view>
+                <view class="stepper__btn stepper__btn--solid" data-id="{{item.id}}" bindtap="handleIncrease">+</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{invalidItems.length}}" class="section-card">
+      <view class="section-card__title">失效商品</view>
+      <view
+        wx:for="{{invalidItems}}"
+        wx:key="id"
+        class="invalid-card"
+      >
+        <view class="invalid-card__name">{{item.name}}</view>
+        <view class="invalid-card__reason">{{item.invalidReason || '当前商品暂不可下单'}}</view>
+      </view>
+      <view class="inline-action" bindtap="handleClearInvalid">清空失效商品</view>
+    </view>
+
+    <view class="cart-toolbar">
+      <view class="cart-toolbar__select" bindtap="handleToggleAll">
+        {{allChecked ? '取消全选' : '全选商品'}}
+      </view>
+
+      <view class="cart-toolbar__summary">
+        <view class="cart-toolbar__amount">¥{{amountSummary.payable}}</view>
+        <view class="cart-toolbar__desc">已选 {{amountSummary.selectedLineCount}} 行 / {{amountSummary.selectedQuantity}} 件</view>
+      </view>
+
+      <view class="cart-toolbar__submit" bindtap="handleCheckout">去结算</view>
+    </view>
+  </block>
 </view>

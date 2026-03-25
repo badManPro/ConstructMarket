@@ -1,5 +1,5 @@
 import { ROUTES } from "../constants/routes";
-import type { Order, RouteLink, UserProfile } from "../types/models";
+import type { Order, ProfileDraft, RouteLink, UserProfile } from "../types/models";
 import type { OrderFilterValue } from "../utils/order";
 
 export type ProfileOrderFilter = Extract<OrderFilterValue, "pending_payment" | "pending_receipt" | "completed" | "after_sale">;
@@ -26,6 +26,12 @@ export type ProfileAssetStat = {
   value: string;
 };
 
+export type ProfileChoiceOption = {
+  value: string;
+  label: string;
+  description?: string;
+};
+
 export type ProfilePageData = {
   userProfile: UserProfile;
   couponNote: string;
@@ -45,6 +51,65 @@ export const seededUserProfile: UserProfile = {
   couponCount: 9,
   defaultAddressId: "addr-001",
 };
+
+export const profileAvatarOptions: ProfileChoiceOption[] = [
+  { value: "李", label: "李工" },
+  { value: "王", label: "王工" },
+  { value: "周", label: "周工" },
+  { value: "赵", label: "赵工" },
+  { value: "苏", label: "苏工" },
+];
+
+export const buyerRoleOptions: ProfileChoiceOption[] = [
+  {
+    value: "项目采购主管",
+    label: "采购主管",
+    description: "统筹项目材料采购计划与供应节奏。",
+  },
+  {
+    value: "材料工程师",
+    label: "材料工程师",
+    description: "负责规格确认、选型与供应商比价。",
+  },
+  {
+    value: "成本经理",
+    label: "成本经理",
+    description: "关注合同价格、费用归集和成本控制。",
+  },
+  {
+    value: "仓配负责人",
+    label: "仓配负责人",
+    description: "负责到货验收、入库和现场调拨。",
+  },
+];
+
+export function buildProfileDraft(userProfile: UserProfile): ProfileDraft {
+  return {
+    avatar: userProfile.avatar,
+    nickname: userProfile.nickname,
+    phone: userProfile.phone,
+    companyName: userProfile.companyName,
+    buyerRole: userProfile.buyerRole,
+  };
+}
+
+export function isEnterpriseProfileComplete(profileDraft: ProfileDraft) {
+  return Boolean(profileDraft.companyName.trim() && profileDraft.buyerRole.trim());
+}
+
+export function getProfileCompletionTips(profileDraft: ProfileDraft) {
+  const tips: string[] = [];
+
+  if (!profileDraft.companyName.trim()) {
+    tips.push("补充企业名称后，我的页和订单场景可更清晰展示采购主体。");
+  }
+
+  if (!profileDraft.buyerRole.trim()) {
+    tips.push("补充采购身份后，客服和售后场景可更准确识别你的角色。");
+  }
+
+  return tips;
+}
 
 function countOrdersByStatus(orders: Order[], status: string) {
   return orders.filter((item) => item.status === status).length;
@@ -118,11 +183,9 @@ export function getProfilePageData(params: {
   addressCount: number;
   invoiceCount: number;
   defaultAddressText: string;
+  userProfile: UserProfile;
 }): ProfilePageData {
-  const { orders, favoriteCount, addressCount, invoiceCount, defaultAddressText } = params;
-  const userProfile = {
-    ...seededUserProfile,
-  };
+  const { orders, favoriteCount, addressCount, invoiceCount, defaultAddressText, userProfile } = params;
   const afterSaleCount = countOrdersByStatus(orders, "after_sale");
 
   return {

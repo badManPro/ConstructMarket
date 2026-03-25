@@ -172,6 +172,14 @@ export type UserProfile = {
   defaultAddressId: string;
 };
 
+export type ProfileDraft = {
+  avatar: string;
+  nickname: string;
+  phone: string;
+  companyName: string;
+  buyerRole: string;
+};
+
 export type FaqItem = {
   id: string;
   category: string;

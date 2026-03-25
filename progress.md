@@ -168,3 +168,13 @@
 ### Follow-up Session: 收藏夹页运行时兼容修复
 - 根据微信开发者工具报错定位到 `miniprogram/utils/storage.ts`：`getCartItems()` 直接信任本地缓存是数组，旧缓存场景会导致 `getCartCount().reduce(...)` 崩溃
 - 更新 `getCartItems()` 和 `getFavoriteIds()`，为本地缓存增加 `Array.isArray` 校验与自愈归一化；读取到脏缓存时自动重置为空数组
+
+### Follow-up Session: 个人信息页真实实现
+- 扩展共享类型：新增 `ProfileDraft`，用于区分已保存资料和编辑中草稿
+- 扩展 `miniprogram/mock/profile.ts`：新增头像选项、推荐采购身份、资料补全提示和 `buildProfileDraft`
+- 扩展 `miniprogram/utils/storage.ts`：新增 `userProfile/profileDraft` 本地持久化、重置和保存回流能力
+- 更新 `miniprogram/pages/profile/index.ts`：我的页改为读取真实 `userProfile`，确保个人信息保存后立即回流
+- 重写 `miniprogram/package-profile/profile/info.ts`、`info.wxml`、`info.wxss`：完成个人信息页真实内容、头像切换、昵称/企业/身份编辑、手机号只读提示、草稿恢复和保存
+- 修复一次补丁误将样式内容写入 `info.wxml` 的问题，并重新拆分到独立 `info.wxss`
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过

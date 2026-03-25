@@ -3,7 +3,7 @@ import { getProfilePageData, type ProfileAssetStat, type ProfileOrderFilter, typ
 import type { Address, UserProfile } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
 import { getPageStatusOverride, type PageStatus } from "../../utils/page";
-import { getAddresses, getFavoriteIds, getInvoiceRecords, getOrders } from "../../utils/storage";
+import { getAddresses, getFavoriteIds, getInvoiceRecords, getOrders, getUserProfile } from "../../utils/storage";
 
 function formatDefaultAddress(addresses: Address[]) {
   const defaultAddress = addresses.find((item) => item.isDefault) ?? addresses[0] ?? null;
@@ -73,6 +73,7 @@ Page({
         addressCount: addresses.length,
         invoiceCount,
         defaultAddressText: formatDefaultAddress(addresses),
+        userProfile: getUserProfile(),
       });
 
       this.setData({

@@ -103,3 +103,9 @@
 - `package-profile/profile/favorite.ts` 已接入 `getFavoriteIds`、`toggleFavoriteId`、`addCartItem`、`getCartCount`，说明个人中心域可以继续沿用现有本地状态体系，不必新建 profile store
 - 收藏夹页已补齐 `loading` / `empty` / `error` / `offline` 分支，并支持通过 `state` query 演示异常态
 - 当前恢复点已前移到 `package-profile/profile/info.ts`，也就是个人信息页真实内容与资料编辑
+
+## Follow-up Findings: 个人信息页真实实现
+- 个人信息页不需要新建全局 profile store，沿用本地 `storage.ts` 即可同时承接 `userProfile` 和 `profileDraft`
+- “我的页”若继续使用 `seededUserProfile`，编辑结果不会回流，因此资料聚合必须改为读取本地持久化后的真实 `userProfile`
+- PRD 中“未完善企业信息时展示补充引导”更适合放在 ready 页内的建议卡，而不是把页面整体降级为 empty 态
+- 当前恢复点已前移到“交易链路边界态联调”和微信开发者工具视觉验收

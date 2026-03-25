@@ -1,13 +1,175 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Profile Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
-  </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+<view class="screen profile-info-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">个人信息</view>
+      <view class="page-head__icon">{{hasUnsavedChanges ? '草稿' : ''}}</view>
+    </view>
+    <view class="page-head__sub">
+      {{status === 'ready' ? '维护昵称、手机号、企业名称和采购身份，保存后会同步到我的页。' : '展示并编辑采购账号的基础资料。'}}
     </view>
   </view>
+
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">个人资料加载中</view>
+    <view class="empty-card__desc">正在整理账号信息、本地草稿和企业资料提示。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">个人资料读取失败</view>
+    <view class="empty-card__desc">请重试本地资料加载，若仍异常可先返回我的页继续查看订单和服务入口。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoProfile">返回我的页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">个人信息页已预留离线占位，恢复后可继续编辑资料并同步到我的页。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoProfile">返回我的页</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复内容</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前还没有初始化资料</view>
+    <view class="empty-card__desc">恢复示例资料后，可继续补充企业名称、采购身份和头像信息。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoProfile">返回我的页</view>
+      <view class="empty-card__action" bindtap="handleRetry">加载资料</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view class="section-card profile-overview-card">
+      <view class="profile-overview-card__main">
+        <view class="profile-overview-card__avatar">{{profileDraft.avatar}}</view>
+        <view class="profile-overview-card__info">
+          <view class="profile-overview-card__name-row">
+            <view class="profile-overview-card__name">{{profileDraft.nickname || '未设置昵称'}}</view>
+            <view class="profile-overview-card__badge {{isEnterpriseComplete ? 'profile-overview-card__badge--ready' : ''}}">
+              {{isEnterpriseComplete ? '企业信息已完善' : '企业信息待完善'}}
+            </view>
+          </view>
+          <view class="profile-overview-card__phone">{{profileDraft.phone}}</view>
+          <view class="profile-overview-card__company">
+            {{profileDraft.companyName || '请补充企业名称'}} · {{profileDraft.buyerRole || '请补充采购身份'}}
+          </view>
+        </view>
+      </view>
+      <view class="profile-overview-card__note">
+        {{hasUnsavedChanges ? '当前草稿已自动保存在本机，返回后仍可继续编辑。' : '当前资料已同步到我的页，订单、发票和客服场景会复用这些信息。'}}
+      </view>
+    </view>
+
+    <view wx:if="{{completionTips.length}}" class="section-card profile-guide-card">
+      <view class="section-card__title">资料补充建议</view>
+      <view class="bullet-list">
+        <view wx:for="{{completionTips}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="section-card profile-form-card">
+      <view class="section-card__title">基础信息</view>
+
+      <view class="form-row form-row--column">
+        <view class="form-row__head">
+          <view class="form-row__label">头像</view>
+          <view class="form-row__meta">当前版本用文字头像演示，可直接切换首字</view>
+        </view>
+        <view class="avatar-options">
+          <view
+            wx:for="{{avatarOptions}}"
+            wx:key="value"
+            class="avatar-option {{profileDraft.avatar === item.value ? 'avatar-option--active' : ''}}"
+            data-value="{{item.value}}"
+            bindtap="handleAvatarSelect"
+          >
+            <view class="avatar-option__badge">{{item.value}}</view>
+            <view class="avatar-option__label">{{item.label}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-row__label">昵称</view>
+        <input
+          class="form-row__input"
+          maxlength="12"
+          placeholder="请输入常用昵称"
+          value="{{profileDraft.nickname}}"
+          data-field="nickname"
+          bindinput="handleInput"
+        />
+      </view>
+
+      <view class="form-row">
+        <view class="form-row__label">手机号</view>
+        <view class="form-row__readonly-wrap">
+          <view class="form-row__readonly">{{profileDraft.phone}}</view>
+          <view class="form-row__inline-action" bindtap="handlePhoneTip">修改入口预留</view>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-row__label">企业名称</view>
+        <input
+          class="form-row__input"
+          maxlength="24"
+          placeholder="请输入企业或项目部名称"
+          value="{{profileDraft.companyName}}"
+          data-field="companyName"
+          bindinput="handleInput"
+        />
+      </view>
+
+      <view class="form-row form-row--column">
+        <view class="form-row__head">
+          <view class="form-row__label">采购身份</view>
+          <view class="form-row__meta">可直接输入，也可使用推荐身份</view>
+        </view>
+        <input
+          class="form-row__input"
+          maxlength="16"
+          placeholder="请输入采购身份或岗位"
+          value="{{profileDraft.buyerRole}}"
+          data-field="buyerRole"
+          bindinput="handleInput"
+        />
+        <view class="role-options">
+          <view
+            wx:for="{{roleOptions}}"
+            wx:key="value"
+            class="role-chip {{profileDraft.buyerRole === item.value ? 'role-chip--active' : ''}}"
+            data-value="{{item.value}}"
+            bindtap="handleRoleSelect"
+          >
+            <view class="role-chip__label">{{item.label}}</view>
+            <view class="role-chip__desc">{{item.description}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card profile-form-card">
+      <view class="section-card__title">资料说明</view>
+      <view class="bullet-list">
+        <view class="bullet-list__item">手机号当前为只读展示，后续可接入账号体系或微信授权修改。</view>
+        <view class="bullet-list__item">企业名称和采购身份未完善时，个人中心会继续提示补充。</view>
+        <view class="bullet-list__item">保存后将同步回我的页，便于订单、发票和客服场景复用。</view>
+      </view>
+    </view>
+
+    <view class="profile-info-toolbar">
+      <view class="profile-info-toolbar__ghost" bindtap="handleReset">恢复已保存</view>
+      <view
+        class="profile-info-toolbar__solid {{!hasUnsavedChanges ? 'profile-info-toolbar__solid--disabled' : ''}}"
+        bindtap="handleSave"
+      >
+        保存资料
+      </view>
+    </view>
+  </block>
 </view>

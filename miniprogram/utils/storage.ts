@@ -1,7 +1,8 @@
+import { buildProfileDraft, seededUserProfile } from "../mock/profile";
 import { seededOrders } from "../mock/order";
 import { defaultComplaintDraft } from "../mock/support";
 import { seededInvoiceRecords, tradeAddresses } from "../mock/trade";
-import type { Address, CartItem, ChatMessage, CheckoutDraft, ComplaintForm, InvoiceRecord, Order } from "../types/models";
+import type { Address, CartItem, ChatMessage, CheckoutDraft, ComplaintForm, InvoiceRecord, Order, ProfileDraft, UserProfile } from "../types/models";
 
 const FAVORITE_KEY = "constructmarket_favorite_ids";
 const CART_KEY = "constructmarket_cart_items";
@@ -11,6 +12,8 @@ const ADDRESS_KEY = "constructmarket_addresses";
 const INVOICE_RECORD_KEY = "constructmarket_invoice_records";
 const SUPPORT_CHAT_KEY = "constructmarket_support_chat";
 const COMPLAINT_DRAFT_KEY = "constructmarket_support_complaint_draft";
+const USER_PROFILE_KEY = "constructmarket_user_profile";
+const PROFILE_DRAFT_KEY = "constructmarket_profile_draft";
 
 const DEFAULT_CHECKOUT_DRAFT: CheckoutDraft = {
   source: "cart",
@@ -22,6 +25,101 @@ const DEFAULT_CHECKOUT_DRAFT: CheckoutDraft = {
   remark: "",
   paymentMethod: "wechat",
 };
+
+function cloneUserProfile(profile: UserProfile): UserProfile {
+  return {
+    ...profile,
+  };
+}
+
+function normalizeUserProfile(profile?: Partial<UserProfile> | null): UserProfile {
+  const nextProfile = profile ?? {};
+  const nickname = typeof nextProfile.nickname === "string" ? nextProfile.nickname.trim() : seededUserProfile.nickname;
+  const avatar = typeof nextProfile.avatar === "string" ? nextProfile.avatar.trim() : "";
+
+  return {
+    id: typeof nextProfile.id === "string" && nextProfile.id ? nextProfile.id : seededUserProfile.id,
+    avatar: avatar || nickname.slice(0, 1) || seededUserProfile.avatar,
+    nickname,
+    phone:
+      typeof nextProfile.phone === "string" && /^1\d{10}$/.test(nextProfile.phone.trim())
+        ? nextProfile.phone.trim()
+        : seededUserProfile.phone,
+    companyName: typeof nextProfile.companyName === "string" ? nextProfile.companyName.trim() : seededUserProfile.companyName,
+    buyerRole: typeof nextProfile.buyerRole === "string" ? nextProfile.buyerRole.trim() : seededUserProfile.buyerRole,
+    couponCount: typeof nextProfile.couponCount === "number" ? nextProfile.couponCount : seededUserProfile.couponCount,
+    defaultAddressId:
+      typeof nextProfile.defaultAddressId === "string" ? nextProfile.defaultAddressId : seededUserProfile.defaultAddressId,
+  };
+}
+
+function normalizeProfileDraft(draft?: Partial<ProfileDraft> | null, userProfile: UserProfile = getUserProfile()): ProfileDraft {
+  const baseDraft = buildProfileDraft(userProfile);
+  const nextDraft = draft ?? {};
+
+  return {
+    avatar:
+      typeof nextDraft.avatar === "string" && nextDraft.avatar.trim()
+        ? nextDraft.avatar.trim().slice(0, 1)
+        : baseDraft.avatar,
+    nickname: typeof nextDraft.nickname === "string" ? nextDraft.nickname : baseDraft.nickname,
+    phone:
+      typeof nextDraft.phone === "string" && /^1\d{10}$/.test(nextDraft.phone.trim()) ? nextDraft.phone.trim() : userProfile.phone,
+    companyName: typeof nextDraft.companyName === "string" ? nextDraft.companyName : baseDraft.companyName,
+    buyerRole: typeof nextDraft.buyerRole === "string" ? nextDraft.buyerRole : baseDraft.buyerRole,
+  };
+}
+
+function saveUserProfileStorage(profile: UserProfile) {
+  const normalized = normalizeUserProfile(profile);
+  wx.setStorageSync(USER_PROFILE_KEY, normalized);
+  return cloneUserProfile(normalized);
+}
+
+export function getUserProfile() {
+  const stored = wx.getStorageSync(USER_PROFILE_KEY) as Partial<UserProfile> | undefined;
+
+  if (stored && typeof stored === "object" && !Array.isArray(stored)) {
+    const normalized = normalizeUserProfile(stored);
+    wx.setStorageSync(USER_PROFILE_KEY, normalized);
+    return cloneUserProfile(normalized);
+  }
+
+  return saveUserProfileStorage(seededUserProfile);
+}
+
+export function getProfileDraft() {
+  const userProfile = getUserProfile();
+  const stored = wx.getStorageSync(PROFILE_DRAFT_KEY) as Partial<ProfileDraft> | undefined;
+
+  if (stored && typeof stored === "object" && !Array.isArray(stored)) {
+    const normalized = normalizeProfileDraft(stored, userProfile);
+    wx.setStorageSync(PROFILE_DRAFT_KEY, normalized);
+    return normalized;
+  }
+
+  const initialDraft = buildProfileDraft(userProfile);
+  wx.setStorageSync(PROFILE_DRAFT_KEY, initialDraft);
+  return initialDraft;
+}
+
+export function saveProfileDraft(draft: ProfileDraft) {
+  const normalized = normalizeProfileDraft(draft);
+  wx.setStorageSync(PROFILE_DRAFT_KEY, normalized);
+  return normalized;
+}
+
+export function resetProfileDraft() {
+  const nextDraft = buildProfileDraft(getUserProfile());
+  wx.setStorageSync(PROFILE_DRAFT_KEY, nextDraft);
+  return nextDraft;
+}
+
+export function saveUserProfile(profile: UserProfile) {
+  const savedProfile = saveUserProfileStorage(profile);
+  saveProfileDraft(buildProfileDraft(savedProfile));
+  return savedProfile;
+}
 
 export function getFavoriteIds() {
   const stored = wx.getStorageSync(FAVORITE_KEY) as unknown;

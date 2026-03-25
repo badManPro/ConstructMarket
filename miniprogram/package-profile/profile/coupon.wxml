@@ -1,13 +1,68 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Profile Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
-  </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+<view class="screen coupon-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">优惠券</view>
+      <view class="page-head__icon"></view>
+    </view>
+    <view class="page-head__sub">
+      {{scene === 'checkout' ? '当前订单可根据金额门槛选择可用优惠券。' : '查看可用券、不可用券和使用范围。'}}
     </view>
   </view>
+
+  <view wx:if="{{scene === 'checkout'}}" class="section-card coupon-summary-card">
+    <view class="coupon-summary-card__label">当前订单金额</view>
+    <view class="coupon-summary-card__value">¥{{orderAmount}}</view>
+    <view wx:if="{{selectedCouponId}}" class="coupon-summary-card__desc">已选择优惠券，可返回结算页查看抵扣结果。</view>
+    <view wx:else class="coupon-summary-card__desc">满足门槛的优惠券会出现在“可用券”列表中。</view>
+    <view class="coupon-summary-card__actions">
+      <view class="coupon-summary-card__ghost" bindtap="handleClearCoupon">不使用优惠券</view>
+    </view>
+  </view>
+
+  <view class="coupon-tabs">
+    <view class="coupon-tabs__item {{activeTab === 'available' ? 'coupon-tabs__item--active' : ''}}" data-value="available" bindtap="handleTabTap">可用券</view>
+    <view class="coupon-tabs__item {{activeTab === 'unavailable' ? 'coupon-tabs__item--active' : ''}}" data-value="unavailable" bindtap="handleTabTap">不可用券</view>
+  </view>
+
+  <view wx:if="{{activeTab === 'available' && !availableCoupons.length}}" class="section-card empty-card">
+    <view class="empty-card__title">当前暂无可用优惠券</view>
+    <view class="empty-card__desc">可以提升订单金额，或稍后再查看是否有新的采购券。</view>
+  </view>
+
+  <view wx:elif="{{activeTab === 'unavailable' && !unavailableCoupons.length}}" class="section-card empty-card">
+    <view class="empty-card__title">当前没有不可用优惠券</view>
+    <view class="empty-card__desc">你名下的优惠券当前都处于可使用状态。</view>
+  </view>
+
+  <block wx:elif="{{activeTab === 'available'}}">
+    <view wx:for="{{availableCoupons}}" wx:key="id" class="section-card coupon-card">
+      <view class="coupon-card__amount">¥{{item.amount}}</view>
+      <view class="coupon-card__content">
+        <view class="coupon-card__title">{{item.name}}</view>
+        <view class="coupon-card__desc">满 ¥{{item.threshold}} 可用 · {{item.scopeDesc}}</view>
+        <view class="coupon-card__meta">有效期 {{item.validFrom}} 至 {{item.validTo}}</view>
+      </view>
+      <view
+        wx:if="{{scene === 'checkout'}}"
+        class="coupon-card__action {{item.selected ? 'coupon-card__action--selected' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="handleSelectCoupon"
+      >
+        {{item.selected ? '已选择' : '选择使用'}}
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view wx:for="{{unavailableCoupons}}" wx:key="id" class="section-card coupon-card coupon-card--disabled">
+      <view class="coupon-card__amount">¥{{item.amount}}</view>
+      <view class="coupon-card__content">
+        <view class="coupon-card__title">{{item.name}}</view>
+        <view class="coupon-card__desc">满 ¥{{item.threshold}} 可用 · {{item.scopeDesc}}</view>
+        <view class="coupon-card__meta">有效期 {{item.validFrom}} 至 {{item.validTo}}</view>
+        <view class="coupon-card__reason">{{item.disabledReason}}</view>
+      </view>
+    </view>
+  </block>
 </view>

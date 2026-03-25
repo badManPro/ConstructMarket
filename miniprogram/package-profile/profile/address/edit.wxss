@@ -1,0 +1,64 @@
+.address-edit-screen {
+  padding-bottom: 132rpx;
+}
+
+.form-item {
+  margin-bottom: 20rpx;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-item__label,
+.form-switch__label {
+  font-size: 22rpx;
+  color: #666666;
+}
+
+.form-item__input,
+.form-item__picker,
+.form-item__textarea {
+  margin-top: 10rpx;
+  width: 100%;
+  padding: 18rpx;
+  border-radius: 10rpx;
+  box-sizing: border-box;
+  background: #f4f4f4;
+  font-size: 24rpx;
+  color: #222222;
+}
+
+.form-item__textarea {
+  min-height: 120rpx;
+  line-height: 1.6;
+}
+
+.form-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.address-edit-toolbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 12rpx 24rpx calc(12rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  border-top: 1rpx solid #f0f0f0;
+  box-shadow: 0 -6rpx 18rpx rgba(31, 31, 31, 0.06);
+}
+
+.address-edit-toolbar__button {
+  padding: 18rpx 0;
+  border-radius: 999rpx;
+  text-align: center;
+  background: #ff4a43;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 500;
+}

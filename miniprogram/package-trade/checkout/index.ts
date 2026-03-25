@@ -1,9 +1,7 @@
 import { ROUTES } from "../../constants/routes";
 import {
   defaultInvoiceDraft,
-  getAddressById,
   getCouponById,
-  getDefaultAddress,
   getRecommendedCoupon,
   tradePaymentMethods,
 } from "../../mock/trade";
@@ -11,8 +9,10 @@ import type { Address, CartAmountSummary, CartItem, Coupon, InvoiceDraft } from 
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
 import {
   clearCheckoutDraft,
+  getAddressById,
   getCartItems,
   getCheckoutDraft,
+  getDefaultAddress,
   patchCheckoutDraft,
   prependOrder,
   removeCartItems,
@@ -113,6 +113,14 @@ Page({
   handleRouteTap(event: WechatMiniprogram.Event) {
     const { route } = event.currentTarget.dataset as { route?: string };
     if (!route) return;
+
+    if (route === ROUTES.addressList || route === ROUTES.coupon || route === ROUTES.invoice) {
+      navigateWithParams(route, {
+        scene: "checkout",
+      });
+      return;
+    }
+
     navigateToRoute(route);
   },
   handleApplyRecommendedCoupon() {

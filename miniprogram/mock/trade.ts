@@ -1,4 +1,4 @@
-import type { Address, Coupon, InvoiceDraft, PaymentMethod } from "../types/models";
+import type { Address, Coupon, InvoiceDraft, InvoiceRecord, PaymentMethod } from "../types/models";
 
 export const tradeAddresses: Address[] = [
   {
@@ -88,6 +88,59 @@ export const defaultInvoiceDraft: InvoiceDraft = {
   taxNo: "91310120MA1K000000",
   email: "finance@constructmarket.local",
 };
+
+export const tradeRegionOptions = [
+  {
+    value: "sh-pudong",
+    label: "上海市 上海市 浦东新区",
+    province: "上海市",
+    city: "上海市",
+    district: "浦东新区",
+  },
+  {
+    value: "js-suzhou",
+    label: "江苏省 苏州市 工业园区",
+    province: "江苏省",
+    city: "苏州市",
+    district: "工业园区",
+  },
+  {
+    value: "zj-hangzhou",
+    label: "浙江省 杭州市 余杭区",
+    province: "浙江省",
+    city: "杭州市",
+    district: "余杭区",
+  },
+] as const;
+
+export const seededInvoiceRecords: InvoiceRecord[] = [
+  {
+    id: "invoice-record-001",
+    orderNo: "CM2603231003",
+    type: "electronic",
+    status: "issued",
+    title: "上海构市建材工程有限公司",
+    taxNo: "91310120MA1K000000",
+    email: "finance@constructmarket.local",
+    receiverName: "王工",
+    receiverPhone: "13800138000",
+    receiverAddress: "上海市 上海市 浦东新区 张江建材产业园 8 号仓 2 楼",
+    applyAt: "2026-03-24 09:20",
+  },
+  {
+    id: "invoice-record-002",
+    orderNo: "CM2603251002",
+    type: "paper",
+    status: "applying",
+    title: "苏州项目临建总包部",
+    taxNo: "91320500MA10000000",
+    email: "procurement@constructmarket.local",
+    receiverName: "李经理",
+    receiverPhone: "13900139000",
+    receiverAddress: "江苏省 苏州市 工业园区 金鸡湖大道 188 号总包临建仓",
+    applyAt: "2026-03-25 16:10",
+  },
+];
 
 export function getDefaultAddress() {
   return tradeAddresses.find((item) => item.isDefault) ?? tradeAddresses[0] ?? null;

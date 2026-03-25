@@ -1,13 +1,44 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Profile Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
-  </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+<view class="screen address-edit-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">{{mode === 'edit' ? '编辑地址' : '新增地址'}}</view>
+      <view class="page-head__icon"></view>
     </view>
+    <view class="page-head__sub">支持新增或修改项目部、工地、仓库等收货地址。</view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">地址信息</view>
+    <view class="form-item">
+      <view class="form-item__label">收货人</view>
+      <input class="form-item__input" placeholder="请输入收货人姓名" value="{{receiver}}" data-field="receiver" bindinput="handleInput" />
+    </view>
+    <view class="form-item">
+      <view class="form-item__label">手机号</view>
+      <input class="form-item__input" type="number" maxlength="11" placeholder="请输入手机号" value="{{phone}}" data-field="phone" bindinput="handleInput" />
+    </view>
+    <view class="form-item">
+      <view class="form-item__label">省市区</view>
+      <picker range="{{regionLabels}}" value="{{regionIndex}}" bindchange="handleRegionChange">
+        <view class="form-item__picker">{{regionLabels[regionIndex]}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <view class="form-item__label">详细地址</view>
+      <textarea class="form-item__textarea" maxlength="80" auto-height placeholder="请输入楼栋、楼层、仓位或门牌号" value="{{detail}}" data-field="detail" bindinput="handleInput" />
+    </view>
+    <view class="form-item">
+      <view class="form-item__label">地址标签</view>
+      <input class="form-item__input" placeholder="如项目部、工地、仓库" value="{{tag}}" data-field="tag" bindinput="handleInput" />
+    </view>
+    <view class="form-switch">
+      <view class="form-switch__label">设为默认地址</view>
+      <switch color="#ff4a43" checked="{{isDefault}}" bindchange="handleDefaultChange" />
+    </view>
+  </view>
+
+  <view class="address-edit-toolbar">
+    <view class="address-edit-toolbar__button" bindtap="handleSave">保存地址</view>
   </view>
 </view>

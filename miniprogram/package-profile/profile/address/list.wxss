@@ -1,0 +1,131 @@
+.address-list-screen {
+  padding-bottom: 132rpx;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-card__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.empty-card__desc {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #666666;
+}
+
+.empty-card__action {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 28rpx;
+  padding: 18rpx 30rpx;
+  border-radius: 999rpx;
+  background: #ff4a43;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.address-card {
+  border: 1rpx solid transparent;
+}
+
+.address-card--selected {
+  border-color: #ffd8d3;
+  background: #fffaf9;
+}
+
+.address-card__head,
+.address-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.address-card__user {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.address-card__badge,
+.address-card__tag,
+.address-card__selected {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12rpx;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+}
+
+.address-card__badge,
+.address-card__selected {
+  margin-top: 0;
+  background: #fff1f0;
+  color: #ff4a43;
+}
+
+.address-card__tag {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.address-card__address {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #444444;
+}
+
+.address-card__actions {
+  justify-content: flex-start;
+  margin-top: 20rpx;
+}
+
+.address-card__action {
+  min-width: 136rpx;
+  padding: 14rpx 0;
+  border-radius: 999rpx;
+  text-align: center;
+  font-size: 22rpx;
+}
+
+.address-card__action--ghost {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.address-card__action--danger {
+  background: #fff1f0;
+  color: #ff4a43;
+}
+
+.address-toolbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 12rpx 24rpx calc(12rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  border-top: 1rpx solid #f0f0f0;
+  box-shadow: 0 -6rpx 18rpx rgba(31, 31, 31, 0.06);
+}
+
+.address-toolbar__button {
+  padding: 18rpx 0;
+  border-radius: 999rpx;
+  text-align: center;
+  background: #ff4a43;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 500;
+}

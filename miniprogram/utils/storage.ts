@@ -1,10 +1,13 @@
 import { seededOrders } from "../mock/order";
-import type { CartItem, CheckoutDraft, Order } from "../types/models";
+import { seededInvoiceRecords, tradeAddresses } from "../mock/trade";
+import type { Address, CartItem, CheckoutDraft, InvoiceRecord, Order } from "../types/models";
 
 const FAVORITE_KEY = "constructmarket_favorite_ids";
 const CART_KEY = "constructmarket_cart_items";
 const CHECKOUT_DRAFT_KEY = "constructmarket_checkout_draft";
 const ORDER_KEY = "constructmarket_orders";
+const ADDRESS_KEY = "constructmarket_addresses";
+const INVOICE_RECORD_KEY = "constructmarket_invoice_records";
 
 const DEFAULT_CHECKOUT_DRAFT: CheckoutDraft = {
   source: "cart",
@@ -161,6 +164,127 @@ function cloneOrder(order: Order): Order {
 
 function getInitialOrders() {
   return seededOrders.map((order) => cloneOrder(order));
+}
+
+function cloneAddress(address: Address): Address {
+  return {
+    ...address,
+  };
+}
+
+function getInitialAddresses() {
+  return tradeAddresses.map((address) => cloneAddress(address));
+}
+
+function saveAddresses(nextAddresses: Address[]) {
+  wx.setStorageSync(ADDRESS_KEY, nextAddresses);
+  return nextAddresses;
+}
+
+export function getAddresses() {
+  const stored = wx.getStorageSync(ADDRESS_KEY) as Address[] | undefined;
+
+  if (Array.isArray(stored)) {
+    return stored;
+  }
+
+  const initialAddresses = getInitialAddresses();
+  saveAddresses(initialAddresses);
+  return initialAddresses;
+}
+
+export function getDefaultAddress() {
+  const addresses = getAddresses();
+  return addresses.find((item) => item.isDefault) ?? addresses[0] ?? null;
+}
+
+export function getAddressById(addressId: string | null | undefined) {
+  if (!addressId) return null;
+  return getAddresses().find((item) => item.id === addressId) ?? null;
+}
+
+export function upsertAddress(address: Address) {
+  const addresses = getAddresses();
+  const exists = addresses.some((item) => item.id === address.id);
+  const normalized = address.isDefault
+    ? addresses.map((item) => ({
+        ...item,
+        isDefault: item.id === address.id ? true : false,
+      }))
+    : addresses;
+
+  const nextAddresses = exists
+    ? normalized.map((item) => (item.id === address.id ? cloneAddress(address) : item))
+    : [cloneAddress(address), ...normalized];
+
+  const hasDefault = nextAddresses.some((item) => item.isDefault);
+  const finalAddresses = hasDefault
+    ? nextAddresses
+    : nextAddresses.map((item, index) => ({
+        ...item,
+        isDefault: index === 0,
+      }));
+
+  saveAddresses(finalAddresses);
+  return finalAddresses.find((item) => item.id === address.id) ?? finalAddresses[0] ?? null;
+}
+
+export function setDefaultAddress(addressId: string) {
+  const nextAddresses = getAddresses().map((item) => ({
+    ...item,
+    isDefault: item.id === addressId,
+  }));
+  saveAddresses(nextAddresses);
+  patchCheckoutDraft({ selectedAddressId: addressId });
+  return nextAddresses.find((item) => item.id === addressId) ?? null;
+}
+
+export function deleteAddress(addressId: string) {
+  const currentDraft = getCheckoutDraft();
+  const nextAddresses = getAddresses().filter((item) => item.id !== addressId);
+  const normalizedAddresses = nextAddresses.map((item, index) => ({
+    ...item,
+    isDefault: nextAddresses.some((current) => current.isDefault) ? item.isDefault : index === 0,
+  }));
+
+  saveAddresses(normalizedAddresses);
+
+  if (currentDraft.selectedAddressId === addressId) {
+    patchCheckoutDraft({ selectedAddressId: normalizedAddresses[0]?.id ?? null });
+  }
+
+  return normalizedAddresses;
+}
+
+function cloneInvoiceRecord(record: InvoiceRecord): InvoiceRecord {
+  return {
+    ...record,
+  };
+}
+
+function getInitialInvoiceRecords() {
+  return seededInvoiceRecords.map((record) => cloneInvoiceRecord(record));
+}
+
+function saveInvoiceRecords(nextRecords: InvoiceRecord[]) {
+  wx.setStorageSync(INVOICE_RECORD_KEY, nextRecords);
+  return nextRecords;
+}
+
+export function getInvoiceRecords() {
+  const stored = wx.getStorageSync(INVOICE_RECORD_KEY) as InvoiceRecord[] | undefined;
+
+  if (Array.isArray(stored)) {
+    return stored;
+  }
+
+  const initialRecords = getInitialInvoiceRecords();
+  saveInvoiceRecords(initialRecords);
+  return initialRecords;
+}
+
+export function prependInvoiceRecord(record: InvoiceRecord) {
+  return saveInvoiceRecords([cloneInvoiceRecord(record), ...getInvoiceRecords()]);
 }
 
 function saveOrders(nextOrders: Order[]) {

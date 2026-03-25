@@ -1,0 +1,122 @@
+.invoice-screen {
+  padding-bottom: 40rpx;
+}
+
+.invoice-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  padding: 16rpx 24rpx 0;
+}
+
+.invoice-tabs__item {
+  padding: 16rpx 0;
+  border-radius: 999rpx;
+  text-align: center;
+  background: #ffffff;
+  color: #666666;
+  font-size: 22rpx;
+  border: 1rpx solid #eeeeee;
+}
+
+.invoice-tabs__item--active {
+  background: #fff1f0;
+  border-color: #ffd8d3;
+  color: #ff4a43;
+  font-weight: 600;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-card__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.empty-card__desc {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #666666;
+}
+
+.form-item {
+  margin-bottom: 20rpx;
+}
+
+.form-item__label {
+  font-size: 22rpx;
+  color: #666666;
+}
+
+.form-item__input {
+  margin-top: 10rpx;
+  width: 100%;
+  padding: 18rpx;
+  border-radius: 10rpx;
+  box-sizing: border-box;
+  background: #f4f4f4;
+  font-size: 24rpx;
+  color: #222222;
+}
+
+.invoice-form__hint {
+  font-size: 20rpx;
+  line-height: 1.6;
+  color: #666666;
+}
+
+.invoice-form__submit,
+.invoice-candidate__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20rpx;
+  padding: 16rpx 24rpx;
+  border-radius: 999rpx;
+  background: #ff4a43;
+  color: #ffffff;
+  font-size: 22rpx;
+}
+
+.invoice-candidate {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.invoice-candidate:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.invoice-candidate__head,
+.invoice-record__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.invoice-candidate__order-no,
+.invoice-record__title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.invoice-candidate__amount,
+.invoice-record__status {
+  font-size: 22rpx;
+  color: #ff4a43;
+}
+
+.invoice-candidate__desc,
+.invoice-record__desc {
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  line-height: 1.6;
+  color: #666666;
+}

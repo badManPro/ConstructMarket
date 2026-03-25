@@ -1,17 +1,26 @@
 import { ROUTES } from "../../constants/routes";
 import { articleEntrances, getHomeSections, homeBanners, homeCategoryNav, hotSearchKeywords } from "../../mock/browse";
-import type { SearchProduct } from "../../types/models";
+import type { CategoryShortcut, SearchProduct } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
 import { getFavoriteIds, toggleFavoriteId } from "../../utils/storage";
+
+type HomeCategoryItem = CategoryShortcut & {
+  shortName: string;
+};
 
 Page({
   data: {
     title: "建材采购首页",
     summary: "围绕工程采购场景组织主材、辅材和资讯导流，优先打通浏览到商品详情的前半链路。",
+    cityLabel: "杭州",
+    messageBadge: "消息 99+",
     searchKeyword: "42.5R 水泥",
     keywordSuggestions: hotSearchKeywords,
     banners: homeBanners,
-    categoryNav: homeCategoryNav,
+    categoryNav: homeCategoryNav.map((item) => ({
+      ...item,
+      shortName: item.name.slice(0, 2),
+    })) as HomeCategoryItem[],
     campaignProducts: [] as SearchProduct[],
     hotProducts: [] as SearchProduct[],
     articleEntrances,

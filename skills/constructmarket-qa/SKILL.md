@@ -25,6 +25,7 @@ Use this skill for reviews, test planning, smoke validation, and release checks 
 - Route reachability and back-navigation
 - PRD flow integrity across browse, trade, profile, and support chains
 - Mock data consistency with declared types and enums
+- Visual hierarchy, CTA emphasis, card density, tab bar style, and drawer presentation against `docs/pencil`
 - Local persistence for cart, favorites, address defaults, recent search, and checkout drafts
 - Empty, error, loading, and offline states on every page
 - State transitions for order, payment, invoice, and coupon logic

@@ -31,6 +31,9 @@ Page({
   handleGoCart() {
     navigateToRoute(ROUTES.cart);
   },
+  handleGoOrderList() {
+    navigateToRoute(ROUTES.orderList);
+  },
   handleBackCheckout() {
     wx.navigateBack();
   },

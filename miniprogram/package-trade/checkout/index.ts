@@ -42,6 +42,13 @@ Page({
   onShow() {
     this.hydrateCheckout();
   },
+  handleGoBack() {
+    wx.navigateBack({
+      fail: () => {
+        navigateToRoute(ROUTES.cart);
+      },
+    });
+  },
   hydrateCheckout() {
     try {
       const cartItems = getCartItems();

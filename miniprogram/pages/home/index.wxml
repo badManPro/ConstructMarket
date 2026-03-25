@@ -1,17 +1,16 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">ConstructMarket</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
-  </view>
-
-  <view class="section-card">
-    <view class="section-card__title">搜索入口</view>
-    <view class="search-entry" bindtap="handleSearchTap">
-      <view class="search-entry__label">{{searchKeyword}}</view>
-      <view class="search-entry__action">进入搜索</view>
+<view class="screen home-screen">
+  <view class="home-header">
+    <view class="home-header__row">
+      <view class="home-header__city">{{cityLabel}} ▾</view>
+      <view class="home-header__badge">{{messageBadge}}</view>
     </view>
-    <view class="chip-row">
+
+    <view class="home-search" bindtap="handleSearchTap">
+      <view class="home-search__icon">搜索</view>
+      <view class="home-search__text">搜索建材 / 品牌 / 型号</view>
+    </view>
+
+    <view class="chip-row home-chip-row">
       <view
         wx:for="{{keywordSuggestions}}"
         wx:key="*this"
@@ -24,8 +23,7 @@
     </view>
   </view>
 
-  <view class="section-card">
-    <view class="section-card__title">装修图与活动导流</view>
+  <view class="home-banner-wrap">
     <swiper class="banner-swiper" indicator-dots circular autoplay interval="4200">
       <view wx:for="{{banners}}" wx:key="id" wx:for-item="banner">
         <view
@@ -45,16 +43,21 @@
   </view>
 
   <view class="section-card">
-    <view class="section-card__title">商品分类导航</view>
+    <view class="section-head">
+      <view class="section-card__title">快捷选型</view>
+      <view class="section-head__more" data-route="/pages/category/index" bindtap="handleRouteTap">查看更多 ></view>
+    </view>
     <view class="category-grid">
       <view
         wx:for="{{categoryNav}}"
         wx:key="id"
+        wx:for-index="index"
         class="category-tile"
         data-route="{{item.route}}"
         data-params="{{item.params}}"
         bindtap="handleCategoryTap"
       >
+        <view class="category-tile__icon category-tile__icon--{{index}}">{{item.shortName}}</view>
         <view class="category-tile__name">{{item.name}}</view>
         <view class="category-tile__tagline">{{item.tagline}}</view>
       </view>
@@ -62,7 +65,10 @@
   </view>
 
   <view class="section-card">
-    <view class="section-card__title">活动商品推荐</view>
+    <view class="section-head">
+      <view class="section-card__title">尖货榜单 限时抢</view>
+      <view class="section-head__more">查看更多 ></view>
+    </view>
     <view class="section-card__meta">优先展示当前工程采购场景里的主推组合。</view>
     <view class="product-list">
       <product-card
@@ -76,7 +82,10 @@
   </view>
 
   <view class="section-card">
-    <view class="section-card__title">热门商品推荐</view>
+    <view class="section-head">
+      <view class="section-card__title">热门商品推荐</view>
+      <view class="section-head__more">查看更多 ></view>
+    </view>
     <view class="section-card__meta">用于验证首页到详情页的主流跳转链路。</view>
     <view class="product-list">
       <product-card
@@ -90,7 +99,10 @@
   </view>
 
   <view class="section-card">
-    <view class="section-card__title">建材资讯入口</view>
+    <view class="section-head">
+      <view class="section-card__title">建材资讯</view>
+      <view class="section-head__more" data-route="/package-content/article/list" bindtap="handleRouteTap">查看更多 ></view>
+    </view>
     <view class="link-list">
       <view
         wx:for="{{articleEntrances}}"

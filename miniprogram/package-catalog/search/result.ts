@@ -44,6 +44,13 @@ Page({
   onShow() {
     this.refreshProductList();
   },
+  handleGoBack() {
+    wx.navigateBack({
+      fail: () => {
+        navigateToRoute(ROUTES.home);
+      },
+    });
+  },
   refreshProductList() {
     const productList = searchProducts({
       keyword: this.data.keyword,

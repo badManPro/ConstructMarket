@@ -1,8 +1,10 @@
 <view class="screen checkout-screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Trade Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}} 当前来源：{{sourceLabel}}</view>
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">确认订单</view>
+      <view class="page-head__icon"></view>
+    </view>
   </view>
 
   <view wx:if="{{status === 'error'}}" class="section-card empty-card">
@@ -23,27 +25,29 @@
   </block>
 
   <block wx:else>
+    <view class="section-card checkout-source-card">
+      <view class="checkout-source-card__text">当前来源：{{sourceLabel}}</view>
+    </view>
+
     <view class="section-card" data-route="/package-profile/profile/address/list" bindtap="handleRouteTap">
       <view class="trade-row">
         <view class="trade-row__main">
-          <view class="trade-row__label">收货地址</view>
-          <view wx:if="{{selectedAddress}}" class="trade-row__value">{{selectedAddress.receiver}} {{selectedAddress.phone}}</view>
-          <view wx:if="{{selectedAddress}}" class="trade-row__desc">{{addressText}}</view>
+          <view wx:if="{{selectedAddress}}" class="trade-row__value">收货人：{{selectedAddress.receiver}} {{selectedAddress.phone}}</view>
+          <view wx:if="{{selectedAddress}}" class="trade-row__desc">地址：{{addressText}}</view>
           <view wx:if="{{selectedAddress}}" class="trade-row__tag">{{selectedAddress.tag}}</view>
           <view wx:else class="trade-row__warn">暂无地址，请先新增</view>
         </view>
-        <view class="trade-row__arrow">地址</view>
+        <view class="trade-row__arrow">></view>
       </view>
     </view>
 
     <view class="section-card">
-      <view class="section-card__title">商品清单</view>
       <view wx:for="{{items}}" wx:key="id" class="checkout-item">
         <view class="checkout-item__cover">{{item.cover}}</view>
         <view class="checkout-item__content">
           <view class="checkout-item__name">{{item.name}}</view>
           <view class="checkout-item__model">{{item.model}}</view>
-          <view class="checkout-item__meta">¥{{item.price}} / {{item.unit}} · 数量 {{item.quantity}}</view>
+          <view class="checkout-item__meta">¥{{item.price}} x {{item.quantity}}</view>
         </view>
       </view>
     </view>
@@ -57,7 +61,7 @@
           <view wx:elif="{{recommendedCoupon}}" class="trade-row__desc">推荐 {{recommendedCoupon.name}}，当前可抵扣 ¥{{recommendedCoupon.amount}}</view>
           <view wx:else class="trade-row__desc">当前暂无可用优惠券，后续可从优惠券页回流</view>
         </view>
-        <view class="trade-row__arrow">选券</view>
+        <view class="trade-row__arrow">></view>
       </view>
 
       <view wx:if="{{recommendedCoupon && !selectedCoupon}}" class="trade-action-row">
@@ -76,7 +80,7 @@
           <view class="trade-row__value">{{invoiceText}}</view>
           <view wx:if="{{invoiceDraft}}" class="trade-row__desc">{{invoiceDraft.taxNo}} · {{invoiceDraft.email}}</view>
         </view>
-        <view class="trade-row__arrow">发票</view>
+        <view class="trade-row__arrow">></view>
       </view>
     </view>
 
@@ -130,7 +134,7 @@
 
     <view class="checkout-toolbar">
       <view class="checkout-toolbar__summary">
-        <view class="checkout-toolbar__amount">¥{{amountSummary.payable}}</view>
+        <view class="checkout-toolbar__amount">应付 ¥{{amountSummary.payable}}</view>
         <view class="checkout-toolbar__desc">{{items.length}} 行商品待提交</view>
       </view>
       <view class="checkout-toolbar__submit" bindtap="handleSubmitOrder">

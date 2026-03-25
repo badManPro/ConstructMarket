@@ -73,3 +73,20 @@
 - 完成结算页第一版实现：地址/优惠券/发票容器、备注输入、支付方式选择、金额明细、提交订单
 - 完成支付结果页第一版实现：成功/失败态壳子、订单号和金额展示、回首页/购物车入口
 - `npm run typecheck` 通过
+
+### Follow-up Session: UI 参考规范切换
+- 明确后续规则改为“功能按 PRD，视觉按 `docs/pencil`”
+- 新增 `docs/ui-reference-guideline.md`，沉淀主题、布局、卡片、CTA、TabBar 和弹层规则
+- 更新项目私有 skills，使后续 UI/页面任务默认先读取 pencil 参考
+- 将当前已实现页面纳入本轮 UI 重构范围：首页、搜索结果页、商品详情页、购物车页、结算页、支付结果页
+
+### Follow-up Session: 首批页面 UI 重构
+- 重写全局视觉基底：`miniprogram/app.wxss`
+- 重写自定义 TabBar 样式，改为白底扁平电商风格：`miniprogram/custom-tab-bar/index.wxss`
+- 重写共享商品卡、规格弹层、筛选抽屉视觉，使其贴近 pencil 参考稿
+- 重构首页为“城市 + 搜索栏 + 暖色 banner + 快捷分类 + 商品信息流”布局
+- 重构搜索结果页为“顶部标题栏 + 紧凑搜索区 + 文本筛选条 + 轻量抽屉/侧栏”布局
+- 重构商品详情页为“标题栏 + 图集 + 价格卡 + 规格卡 + 店铺卡 + 贴底操作栏”布局
+- 重构购物车、结算、支付结果页，使其与 `docs/pencil` 中的交易链路页面视觉保持一致
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过

@@ -23,6 +23,13 @@ Page({
   onShow() {
     this.hydrateProductPage();
   },
+  handleGoBack() {
+    wx.navigateBack({
+      fail: () => {
+        navigateToRoute(ROUTES.home);
+      },
+    });
+  },
   hydrateProductPage() {
     const favoriteIds = getFavoriteIds();
     const product = getProductDetail(this.data.productId, favoriteIds);

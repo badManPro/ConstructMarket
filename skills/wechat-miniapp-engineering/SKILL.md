@@ -14,6 +14,8 @@ Use this skill for technical implementation decisions in the native WeChat mini 
 - Use a component library only for primitive UI building blocks.
 - Keep business components project-local.
 - Design for local Mock delivery first.
+- For ConstructMarket visual work, treat `docs/pencil/miniapp.pen` and `docs/pencil/*.jpg` as the primary UI source for theme and layout.
+- Use the PRD for functionality, but use the pencil references for page density, surface hierarchy, CTA styling, tab bar feel, and drawer/sheet presentation.
 
 ## Recommended Stack
 
@@ -37,10 +39,11 @@ Use this skill for technical implementation decisions in the native WeChat mini 
 ## Workflow
 
 1. Read the PRD sections for routes, global state, data models, and acceptance.
-2. Decide whether the task belongs to base infrastructure, shared UI, or a business domain.
-3. Update config, contracts, mock data, and shared dependencies first.
-4. Implement page containers and business components after shared pieces are stable.
-5. Run a focused smoke pass on navigation and state persistence after each domain lands.
+2. Read `docs/ui-reference-guideline.md` and the relevant `docs/pencil` screen before changing visuals.
+3. Decide whether the task belongs to base infrastructure, shared UI, or a business domain.
+4. Update config, contracts, mock data, and shared dependencies first.
+5. Implement page containers and business components after shared pieces are stable.
+6. Run a focused smoke pass on navigation and state persistence after each domain lands.
 
 ## Guardrails
 

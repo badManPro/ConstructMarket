@@ -1,3 +1,7 @@
+.search-panel-card {
+  margin-top: 12rpx;
+}
+
 .search-panel {
   display: flex;
   gap: 16rpx;
@@ -5,85 +9,87 @@
 
 .search-panel__input {
   flex: 1;
-  padding: 20rpx 24rpx;
-  border-radius: 20rpx;
-  background: #f8fafc;
-  font-size: 26rpx;
+  height: 68rpx;
+  padding: 0 20rpx;
+  border-radius: 34rpx;
+  background: #f1f2f5;
+  font-size: 24rpx;
 }
 
 .search-panel__button {
-  padding: 20rpx 28rpx;
-  border-radius: 20rpx;
-  background: #0f172a;
+  padding: 18rpx 28rpx;
+  border-radius: 34rpx;
+  background: #ff4a43;
   color: #ffffff;
   font-size: 24rpx;
-  font-weight: 600;
+  font-weight: 500;
+}
+
+.search-summary {
+  font-size: 20rpx;
+  color: #666666;
 }
 
 .toolbar-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-}
-
-.toolbar-row__label {
-  font-size: 28rpx;
-  font-weight: 700;
+  margin-top: 10rpx;
 }
 
 .toolbar-row__action {
-  font-size: 24rpx;
-  color: #2563eb;
+  font-size: 20rpx;
+  color: #666666;
 }
 
 .category-scroll {
-  margin-top: 20rpx;
+  margin-top: 12rpx;
   white-space: nowrap;
 }
 
 .category-scroll__inner {
   display: inline-flex;
-  gap: 14rpx;
+  gap: 22rpx;
 }
 
 .category-pill,
 .sort-pill {
-  padding: 14rpx 20rpx;
-  border-radius: 999rpx;
-  background: #f1f5f9;
-  font-size: 24rpx;
-  color: #334155;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 20rpx;
+  color: #666666;
 }
 
 .category-pill--active,
 .sort-pill--active {
-  background: #dbeafe;
-  color: #1d4ed8;
+  color: #ff4a43;
 }
 
 .sort-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 14rpx;
-  margin-top: 20rpx;
+  justify-content: space-between;
+  margin-top: 16rpx;
 }
 
 .sort-pill--filter {
-  margin-left: auto;
-  background: #0f172a;
-  color: #ffffff;
+  color: #666666;
 }
 
 .results-meta {
-  margin-top: 20rpx;
-  font-size: 24rpx;
-  color: #64748b;
+  margin-top: 14rpx;
+  font-size: 20rpx;
+  color: #888888;
 }
 
 .product-list {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 12rpx;
+}
+
+.search-product-list {
+  margin: 16rpx 24rpx 0;
 }
 
 .empty-card {
@@ -105,64 +111,89 @@
 .empty-actions__link {
   flex: 1;
   padding: 20rpx 0;
-  border-radius: 20rpx;
-  font-size: 24rpx;
-  font-weight: 600;
+  border-radius: 10rpx;
+  font-size: 22rpx;
+  font-weight: 500;
 }
 
 .empty-actions__ghost {
-  background: #e2e8f0;
-  color: #334155;
+  background: #f4f4f4;
+  color: #666666;
 }
 
 .empty-actions__solid {
-  background: #0f172a;
+  background: #ff4a43;
   color: #ffffff;
 }
 
 .empty-actions__link {
-  background: #f1f5f9;
-  color: #1d4ed8;
+  background: #fff1f0;
+  color: #ff4a43;
 }
 
 .category-drawer-mask {
   position: fixed;
   inset: 0;
   z-index: 35;
-  background: rgba(15, 23, 42, 0.28);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .category-drawer {
   position: absolute;
-  right: 24rpx;
-  bottom: 24rpx;
-  left: 24rpx;
-  padding: 28rpx;
-  border-radius: 28rpx;
+  right: 14rpx;
+  left: 14rpx;
+  top: 120rpx;
+  padding: 20rpx;
+  border-radius: 16rpx;
   background: #ffffff;
-  box-shadow: 0 24rpx 60rpx rgba(15, 23, 42, 0.18);
+  box-shadow: 0 16rpx 40rpx rgba(31, 31, 31, 0.14);
 }
 
 .category-drawer__title {
   margin-bottom: 20rpx;
-  font-size: 28rpx;
-  font-weight: 700;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #666666;
 }
 
 .category-drawer__grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16rpx 12rpx;
 }
 
 .category-drawer__chip {
-  padding: 16rpx 20rpx;
-  border-radius: 18rpx;
-  background: #f8fafc;
-  font-size: 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 0;
+  background: transparent;
+  font-size: 20rpx;
 }
 
 .category-drawer__chip--active {
-  background: #dbeafe;
-  color: #1d4ed8;
+  color: #ff4a43;
+}
+
+.category-drawer__thumb {
+  width: 100%;
+  height: 96rpx;
+  border-radius: 8rpx;
+  background: #f4f4f4;
+}
+
+.category-drawer__label {
+  color: inherit;
+}
+
+.category-drawer__submit {
+  margin-top: 20rpx;
+  padding: 18rpx 0;
+  border-radius: 10rpx;
+  background: #ff4a43;
+  color: #ffffff;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 500;
 }

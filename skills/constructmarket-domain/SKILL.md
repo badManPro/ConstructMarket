@@ -17,9 +17,10 @@ Use this skill when the task depends on ConstructMarket business rules rather th
 ## Source of Truth
 
 - Treat `docs/PRD-建材市场小程序前端.md` as the implementation baseline.
+- Treat `docs/ui-reference-guideline.md` plus `docs/pencil` as the visual baseline.
 - Keep the scope frontend-only with local Mock data.
 - Do not add backend contracts, real payment, approval flow, ERP integration, or real-time messaging unless the user explicitly changes scope.
-- If reference designs conflict with the PRD, follow the PRD.
+- If reference designs conflict with the PRD, keep functionality aligned to the PRD and keep visual style aligned to the pencil references.
 
 ## Working Rules
 

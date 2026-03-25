@@ -32,7 +32,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "trial",
+  "libVersion": "latest",
   "appid": "wx6c1d03992941a748",
   "projectname": "ConstructMarket",
   "srcMiniprogramRoot": "miniprogram/",

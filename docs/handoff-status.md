@@ -12,6 +12,7 @@
   - 路由与分包：[`miniprogram/app.json`](../miniprogram/app.json)
   - 共享类型：[`miniprogram/types/models.ts`](../miniprogram/types/models.ts)
   - 路由常量：[`miniprogram/constants/routes.ts`](../miniprogram/constants/routes.ts)
+- 已新增 UI 视觉约束文档：[`docs/ui-reference-guideline.md`](./ui-reference-guideline.md)
 - 已完成依赖安装并通过静态校验：
   - `npm install --cache ./.npm-cache`
   - `npm run typecheck`
@@ -24,10 +25,13 @@
   - 购物车页：本地购物车读取、勾选/全选、数量步进器、删除、失效商品清空
   - 结算页：地址/优惠券/发票容器、备注、支付方式、金额明细、提交订单入口
   - 支付结果页：成功/失败结果态壳子、订单号和金额展示、回首页/购物车
+- 已完成首批 UI 重构：
+  - 全局视觉基底、TabBar、商品卡、筛选抽屉、规格弹层
+  - 首页、搜索结果页、商品详情页、购物车页、结算页、支付结果页
 
 ## 当前停留点
 
-当前项目停在“浏览主链路已实现，交易主链路第一段已实现，但订单状态流转和回流页未实现”的阶段。
+当前项目停在“浏览主链路已实现，交易主链路第一段已实现，且 UI 视觉规则已切换到 `docs/pencil` 主导，但订单状态流转和回流页未实现”的阶段。
 
 已完成：
 - 4 个 TabBar 页面骨架
@@ -41,6 +45,8 @@
 - 购物车页真实列表、勾选、步进器、删除和失效商品清空
 - 结算页第一版容器、金额明细和提交订单入口
 - 支付结果页第一版结果态
+- 已明确后续 UI 默认遵循 `docs/ui-reference-guideline.md`
+- 已对首批已实现页面完成 pencil 风格对齐
 
 未完成：
 - 本地订单存储与订单状态流转
@@ -63,7 +69,7 @@
 推荐顺序：
 
 1. 先让结算提交写入本地订单存储
-2. 再做订单列表和订单详情联动
+2. 再做订单列表和订单详情联动，并沿用 `docs/ui-reference-guideline.md`
 3. 再做地址、优惠券、发票页面与结算页回流
 4. 最后补资讯页、客服页和开发者工具联调
 
@@ -94,4 +100,5 @@ npm run typecheck
 - [`findings.md`](../findings.md)
 - [`progress.md`](../progress.md)
 - [`docs/handoff-status.md`](./handoff-status.md)
+- [`docs/ui-reference-guideline.md`](./ui-reference-guideline.md)
 - [`docs/PRD-建材市场小程序前端.md`](./PRD-建材市场小程序前端.md)

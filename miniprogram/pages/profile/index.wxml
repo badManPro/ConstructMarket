@@ -1,23 +1,111 @@
 <view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Profile</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card profile-state-card">
+    <view class="empty-card__title">个人中心加载中</view>
+    <view class="empty-card__desc">正在整理用户资料、订单摘要和采购服务入口。</view>
   </view>
 
-  <view class="section-card">
-    <view class="section-card__title">服务矩阵</view>
-    <view class="link-list">
-      <view
-        wx:for="{{links}}"
-        wx:key="route"
-        class="link-card"
-        data-route="{{item.route}}"
-        bindtap="handleRouteTap"
-      >
-        <view class="link-card__title">{{item.label}}</view>
-        <view class="link-card__desc">{{item.description}}</view>
-      </view>
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card profile-state-card">
+    <view class="empty-card__title">个人中心读取失败</view>
+    <view class="empty-card__desc">请重试本地资料加载，若仍异常可先返回首页继续浏览商品。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card profile-state-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">我的页已预留离线占位，恢复后可继续查看订单、地址和服务入口。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复内容</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card profile-state-card">
+    <view class="empty-card__title">采购账号待激活</view>
+    <view class="empty-card__desc">授权后可查看订单摘要、收货地址、优惠券和售后服务入口。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">先去首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">刷新状态</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view class="profile-hero">
+      <view class="profile-card">
+        <view class="profile-card__main">
+          <view class="profile-card__avatar">{{userProfile.avatar}}</view>
+          <view class="profile-card__info">
+            <view class="profile-card__name-row">
+              <view class="profile-card__name">{{userProfile.nickname}}</view>
+              <view class="profile-card__role">{{userProfile.buyerRole}}</view>
+            </view>
+            <view class="profile-card__phone">{{userProfile.phone}}</view>
+            <view class="profile-card__company">{{userProfile.companyName}}</view>
+          </view>
+          <view class="profile-card__cta" data-route="{{profileInfoRoute}}" bindtap="handleRouteTap">资料</view>
+        </view>
+        <view class="profile-card__note">{{couponNote}}</view>
+        <view class="profile-chip-row">
+          <view class="profile-chip">{{defaultAddressText}}</view>
+        </view>
+      </view>
+
+      <view class="profile-assets">
+        <view wx:for="{{assetStats}}" wx:key="label" class="profile-asset">
+          <view class="profile-asset__value">{{item.value}}</view>
+          <view class="profile-asset__label">{{item.label}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card profile-section">
+      <view class="section-head">
+        <view class="section-card__title">我的订单</view>
+        <view class="section-link" bindtap="handleViewAllOrders">查看全部</view>
+      </view>
+      <view class="order-shortcuts">
+        <view
+          wx:for="{{orderShortcuts}}"
+          wx:key="filter"
+          class="order-shortcut"
+          data-filter="{{item.filter}}"
+          bindtap="handleOrderTap"
+        >
+          <view class="order-shortcut__count {{item.count > 0 ? 'order-shortcut__count--active' : ''}}">{{item.count}}</view>
+          <view class="order-shortcut__label">{{item.label}}</view>
+          <view class="order-shortcut__hint">{{item.hint}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:for="{{serviceSections}}" wx:key="title" wx:for-item="section" class="section-card profile-section">
+      <view class="section-card__title">{{section.title}}</view>
+      <view class="service-list">
+        <view
+          wx:for="{{section.items}}"
+          wx:key="route"
+          wx:for-item="service"
+          class="service-item"
+          data-route="{{service.route}}"
+          bindtap="handleRouteTap"
+        >
+          <view class="service-item__body">
+            <view class="service-item__title">{{service.label}}</view>
+            <view class="service-item__desc">{{service.description}}</view>
+          </view>
+          <view class="service-item__meta">
+            <view
+              wx:if="{{service.badge}}"
+              class="service-item__badge {{service.emphasis ? 'service-item__badge--accent' : ''}}"
+            >
+              {{service.badge}}
+            </view>
+            <view class="service-item__arrow">›</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
 </view>

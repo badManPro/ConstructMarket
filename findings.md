@@ -74,3 +74,18 @@
 - 已创建自定义 `custom-tab-bar`，避免在当前阶段引入图标资源阻塞
 - 已用 `npm install --cache ./.npm-cache` 规避本机全局 npm cache 权限问题
 - `npm run typecheck` 已通过，说明当前 scaffold 在静态类型层面自洽
+
+## Follow-up Findings: 恢复点与下一步
+- `task_plan.md` 当前明确的下一个实施项是先完成“我的页真实用户卡、订单摘要和服务入口整理”，而不是直接开始收藏夹页或个人信息页
+- PRD 6.12 已固定我的页核心范围：用户信息卡片、订单管理快捷入口、发票中心、收货地址、收藏夹、优惠券、个人信息、客服系统入口
+- 我的页当前还未满足 PRD 的 `userProfile`、`orderSummary`、`couponCount` 这组核心 Mock 字段
+- `miniprogram/pages/profile/index.ts` 目前仍是占位实现，仅展示标题、摘要和 `profileLinks`
+- `miniprogram/mock/profile.ts` 目前仅提供服务入口数组，尚未沉淀用户卡与订单摘要数据
+- `package-profile/profile/favorite.ts` 仍是占位页，说明个人中心域后续还有连续任务，但本轮应先把 TabBar 我的页做成真实入口页
+
+## Follow-up Findings: 我的页真实实现
+- `docs/pencil/miniapp.pen` 中“我的页”结构可收敛为三块：深色用户卡、订单状态快捷入口、服务入口列表；其中“消息中心/订单审批/我的清单”不在 PRD 内，继续排除为非硬需求
+- `miniprogram/types/models.ts` 已有 `UserProfile`，当前无需新增全局 store，只需在 `mock/profile.ts` 聚合本地订单、收藏、地址、发票记录即可生成我的页数据
+- `miniprogram/pages/profile/index.ts` 已接入 `getOrders`、`getFavoriteIds`、`getAddresses`、`getInvoiceRecords`，可直接从现有本地状态形成订单摘要和服务角标
+- 我的页已补齐 `loading` / `empty` / `error` / `offline` 状态分支，并支持通过 `state` query 做演示态切换，和内容域/服务域页面保持一致
+- 当前个人中心域的下一步已前移为二级页补完：`package-profile/profile/favorite.ts` 与 `package-profile/profile/info.ts`

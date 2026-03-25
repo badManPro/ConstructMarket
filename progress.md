@@ -135,3 +135,18 @@
 - 更新订单详情页联系客服跳转：进入在线咨询时携带订单上下文
 - `npm run typecheck` 通过
 - `npm run build:miniapp` 通过
+
+### Follow-up Session: 恢复下一步任务
+- 按 `planning-with-files` 重新读取 `task_plan.md`、`findings.md`、`progress.md`
+- 确认当前明确的下一步是“我的页真实用户卡、订单摘要和服务入口整理”
+- 复核 PRD 6.12，确认我的页需要承接 `userProfile`、`orderSummary`、`couponCount` 以及个人中心全部服务入口
+- 检查当前代码后确认：`miniprogram/pages/profile/index.ts` 仍是占位实现，`miniprogram/mock/profile.ts` 仅有入口链接数据
+
+### Follow-up Session: 我的页真实实现
+- 扩展 `miniprogram/mock/profile.ts`，新增用户卡、采购资产摘要、订单状态快捷入口和服务分组聚合逻辑
+- 重写 `miniprogram/pages/profile/index.ts`，接入订单、收藏、地址、发票本地状态并支持 `state` 演示态切换
+- 重写 `miniprogram/pages/profile/index.wxml`，完成深色用户卡、订单摘要区和采购服务/账号与售后入口布局
+- 新增 `miniprogram/pages/profile/index.wxss`，按 `docs/pencil` 的个人中心参考实现页面视觉
+- 修复一次补丁误将样式内容写入 `index.wxml` 的问题，并拆分回独立 `wxss` 文件
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过

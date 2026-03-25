@@ -90,3 +90,14 @@
 - 重构购物车、结算、支付结果页，使其与 `docs/pencil` 中的交易链路页面视觉保持一致
 - `npm run typecheck` 通过
 - `npm run build:miniapp` 通过
+
+### Follow-up Session: 订单链路闭环
+- 新增本地订单 Mock：`miniprogram/mock/order.ts`
+- 新增订单工具：`miniprogram/utils/order.ts`
+- 扩展本地存储：补充订单初始化、订单写入、继续支付、确认收货、售后申请
+- 更新结算页提交流程：提交订单后写入本地订单，再进入支付结果页
+- 更新支付结果页回流：成功态可直接进入订单详情
+- 完成订单列表页真实实现：状态 Tab、订单卡片摘要、继续支付、空态/异常态
+- 完成订单详情页真实实现：状态卡、收货信息、商品明细、金额/支付/发票信息、联系客服与状态动作
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过

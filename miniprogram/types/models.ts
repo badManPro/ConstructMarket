@@ -127,10 +127,10 @@ export type Order = {
   items: CartItem[];
   address: Address;
   coupon: Coupon | null;
-  invoiceInfo: Record<string, unknown>;
+  invoiceInfo: InvoiceDraft | null;
   remark: string;
   paymentMethod: string;
-  amount: Record<string, number>;
+  amount: CartAmountSummary;
   createdAt: string;
 };
 

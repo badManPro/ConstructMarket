@@ -1,13 +1,106 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Trade Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
+<view class="screen order-detail-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">订单详情</view>
+      <view class="page-head__icon"></view>
+    </view>
+    <view wx:if="{{orderNo}}" class="page-head__sub">订单号：{{orderNo}}</view>
   </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+
+  <view wx:if="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">订单读取失败</view>
+    <view class="empty-card__desc">请重新加载订单详情，若仍异常可返回订单列表重试。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoOrderList">订单列表</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
+    <view class="empty-card__title">订单已失效</view>
+    <view class="empty-card__desc">当前未找到对应订单，可返回订单列表或首页重新发起下单。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoOrderList">订单列表</view>
+      <view class="empty-card__action" bindtap="handleGoHome">返回首页</view>
+    </view>
+  </view>
+
+  <block wx:elif="{{order}}">
+    <view class="section-card order-status-card">
+      <view class="order-status-card__head">
+        <view class="order-status-card__title">{{statusText}}</view>
+        <view class="order-status-card__time">{{order.createdAt}}</view>
+      </view>
+      <view class="order-status-card__desc">{{statusDesc}}</view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-card__title">收货信息</view>
+      <view class="trade-row__value">{{order.address.receiver}} {{order.address.phone}}</view>
+      <view class="trade-row__desc">地址：{{addressText}}</view>
+      <view class="trade-row__tag">{{order.address.tag}}</view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-card__title">商品明细</view>
+      <view wx:for="{{order.items}}" wx:key="id" class="detail-item">
+        <view class="detail-item__cover">{{item.cover}}</view>
+        <view class="detail-item__content">
+          <view class="detail-item__name">{{item.name}}</view>
+          <view class="detail-item__model">{{item.model}}</view>
+          <view class="detail-item__meta">¥{{item.price}} x {{item.quantity}}{{item.unit}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-card__title">金额明细</view>
+      <view class="summary-row">
+        <view class="summary-row__label">商品金额</view>
+        <view class="summary-row__value">¥{{order.amount.subtotal}}</view>
+      </view>
+      <view class="summary-row">
+        <view class="summary-row__label">优惠抵扣</view>
+        <view class="summary-row__value">-¥{{order.amount.discount}}</view>
+      </view>
+      <view class="summary-row">
+        <view class="summary-row__label">运费</view>
+        <view class="summary-row__value">¥{{order.amount.freight}}</view>
+      </view>
+      <view class="summary-row summary-row--strong">
+        <view class="summary-row__label">实付金额</view>
+        <view class="summary-row__value">¥{{order.amount.payable}}</view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-card__title">支付与备注</view>
+      <view class="info-row">
+        <view class="info-row__label">支付方式</view>
+        <view class="info-row__value">{{paymentText}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-row__label">支付状态</view>
+        <view class="info-row__value">{{order.payStatus === 'success' ? '已支付' : '待支付'}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-row__label">订单备注</view>
+        <view class="info-row__value">{{order.remark || '未填写备注'}}</view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-card__title">发票信息</view>
+      <view class="trade-row__value">{{invoiceText}}</view>
+      <view wx:if="{{order.invoiceInfo}}" class="trade-row__desc">{{order.invoiceInfo.taxNo}} · {{order.invoiceInfo.email}}</view>
+      <view wx:if="{{order.coupon}}" class="trade-row__desc">已使用优惠券：{{order.coupon.name}}</view>
+      <view wx:elif="{{!order.invoiceInfo}}" class="trade-row__desc">当前订单未开具发票。</view>
+    </view>
+
+    <view class="detail-toolbar">
+      <view class="detail-toolbar__ghost" bindtap="handleContactService">联系客服</view>
+      <view class="detail-toolbar__solid" bindtap="handlePrimaryAction">{{primaryActionText}}</view>
+    </view>
+  </block>
 </view>

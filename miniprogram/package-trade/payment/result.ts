@@ -1,20 +1,21 @@
 import { ROUTES } from "../../constants/routes";
-import { navigateToRoute } from "../../utils/navigate";
+import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
 
 Page({
   data: {
     status: "success",
     title: "支付成功",
-    summary: "当前以本地 Mock 订单提交为准，后续会继续补订单列表和详情页的完整状态流转。",
+    summary: "当前订单已写入本地状态，可继续进入订单详情查看后续流转。",
     orderNo: "",
     amount: "0",
+    orderId: "",
   },
   onLoad(options: Record<string, string | undefined>) {
     const status = options.status === "failed" ? "failed" : "success";
     const title = status === "success" ? "支付成功" : "支付失败";
     const summary =
       status === "success"
-        ? "本次提交已完成本地落单演练，已从购物车移除对应勾选商品。"
+        ? "本次提交已完成本地落单，相关商品已从购物车移除。"
         : "当前仍停留在 Mock 支付阶段，可返回结算页后重试。";
 
     this.setData({
@@ -23,6 +24,7 @@ Page({
       summary,
       orderNo: options.orderNo ?? "",
       amount: options.amount ?? "0",
+      orderId: options.orderId ?? "",
     });
   },
   handleGoHome() {
@@ -32,7 +34,14 @@ Page({
     navigateToRoute(ROUTES.cart);
   },
   handleGoOrderList() {
-    navigateToRoute(ROUTES.orderList);
+    if (!this.data.orderId) {
+      navigateToRoute(ROUTES.orderList);
+      return;
+    }
+
+    navigateWithParams(ROUTES.orderDetail, {
+      id: this.data.orderId,
+    });
   },
   handleBackCheckout() {
     wx.navigateBack();

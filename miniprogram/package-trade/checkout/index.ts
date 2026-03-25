@@ -9,7 +9,14 @@ import {
 } from "../../mock/trade";
 import type { Address, CartAmountSummary, CartItem, Coupon, InvoiceDraft } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
-import { clearCheckoutDraft, getCartItems, getCheckoutDraft, patchCheckoutDraft, removeCartItems } from "../../utils/storage";
+import {
+  clearCheckoutDraft,
+  getCartItems,
+  getCheckoutDraft,
+  patchCheckoutDraft,
+  prependOrder,
+  removeCartItems,
+} from "../../utils/storage";
 import {
   calculateCartAmountSummary,
   EMPTY_CART_AMOUNT_SUMMARY,
@@ -157,9 +164,30 @@ Page({
     }
 
     const draft = getCheckoutDraft();
-    const orderNo = `CM${Date.now().toString().slice(-10)}`;
+    const timestamp = Date.now();
+    const orderId = `order-${timestamp}`;
+    const orderNo = `CM${timestamp.toString().slice(-10)}`;
+    const date = new Date(timestamp);
+    const createdAt = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
     this.setData({ submitting: true });
+
+    prependOrder({
+      id: orderId,
+      orderNo,
+      status: "pending_receipt",
+      payStatus: "success",
+      items: this.data.items.map((item) => ({ ...item })),
+      address: this.data.selectedAddress,
+      coupon: this.data.selectedCoupon,
+      invoiceInfo: this.data.invoiceDraft,
+      remark: this.data.remark,
+      paymentMethod: this.data.selectedPaymentMethod,
+      amount: {
+        ...this.data.amountSummary,
+      },
+      createdAt,
+    });
 
     if (draft.source === "cart") {
       const itemIds = draft.selectedCartItemIds.length ? draft.selectedCartItemIds : this.data.items.map((item) => item.id);
@@ -173,6 +201,7 @@ Page({
       status: "success",
       orderNo,
       amount: this.data.amountSummary.payable,
+      orderId,
     });
   },
 });

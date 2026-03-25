@@ -1,13 +1,90 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Trade Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
+<view class="screen order-list-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">我的订单</view>
+      <view class="page-head__icon"></view>
+    </view>
+    <view class="page-head__sub">按状态查看订单，并继续推进本地交易流转。</view>
   </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+
+  <scroll-view class="order-tabs" scroll-x enable-flex show-scrollbar="{{false}}">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="order-tabs__item {{currentFilter === item.value ? 'order-tabs__item--active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="handleFilterTap"
+    >
+      <view class="order-tabs__label">{{item.label}}</view>
+      <view class="order-tabs__count">{{item.count}}</view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">订单数据读取失败</view>
+    <view class="empty-card__desc">请重试本地订单读取，若仍失败可回首页重新发起下单。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前还没有订单</view>
+    <view class="empty-card__desc">先去首页挑选商品，或从购物车进入结算后生成本地订单。</view>
+    <view class="empty-card__action" bindtap="handleGoHome">去首页逛逛</view>
+  </view>
+
+  <view wx:elif="{{!filteredOrders.length}}" class="section-card empty-card">
+    <view class="empty-card__title">该状态下暂无订单</view>
+    <view class="empty-card__desc">可以切换其他状态查看，或返回全部订单继续浏览。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleViewAll">查看全部</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view
+      wx:for="{{filteredOrders}}"
+      wx:key="id"
+      class="section-card order-card"
+      data-id="{{item.id}}"
+      bindtap="handleOpenDetail"
+    >
+      <view class="order-card__head">
+        <view class="order-card__order-no">订单号 {{item.orderNo}}</view>
+        <view class="order-card__status">{{item.statusText}}</view>
+      </view>
+      <view class="order-card__time">{{item.createdAt}}</view>
+      <view class="order-card__desc">{{item.statusDesc}}</view>
+
+      <view wx:if="{{item.primaryItem}}" class="order-card__body">
+        <view class="order-card__cover">{{item.primaryItem.cover}}</view>
+        <view class="order-card__content">
+          <view class="order-card__name">{{item.primaryItem.name}}</view>
+          <view class="order-card__meta">{{item.primaryItem.model}}</view>
+          <view class="order-card__summary">共 {{item.itemCount}} 行商品，合计 {{item.totalQuantity}} 件</view>
+        </view>
+      </view>
+
+      <view class="order-card__foot">
+        <view class="order-card__amount">实付 ¥{{item.amount.payable}}</view>
+        <view class="order-card__total">商品金额 ¥{{item.amount.subtotal}}</view>
+      </view>
+
+      <view class="order-card__actions">
+        <view class="order-card__ghost" data-id="{{item.id}}" catchtap="handleOpenDetail">查看详情</view>
+        <view
+          wx:if="{{item.status === 'pending_payment'}}"
+          class="order-card__solid"
+          data-id="{{item.id}}"
+          catchtap="handleContinuePay"
+        >
+          继续支付
+        </view>
+      </view>
+    </view>
+  </block>
 </view>

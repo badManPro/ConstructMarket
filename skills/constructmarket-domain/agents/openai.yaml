@@ -1,0 +1,4 @@
+interface:
+  display_name: "ConstructMarket Domain"
+  short_description: "Project domain rules for the ConstructMarket mini app."
+  default_prompt: "Use $constructmarket-domain to map work to the ConstructMarket PRD, routes, entities, and business flows."

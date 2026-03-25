@@ -51,3 +51,18 @@
 - 默认采用微信原生小程序
 - 所有列表、详情、状态流转、支付结果都先用 Mock 数据模拟
 - 不写后端接口、后台管理、实时推送、审批流
+
+## Follow-up Findings: PRD 落地分析
+- 当前仓库没有 `package.json`、锁文件、`tsconfig`、构建配置或 `miniprogram-ci` 配置，说明尚未进入工程实现阶段
+- 当前分支为 `main`，工作区干净，适合从“初始化工程基座”开始推进
+- PRD 路由清单共 22 个页面能力，其中 4 个 TabBar 页面、18 个二级业务页，适合按“基础设施/交易域/内容域/个人中心与服务域”拆分
+- 并行开发的前提不是页面数量，而是先冻结共用约束：设计 token、路由规范、Mock 数据模型、全局 store、基础组件封装方式
+- 组件库不应承载业务心智，商品卡片、订单卡片、地址卡片、发票卡片、客服会话等业务组件仍应自建
+- 外部资料初步核验显示：`TDesign Miniprogram` 提供小程序组件库与零售模板；`NutUI React` 明确面向 React/Taro 多端；因此若坚持微信原生小程序，NutUI 不是优先路线
+
+## Follow-up Findings: 项目私有 Skills
+- 已在仓库内新增 3 个项目私有 skill：`constructmarket-domain`、`wechat-miniapp-engineering`、`constructmarket-qa`
+- 这 3 个 skill 选择落库到项目 `skills/` 目录，而不是只保存在本机 `$CODEX_HOME/skills`，目的是支持换设备后的快速恢复
+- 已新增 `docs/skills-setup.md` 记录技能用途和安装方法
+- 已新增 `scripts/install_project_skills.sh`，支持将项目内 skills 复制安装到 `${CODEX_HOME:-$HOME/.codex}/skills`
+- `skill-creator` 自带初始化脚本在当前环境缺少 `PyYAML` 依赖，因此改为手工生成最小可用 skill 结构

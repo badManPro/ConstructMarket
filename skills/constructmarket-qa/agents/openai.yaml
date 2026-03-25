@@ -1,0 +1,4 @@
+interface:
+  display_name: "ConstructMarket QA"
+  short_description: "QA workflow and acceptance checks for ConstructMarket."
+  default_prompt: "Use $constructmarket-qa to validate ConstructMarket flows, edge cases, regressions, and PRD coverage before sign-off."

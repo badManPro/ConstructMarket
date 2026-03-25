@@ -1,0 +1,4 @@
+interface:
+  display_name: "WeChat Miniapp Engineering"
+  short_description: "Engineering workflow for native WeChat mini programs."
+  default_prompt: "Use $wechat-miniapp-engineering to structure a native WeChat mini program with stable routing, subpackages, components, and mock-driven delivery."

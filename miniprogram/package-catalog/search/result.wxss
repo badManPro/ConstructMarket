@@ -9,11 +9,15 @@
 
 .search-panel__input {
   flex: 1;
+  display: block;
   height: 68rpx;
   padding: 0 20rpx;
   border-radius: 34rpx;
   background: #f1f2f5;
   font-size: 24rpx;
+  line-height: 68rpx;
+  box-sizing: border-box;
+  color: #222222;
 }
 
 .search-panel__button {

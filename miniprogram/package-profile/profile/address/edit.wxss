@@ -20,8 +20,9 @@
 .form-item__picker,
 .form-item__textarea {
   margin-top: 10rpx;
+  display: block;
   width: 100%;
-  padding: 18rpx;
+  padding: 0 18rpx;
   border-radius: 10rpx;
   box-sizing: border-box;
   background: #f4f4f4;
@@ -29,7 +30,14 @@
   color: #222222;
 }
 
+.form-item__input,
+.form-item__picker {
+  height: 76rpx;
+  line-height: 76rpx;
+}
+
 .form-item__textarea {
+  padding: 18rpx;
   min-height: 120rpx;
   line-height: 1.6;
 }

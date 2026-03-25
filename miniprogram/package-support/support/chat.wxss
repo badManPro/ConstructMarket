@@ -145,11 +145,15 @@
 
 .chat-toolbar__input {
   flex: 1;
+  display: block;
   height: 76rpx;
   padding: 0 24rpx;
   border-radius: 999rpx;
   background: #f5f5f5;
   font-size: 24rpx;
+  line-height: 76rpx;
+  box-sizing: border-box;
+  color: #222222;
 }
 
 .chat-toolbar__button {

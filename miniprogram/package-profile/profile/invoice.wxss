@@ -54,12 +54,15 @@
 
 .form-item__input {
   margin-top: 10rpx;
+  display: block;
   width: 100%;
-  padding: 18rpx;
+  height: 76rpx;
+  padding: 0 18rpx;
   border-radius: 10rpx;
   box-sizing: border-box;
   background: #f4f4f4;
   font-size: 24rpx;
+  line-height: 76rpx;
   color: #222222;
 }
 

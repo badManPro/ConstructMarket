@@ -178,3 +178,10 @@
 - 修复一次补丁误将样式内容写入 `info.wxml` 的问题，并重新拆分到独立 `info.wxss`
 - `npm run typecheck` 通过
 - `npm run build:miniapp` 通过
+
+### Follow-up Session: 输入框文字裁切修复
+- 根据开发者工具截图复核当前表单样式，确认多个单行 `input` 依赖纵向 `padding` 撑高，存在文字基线裁切风险
+- 统一修正搜索、个人信息、地址、发票、投诉建议和在线咨询的输入框样式：改为显式 `height + line-height + 横向 padding`
+- 补充 `box-sizing`、`display: block` 和文本颜色，避免微信开发者工具里出现“只显示半行字，点击后偶尔恢复”的现象
+- 保留 `textarea` 的纵向 padding，但补齐 `line-height` 和基础文本样式
+- `npm run build:miniapp` 通过

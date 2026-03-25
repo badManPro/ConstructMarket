@@ -54,11 +54,18 @@
 .form-textarea {
   width: 100%;
   margin-top: 14rpx;
-  padding: 18rpx 20rpx;
   border-radius: 14rpx;
   background: #f7f7f7;
   box-sizing: border-box;
   font-size: 24rpx;
+  color: #222222;
+}
+
+.form-input {
+  display: block;
+  height: 84rpx;
+  padding: 0 20rpx;
+  line-height: 84rpx;
 }
 
 .form-input--single {
@@ -66,7 +73,9 @@
 }
 
 .form-textarea {
+  padding: 18rpx 20rpx;
   min-height: 200rpx;
+  line-height: 1.6;
 }
 
 .form-error {

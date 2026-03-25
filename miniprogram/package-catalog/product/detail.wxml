@@ -1,13 +1,82 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Catalog Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
+<view wx:if="{{product}}" class="screen detail-screen">
+  <view class="detail-hero" style="background: {{product.coverTone}};">
+    <swiper class="detail-hero__swiper" indicator-dots circular>
+      <view wx:for="{{product.gallery}}" wx:key="*this">
+        <view class="detail-hero__panel">
+          <view class="detail-hero__eyebrow">{{product.categoryName}} · {{product.brand}}</view>
+          <view class="detail-hero__title">{{item}}</view>
+          <view class="detail-hero__subtitle">{{product.subtitle}}</view>
+        </view>
+      </view>
+    </swiper>
   </view>
+
   <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+    <view class="detail-header">
+      <view>
+        <view class="detail-header__price">¥{{product.price}}<text class="detail-header__unit"> / {{product.unit}}</text></view>
+        <view class="detail-header__stats">销量 {{product.salesVolume}} · 起订 {{product.minOrderQty}}{{product.unit}} · {{product.stockStatus}}</view>
+      </view>
+      <view
+        class="detail-header__favorite {{product.isFavorite ? 'detail-header__favorite--active' : ''}}"
+        bindtap="handleToggleFavorite"
+      >
+        {{product.isFavorite ? '已收藏' : '收藏'}}
+      </view>
+    </view>
+    <view class="detail-header__title">{{product.name}}</view>
+    <view class="detail-header__desc">{{product.description}}</view>
+
+    <view class="tag-row">
+      <view wx:for="{{product.serviceTags}}" wx:key="*this" class="tag-row__item">{{item}}</view>
     </view>
   </view>
+
+  <view class="section-card" bindtap="openSpecPopup">
+    <view class="detail-row">
+      <view>
+        <view class="detail-row__label">规格选择</view>
+        <view class="detail-row__value">{{selectedSpecText}}</view>
+      </view>
+      <view class="detail-row__arrow">选择</view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">商品参数</view>
+    <view wx:for="{{product.params}}" wx:key="key" class="param-row">
+      <view class="param-row__key">{{item.key}}</view>
+      <view class="param-row__value">{{item.value}}</view>
+    </view>
+    <view class="detail-delivery">{{product.deliveryDesc}}</view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">相关推荐</view>
+    <view class="product-list">
+      <product-card
+        wx:for="{{recommendedProducts}}"
+        wx:key="id"
+        item="{{item}}"
+        bindtapcard="handleProductTap"
+        bindfavorite="handleFavoriteTap"
+      />
+    </view>
+  </view>
+
+  <view class="detail-toolbar">
+    <view class="detail-toolbar__aside" bindtap="handleCustomerService">客服</view>
+    <view class="detail-toolbar__cart" bindtap="handleGoCart">购物车 {{cartPreviewCount}}</view>
+    <view class="detail-toolbar__ghost" bindtap="handleAddToCart">加入购物车</view>
+    <view class="detail-toolbar__solid" bindtap="handleBuyNow">立即购买</view>
+  </view>
+
+  <spec-popup
+    visible="{{showSpecPopup}}"
+    product="{{product}}"
+    selectedOptions="{{selectedOptions}}"
+    quantity="{{quantity}}"
+    bindclose="closeSpecPopup"
+    bindconfirm="handleSpecConfirm"
+  />
 </view>

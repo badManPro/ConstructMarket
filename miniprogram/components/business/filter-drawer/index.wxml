@@ -1,0 +1,61 @@
+<view wx:if="{{visible}}" class="drawer-mask" bindtap="handleClose">
+  <view class="drawer-panel" catchtap="noop">
+    <view class="drawer-panel__header">
+      <view class="drawer-panel__title">筛选条件</view>
+      <view class="drawer-panel__close" bindtap="handleClose">关闭</view>
+    </view>
+
+    <view class="drawer-section">
+      <view class="drawer-section__title">价格区间</view>
+      <view class="drawer-options">
+        <view
+          wx:for="{{priceOptions}}"
+          wx:key="value"
+          class="drawer-chip {{draft.priceRange === item.value ? 'drawer-chip--active' : ''}}"
+          data-field="priceRange"
+          data-value="{{item.value}}"
+          bindtap="handleSelect"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <view class="drawer-section">
+      <view class="drawer-section__title">起订量</view>
+      <view class="drawer-options">
+        <view
+          wx:for="{{quantityOptions}}"
+          wx:key="value"
+          class="drawer-chip {{draft.minOrder === item.value ? 'drawer-chip--active' : ''}}"
+          data-field="minOrder"
+          data-value="{{item.value}}"
+          bindtap="handleSelect"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <view class="drawer-section">
+      <view class="drawer-section__title">材质偏好</view>
+      <view class="drawer-options">
+        <view
+          wx:for="{{materialOptions}}"
+          wx:key="value"
+          class="drawer-chip {{draft.material === item.value ? 'drawer-chip--active' : ''}}"
+          data-field="material"
+          data-value="{{item.value}}"
+          bindtap="handleSelect"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <view class="drawer-actions">
+      <view class="drawer-actions__ghost" bindtap="handleReset">重置</view>
+      <view class="drawer-actions__solid" bindtap="handleApply">应用筛选</view>
+    </view>
+  </view>
+</view>

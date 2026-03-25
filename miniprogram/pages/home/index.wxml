@@ -6,27 +6,102 @@
   </view>
 
   <view class="section-card">
-    <view class="section-card__title">项目概览</view>
-    <view class="state-grid">
-      <view wx:for="{{highlights}}" wx:key="label" class="state-grid__item">
-        <view class="state-grid__value">{{item.value}}</view>
-        <view class="state-grid__label">{{item.label}}</view>
+    <view class="section-card__title">搜索入口</view>
+    <view class="search-entry" bindtap="handleSearchTap">
+      <view class="search-entry__label">{{searchKeyword}}</view>
+      <view class="search-entry__action">进入搜索</view>
+    </view>
+    <view class="chip-row">
+      <view
+        wx:for="{{keywordSuggestions}}"
+        wx:key="*this"
+        class="route-chip"
+        data-keyword="{{item}}"
+        bindtap="handleKeywordTap"
+      >
+        {{item}}
       </view>
     </view>
   </view>
 
-  <view wx:for="{{sections}}" wx:key="title" class="section-card">
-    <view class="section-card__title">{{item.title}}</view>
+  <view class="section-card">
+    <view class="section-card__title">装修图与活动导流</view>
+    <swiper class="banner-swiper" indicator-dots circular autoplay interval="4200">
+      <view wx:for="{{banners}}" wx:key="id" wx:for-item="banner">
+        <view
+          class="banner-card"
+          style="background: {{banner.accent}};"
+          data-route="{{banner.route}}"
+          data-params="{{banner.params}}"
+          bindtap="handleBannerTap"
+        >
+          <view class="banner-card__eyebrow">{{banner.eyebrow}}</view>
+          <view class="banner-card__title">{{banner.title}}</view>
+          <view class="banner-card__subtitle">{{banner.subtitle}}</view>
+          <view class="banner-card__action">{{banner.actionText}}</view>
+        </view>
+      </view>
+    </swiper>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">商品分类导航</view>
+    <view class="category-grid">
+      <view
+        wx:for="{{categoryNav}}"
+        wx:key="id"
+        class="category-tile"
+        data-route="{{item.route}}"
+        data-params="{{item.params}}"
+        bindtap="handleCategoryTap"
+      >
+        <view class="category-tile__name">{{item.name}}</view>
+        <view class="category-tile__tagline">{{item.tagline}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">活动商品推荐</view>
+    <view class="section-card__meta">优先展示当前工程采购场景里的主推组合。</view>
+    <view class="product-list">
+      <product-card
+        wx:for="{{campaignProducts}}"
+        wx:key="id"
+        item="{{item}}"
+        bindtapcard="handleProductTap"
+        bindfavorite="handleFavoriteTap"
+      />
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">热门商品推荐</view>
+    <view class="section-card__meta">用于验证首页到详情页的主流跳转链路。</view>
+    <view class="product-list">
+      <product-card
+        wx:for="{{hotProducts}}"
+        wx:key="id"
+        item="{{item}}"
+        bindtapcard="handleProductTap"
+        bindfavorite="handleFavoriteTap"
+      />
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">建材资讯入口</view>
     <view class="link-list">
       <view
-        wx:for="{{item.links}}"
-        wx:key="route"
+        wx:for="{{articleEntrances}}"
+        wx:key="id"
         class="link-card"
         data-route="{{item.route}}"
-        bindtap="handleRouteTap"
+        data-params="{{item.params}}"
+        bindtap="handleArticleTap"
       >
-        <view class="link-card__title">{{item.label}}</view>
-        <view class="link-card__desc">{{item.description}}</view>
+        <view class="link-card__title">{{item.category}} · {{item.title}}</view>
+        <view class="link-card__desc">{{item.summary}}</view>
       </view>
     </view>
   </view>

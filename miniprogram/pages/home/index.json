@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "首页"
+  "navigationBarTitleText": "首页",
+  "usingComponents": {
+    "product-card": "../../components/business/product-card/index"
+  }
 }

@@ -1,0 +1,34 @@
+<view class="product-card" bindtap="handleTap">
+  <view class="product-card__cover" style="background: {{item.coverTone || 'linear-gradient(135deg, #1e293b, #475569)'}};">
+    <view class="product-card__cover-badge">{{item.cover}}</view>
+    <view class="product-card__cover-brand">{{item.brand}}</view>
+    <view class="product-card__cover-model">{{item.model}}</view>
+  </view>
+
+  <view class="product-card__body">
+    <view class="product-card__header">
+      <view class="product-card__name">{{item.name}}</view>
+      <view
+        wx:if="{{showFavorite}}"
+        class="product-card__favorite {{item.isFavorite ? 'product-card__favorite--active' : ''}}"
+        catchtap="handleFavoriteTap"
+      >
+        {{item.isFavorite ? '已藏' : '收藏'}}
+      </view>
+    </view>
+
+    <view class="product-card__meta">{{item.categoryName}} · {{item.material}}</view>
+
+    <view class="product-card__tags">
+      <view wx:for="{{item.tags}}" wx:key="*this" class="product-card__tag">{{item}}</view>
+    </view>
+
+    <view class="product-card__footer">
+      <view>
+        <view class="product-card__price">¥{{item.price}}<text class="product-card__unit"> / {{item.unit}}</text></view>
+        <view class="product-card__stats">起订 {{item.minOrderQty}}{{item.unit}} · 销量 {{item.salesVolume}}</view>
+      </view>
+      <view class="product-card__cta">查看</view>
+    </view>
+  </view>
+</view>

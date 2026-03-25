@@ -1,0 +1,168 @@
+.search-panel {
+  display: flex;
+  gap: 16rpx;
+}
+
+.search-panel__input {
+  flex: 1;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: #f8fafc;
+  font-size: 26rpx;
+}
+
+.search-panel__button {
+  padding: 20rpx 28rpx;
+  border-radius: 20rpx;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.toolbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolbar-row__label {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.toolbar-row__action {
+  font-size: 24rpx;
+  color: #2563eb;
+}
+
+.category-scroll {
+  margin-top: 20rpx;
+  white-space: nowrap;
+}
+
+.category-scroll__inner {
+  display: inline-flex;
+  gap: 14rpx;
+}
+
+.category-pill,
+.sort-pill {
+  padding: 14rpx 20rpx;
+  border-radius: 999rpx;
+  background: #f1f5f9;
+  font-size: 24rpx;
+  color: #334155;
+}
+
+.category-pill--active,
+.sort-pill--active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.sort-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+
+.sort-pill--filter {
+  margin-left: auto;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.results-meta {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.empty-actions--single {
+  margin-top: 16rpx;
+}
+
+.empty-actions__ghost,
+.empty-actions__solid,
+.empty-actions__link {
+  flex: 1;
+  padding: 20rpx 0;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.empty-actions__ghost {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.empty-actions__solid {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.empty-actions__link {
+  background: #f1f5f9;
+  color: #1d4ed8;
+}
+
+.category-drawer-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.category-drawer {
+  position: absolute;
+  right: 24rpx;
+  bottom: 24rpx;
+  left: 24rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 24rpx 60rpx rgba(15, 23, 42, 0.18);
+}
+
+.category-drawer__title {
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.category-drawer__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.category-drawer__chip {
+  padding: 16rpx 20rpx;
+  border-radius: 18rpx;
+  background: #f8fafc;
+  font-size: 24rpx;
+}
+
+.category-drawer__chip--active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}

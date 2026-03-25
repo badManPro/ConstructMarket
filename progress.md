@@ -46,3 +46,20 @@
 - 改用本地缓存命令 `npm install --cache ./.npm-cache` 后成功安装依赖
 - 修正 `tsconfig` 对小程序 typings 的接入方式，并将事件类型改为 `WechatMiniprogram.Event`
 - `npm run typecheck` 通过
+
+### Follow-up Session: Handoff 文档
+- 更新 `task_plan.md` 中的落地分析状态，补齐已完成项
+- 新增 `docs/handoff-status.md`，明确当前停留点、下一步和换设备恢复步骤
+
+### Follow-up Session: 浏览主链路第一批实现
+- 新增共享浏览 Mock：`miniprogram/mock/browse.ts`
+- 新增本地状态工具：`miniprogram/utils/storage.ts`
+- 新增带 query 参数的导航辅助：`miniprogram/utils/navigate.ts`
+- 新增业务组件：
+  - `miniprogram/components/business/product-card`
+  - `miniprogram/components/business/filter-drawer`
+  - `miniprogram/components/business/spec-popup`
+- 完成首页真实实现：搜索入口、banner、分类导航、活动/热门商品、资讯入口
+- 完成搜索结果页真实实现：关键词回填、类目切换、排序、筛选抽屉、更多类目抽屉、空态
+- 完成商品详情页真实实现：图集、规格弹层、收藏、客服、加入购物车、立即购买、相关推荐
+- `npm run typecheck` 通过

@@ -1,0 +1,43 @@
+<view wx:if="{{visible}}" class="spec-mask" bindtap="handleClose">
+  <view class="spec-panel" catchtap="noop">
+    <view class="spec-panel__header">
+      <view>
+        <view class="spec-panel__title">{{product.name}}</view>
+        <view class="spec-panel__price">¥{{product.price}} / {{product.unit}}</view>
+      </view>
+      <view class="spec-panel__close" bindtap="handleClose">关闭</view>
+    </view>
+
+    <view wx:for="{{product.specGroups}}" wx:key="groupName" wx:for-item="group" wx:for-index="groupIndex" class="spec-group">
+      <view class="spec-group__title">{{group.groupName}}</view>
+      <view class="spec-group__options">
+        <view
+          wx:for="{{group.options}}"
+          wx:key="*this"
+          wx:for-item="option"
+          class="spec-chip {{draftOptions[groupIndex] === option ? 'spec-chip--active' : ''}}"
+          data-group-index="{{groupIndex}}"
+          data-option="{{option}}"
+          bindtap="handleSelect"
+        >
+          {{option}}
+        </view>
+      </view>
+    </view>
+
+    <view class="spec-group">
+      <view class="spec-group__title">采购数量</view>
+      <view class="quantity-row">
+        <view class="quantity-row__btn" bindtap="decreaseQuantity">-</view>
+        <view class="quantity-row__value">{{draftQuantity}}</view>
+        <view class="quantity-row__btn" bindtap="increaseQuantity">+</view>
+      </view>
+      <view class="quantity-row__hint">按最小起订量 {{product.minOrderQty}}{{product.unit}} 递增</view>
+    </view>
+
+    <view class="spec-panel__footer">
+      <view class="spec-panel__summary">{{draftOptions.length ? draftOptions.join(' / ') : '请选择规格后确认'}}</view>
+      <view class="spec-panel__confirm" bindtap="handleConfirm">确认规格</view>
+    </view>
+  </view>
+</view>

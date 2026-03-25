@@ -1,3 +1,7 @@
 {
-  "navigationBarTitleText": "搜索结果"
+  "navigationBarTitleText": "搜索结果",
+  "usingComponents": {
+    "product-card": "../../components/business/product-card/index",
+    "filter-drawer": "../../components/business/filter-drawer/index"
+  }
 }

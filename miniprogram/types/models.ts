@@ -159,3 +159,58 @@ export type RouteLink = {
   description: string;
   route: string;
 };
+
+export type BannerCard = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  actionText: string;
+  accent: string;
+  route: string;
+  params?: Record<string, string>;
+};
+
+export type CategoryShortcut = {
+  id: string;
+  name: string;
+  tagline: string;
+  route: string;
+  params?: Record<string, string>;
+};
+
+export type ArticleEntrance = {
+  id: string;
+  category: string;
+  title: string;
+  summary: string;
+  route: string;
+  params?: Record<string, string>;
+};
+
+export type SearchFilterState = {
+  priceRange: string;
+  minOrder: string;
+  material: string;
+};
+
+export type FilterOption = {
+  value: string;
+  label: string;
+  desc?: string;
+};
+
+export type SearchProduct = ProductCard & {
+  categoryId: string;
+  categoryName: string;
+  material: string;
+  coverTone: string;
+};
+
+export type BrowseProductDetail = ProductDetail & {
+  categoryId: string;
+  categoryName: string;
+  material: string;
+  coverTone: string;
+  recommendedIds: string[];
+};

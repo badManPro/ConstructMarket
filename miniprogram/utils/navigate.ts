@@ -11,3 +11,16 @@ export function navigateToRoute(route: string) {
 
   wx.navigateTo({ url: normalized });
 }
+
+export function navigateWithParams(
+  route: string,
+  params: Record<string, string | number | boolean | undefined> = {},
+) {
+  const query = Object.entries(params)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .join("&");
+
+  const target = query ? `${route}?${query}` : route;
+  navigateToRoute(target);
+}

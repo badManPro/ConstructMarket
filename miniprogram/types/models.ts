@@ -210,6 +210,8 @@ export type PaymentMethod = {
   desc: string;
 };
 
+export type PaymentResultStatus = "success" | "processing" | "failed";
+
 export type RouteLink = {
   label: string;
   description: string;

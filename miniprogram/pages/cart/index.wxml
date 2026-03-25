@@ -11,10 +11,21 @@
     </view>
   </view>
 
-  <view wx:if="{{status === 'error'}}" class="section-card empty-card">
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">正在整理购物车</view>
+    <view class="empty-card__desc">本地商品与勾选状态正在同步，请稍候。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
     <view class="empty-card__title">购物车加载失败</view>
     <view class="empty-card__desc">本地购物车读取异常，请重试当前页面。</view>
     <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+  </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">购物车商品已保留在本地，恢复网络后可继续结算。</view>
+    <view class="empty-card__action" bindtap="handleRetry">恢复页面</view>
   </view>
 
   <block wx:elif="{{status === 'empty'}}">

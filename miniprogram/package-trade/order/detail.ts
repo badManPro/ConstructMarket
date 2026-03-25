@@ -1,15 +1,22 @@
 import { ROUTES } from "../../constants/routes";
 import type { Order } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
-import { getOrderPaymentText, getOrderPrimaryActionText, getOrderStatusDesc, getOrderStatusText } from "../../utils/order";
-import { getOrderById, getOrderByNo, markOrderAfterSale, markOrderPaid, markOrderReceived } from "../../utils/storage";
+import { getPageStatusOverride, type PageStatus } from "../../utils/page";
+import {
+  getOrderPaymentStatusText,
+  getOrderPaymentText,
+  getOrderPrimaryActionText,
+  getOrderStatusDesc,
+  getOrderStatusText,
+  getPaymentResultStatusFromOrder,
+} from "../../utils/order";
+import { getOrderById, getOrderByNo, markOrderAfterSale, markOrderReceived } from "../../utils/storage";
 import { formatAddressText, formatInvoiceText } from "../../utils/trade";
-
-type PageStatus = "loading" | "ready" | "empty" | "error";
 
 Page({
   data: {
     status: "loading" as PageStatus,
+    mockState: null as PageStatus | null,
     orderId: "",
     orderNo: "",
     order: null as Order | null,
@@ -17,6 +24,7 @@ Page({
     statusDesc: "",
     addressText: "",
     paymentText: "",
+    paymentStatusText: "",
     invoiceText: "",
     primaryActionText: "",
   },
@@ -24,10 +32,11 @@ Page({
     this.setData({
       orderId: options.id ?? "",
       orderNo: options.orderNo ?? "",
+      mockState: getPageStatusOverride(options.state),
     });
   },
   onShow() {
-    this.hydrateOrder();
+    this.hydrateOrder(this.data.mockState);
   },
   handleGoBack() {
     wx.navigateBack({
@@ -36,7 +45,23 @@ Page({
       },
     });
   },
-  hydrateOrder() {
+  hydrateOrder(override: PageStatus | null = null) {
+    if (override === "loading") {
+      this.setData({
+        status: "loading",
+        order: null,
+      });
+      return;
+    }
+
+    if (override && override !== "ready") {
+      this.setData({
+        status: override,
+        order: null,
+      });
+      return;
+    }
+
     try {
       const order = getOrderById(this.data.orderId) ?? getOrderByNo(this.data.orderNo);
 
@@ -57,6 +82,7 @@ Page({
         statusDesc: getOrderStatusDesc(order),
         addressText: formatAddressText(order.address),
         paymentText: getOrderPaymentText(order.paymentMethod),
+        paymentStatusText: getOrderPaymentStatusText(order.payStatus),
         invoiceText: formatInvoiceText(order.invoiceInfo),
         primaryActionText: getOrderPrimaryActionText(order),
       });
@@ -71,13 +97,12 @@ Page({
     if (!order) return;
 
     if (order.status === "pending_payment") {
-      const updatedOrder = markOrderPaid(order.id);
-      if (!updatedOrder) return;
       navigateWithParams(ROUTES.paymentResult, {
-        status: "success",
-        orderNo: updatedOrder.orderNo,
-        amount: updatedOrder.amount.payable,
-        orderId: updatedOrder.id,
+        status: getPaymentResultStatusFromOrder(order),
+        orderNo: order.orderNo,
+        amount: order.amount.payable,
+        orderId: order.id,
+        paymentMethod: order.paymentMethod,
       });
       return;
     }
@@ -129,6 +154,10 @@ Page({
     navigateToRoute(ROUTES.home);
   },
   handleRetry() {
+    this.setData({
+      status: "loading",
+      mockState: null,
+    });
     this.hydrateOrder();
   },
 });

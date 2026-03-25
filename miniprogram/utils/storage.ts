@@ -2,7 +2,18 @@ import { buildProfileDraft, seededUserProfile } from "../mock/profile";
 import { seededOrders } from "../mock/order";
 import { defaultComplaintDraft } from "../mock/support";
 import { seededInvoiceRecords, tradeAddresses } from "../mock/trade";
-import type { Address, CartItem, ChatMessage, CheckoutDraft, ComplaintForm, InvoiceRecord, Order, ProfileDraft, UserProfile } from "../types/models";
+import type {
+  Address,
+  CartItem,
+  ChatMessage,
+  CheckoutDraft,
+  ComplaintForm,
+  InvoiceRecord,
+  Order,
+  PaymentResultStatus,
+  ProfileDraft,
+  UserProfile,
+} from "../types/models";
 
 const FAVORITE_KEY = "constructmarket_favorite_ids";
 const CART_KEY = "constructmarket_cart_items";
@@ -557,6 +568,30 @@ export function markOrderPaid(orderId: string) {
   return patchOrder(orderId, {
     payStatus: "success",
     status: "pending_receipt",
+  });
+}
+
+export function setOrderPaymentState(orderId: string, status: PaymentResultStatus) {
+  const order = getOrderById(orderId);
+  if (!order) return null;
+
+  if (status === "success") {
+    return patchOrder(orderId, {
+      payStatus: "success",
+      status: "pending_receipt",
+    });
+  }
+
+  if (status === "failed") {
+    return patchOrder(orderId, {
+      payStatus: "failed",
+      status: "pending_payment",
+    });
+  }
+
+  return patchOrder(orderId, {
+    payStatus: "paying",
+    status: "pending_payment",
   });
 }
 

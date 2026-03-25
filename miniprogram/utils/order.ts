@@ -1,4 +1,4 @@
-import type { Order } from "../types/models";
+import type { Order, PaymentResultStatus } from "../types/models";
 
 export type OrderFilterValue =
   | "all"
@@ -33,6 +33,13 @@ const PAYMENT_METHOD_TEXT_MAP: Record<string, string> = {
   unionpay: "银联转账",
 };
 
+const PAYMENT_STATUS_TEXT_MAP: Record<string, string> = {
+  unpaid: "待支付",
+  paying: "支付处理中",
+  success: "已支付",
+  failed: "支付失败",
+};
+
 export function filterOrdersByStatus<T extends Order>(orders: T[], filter: OrderFilterValue): T[] {
   if (filter === "all") return orders;
   return orders.filter((item) => item.status === filter);
@@ -45,7 +52,15 @@ export function getOrderStatusText(status: string) {
 export function getOrderStatusDesc(order: Order) {
   switch (order.status) {
     case "pending_payment":
-      return order.payStatus === "failed" ? "支付未完成，可重新发起支付" : "订单已创建，请尽快完成支付";
+      if (order.payStatus === "failed") {
+        return "支付未完成，可重新发起支付";
+      }
+
+      if (order.payStatus === "paying") {
+        return "支付结果确认中，可稍后刷新或继续查看";
+      }
+
+      return "订单已创建，请尽快完成支付";
     case "pending_shipment":
       return "商家已确认，等待安排发货";
     case "pending_receipt":
@@ -63,6 +78,22 @@ export function getOrderStatusDesc(order: Order) {
 
 export function getOrderPaymentText(code: string) {
   return PAYMENT_METHOD_TEXT_MAP[code] ?? code;
+}
+
+export function getOrderPaymentStatusText(payStatus: string) {
+  return PAYMENT_STATUS_TEXT_MAP[payStatus] ?? "支付处理中";
+}
+
+export function getPaymentResultStatusFromOrder(order: Order): PaymentResultStatus {
+  if (order.payStatus === "success") {
+    return "success";
+  }
+
+  if (order.payStatus === "failed") {
+    return "failed";
+  }
+
+  return "processing";
 }
 
 export function getOrderTotalQuantity(order: Order) {

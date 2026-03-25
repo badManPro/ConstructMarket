@@ -196,6 +196,23 @@
   color: #666666;
 }
 
+.debug-row + .debug-row {
+  margin-top: 24rpx;
+}
+
+.debug-chip {
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f4f4f4;
+  color: #666666;
+  font-size: 22rpx;
+}
+
+.debug-chip--active {
+  background: #fff1f0;
+  color: #ff4a43;
+}
+
 .summary-row {
   display: flex;
   justify-content: space-between;

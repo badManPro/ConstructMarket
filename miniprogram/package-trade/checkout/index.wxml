@@ -7,10 +7,27 @@
     </view>
   </view>
 
-  <view wx:if="{{status === 'error'}}" class="section-card empty-card">
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">正在整理结算信息</view>
+    <view class="empty-card__desc">收货地址、优惠券和发票信息正在从本地状态汇总。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
     <view class="empty-card__title">结算页初始化失败</view>
     <view class="empty-card__desc">本地交易草稿读取异常，请返回购物车后重试。</view>
-    <view class="empty-card__action" bindtap="handleBackCart">返回购物车</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleBackCart">返回购物车</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">结算草稿已保留在本地，恢复网络后可继续提交订单。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleBackCart">返回购物车</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复页面</view>
+    </view>
   </view>
 
   <block wx:elif="{{status === 'empty'}}">
@@ -109,6 +126,59 @@
           <view class="payment-card__title">{{item.name}}</view>
           <view class="payment-card__desc">{{item.desc}}</view>
         </view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-card__title">联调模拟</view>
+
+      <view class="debug-row">
+        <view class="trade-row__label">提交订单</view>
+        <view class="chip-row">
+          <view
+            class="debug-chip {{submitMode === 'normal' ? 'debug-chip--active' : ''}}"
+            data-mode="normal"
+            bindtap="handleSubmitModeTap"
+          >
+            正常提交
+          </view>
+          <view
+            class="debug-chip {{submitMode === 'submit_failed' ? 'debug-chip--active' : ''}}"
+            data-mode="submit_failed"
+            bindtap="handleSubmitModeTap"
+          >
+            模拟提交失败
+          </view>
+        </view>
+        <view wx:if="{{submitErrorText}}" class="trade-row__warn">{{submitErrorText}}</view>
+      </view>
+
+      <view class="debug-row">
+        <view class="trade-row__label">支付结果</view>
+        <view class="chip-row">
+          <view
+            class="debug-chip {{paymentResultMode === 'success' ? 'debug-chip--active' : ''}}"
+            data-mode="success"
+            bindtap="handlePaymentResultModeTap"
+          >
+            支付成功
+          </view>
+          <view
+            class="debug-chip {{paymentResultMode === 'processing' ? 'debug-chip--active' : ''}}"
+            data-mode="processing"
+            bindtap="handlePaymentResultModeTap"
+          >
+            支付中
+          </view>
+          <view
+            class="debug-chip {{paymentResultMode === 'failed' ? 'debug-chip--active' : ''}}"
+            data-mode="failed"
+            bindtap="handlePaymentResultModeTap"
+          >
+            支付失败
+          </view>
+        </view>
+        <view class="trade-row__desc">当前 Mock 订单提交后会带入选中的支付结果态，便于联调订单回流。</view>
       </view>
     </view>
 

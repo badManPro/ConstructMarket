@@ -5,8 +5,9 @@ import {
   getRecommendedCoupon,
   tradePaymentMethods,
 } from "../../mock/trade";
-import type { Address, CartAmountSummary, CartItem, Coupon, InvoiceDraft } from "../../types/models";
+import type { Address, CartAmountSummary, CartItem, Coupon, InvoiceDraft, PaymentResultStatus } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
+import { getPageStatusOverride, type PageStatus } from "../../utils/page";
 import {
   clearCheckoutDraft,
   getAddressById,
@@ -25,13 +26,14 @@ import {
   resolveCheckoutItems,
 } from "../../utils/trade";
 
-type CheckoutStatus = "loading" | "ready" | "empty" | "error";
+type SubmitMode = "normal" | "submit_failed";
 
 Page({
   data: {
     title: "结算页",
     summary: "串联地址、发票、优惠券、备注和支付方式，是交易链路里最关键的状态汇聚页。",
-    status: "loading" as CheckoutStatus,
+    status: "loading" as PageStatus,
+    mockState: null as PageStatus | null,
     sourceLabel: "购物车结算",
     items: [] as CartItem[],
     selectedAddress: null as Address | null,
@@ -42,12 +44,27 @@ Page({
     invoiceText: "",
     paymentMethods: tradePaymentMethods,
     selectedPaymentMethod: "wechat",
+    paymentResultMode: "success" as PaymentResultStatus,
+    submitMode: "normal" as SubmitMode,
+    submitErrorText: "",
     remark: "",
     amountSummary: EMPTY_CART_AMOUNT_SUMMARY as CartAmountSummary,
     submitting: false,
   },
+  onLoad(options: Record<string, string | undefined>) {
+    const paymentResultMode =
+      options.paymentResult === "failed" || options.paymentResult === "processing" || options.paymentResult === "success"
+        ? options.paymentResult
+        : "success";
+
+    this.setData({
+      mockState: getPageStatusOverride(options.state),
+      paymentResultMode,
+      submitMode: options.submitMode === "submit_failed" ? "submit_failed" : "normal",
+    });
+  },
   onShow() {
-    this.hydrateCheckout();
+    this.hydrateCheckout(this.data.mockState);
   },
   handleGoBack() {
     wx.navigateBack({
@@ -56,7 +73,37 @@ Page({
       },
     });
   },
-  hydrateCheckout() {
+  hydrateCheckout(override: PageStatus | null = null) {
+    if (override === "loading") {
+      this.setData({
+        status: "loading",
+        items: [],
+        amountSummary: EMPTY_CART_AMOUNT_SUMMARY,
+        selectedAddress: null,
+        addressText: "",
+        selectedCoupon: null,
+        recommendedCoupon: null,
+        invoiceDraft: null,
+        invoiceText: "",
+      });
+      return;
+    }
+
+    if (override && override !== "ready") {
+      this.setData({
+        status: override,
+        items: [],
+        amountSummary: EMPTY_CART_AMOUNT_SUMMARY,
+        selectedAddress: null,
+        addressText: "",
+        selectedCoupon: null,
+        recommendedCoupon: null,
+        invoiceDraft: null,
+        invoiceText: "",
+      });
+      return;
+    }
+
     try {
       const cartItems = getCartItems();
       const draft = getCheckoutDraft();
@@ -147,6 +194,23 @@ Page({
     });
     patchCheckoutDraft({ paymentMethod: code });
   },
+  handlePaymentResultModeTap(event: WechatMiniprogram.Event) {
+    const { mode } = event.currentTarget.dataset as { mode?: PaymentResultStatus };
+    if (!mode) return;
+
+    this.setData({
+      paymentResultMode: mode,
+    });
+  },
+  handleSubmitModeTap(event: WechatMiniprogram.Event) {
+    const { mode } = event.currentTarget.dataset as { mode?: SubmitMode };
+    if (!mode) return;
+
+    this.setData({
+      submitMode: mode,
+      submitErrorText: "",
+    });
+  },
   handleBackCart() {
     navigateToRoute(ROUTES.cart);
   },
@@ -171,6 +235,18 @@ Page({
       return;
     }
 
+    if (this.data.submitMode === "submit_failed") {
+      const submitErrorText = "本地已模拟提交失败，请核对地址、商品与支付信息后重试。";
+      this.setData({
+        submitErrorText,
+      });
+      wx.showToast({
+        title: "提交订单失败",
+        icon: "none",
+      });
+      return;
+    }
+
     const draft = getCheckoutDraft();
     const timestamp = Date.now();
     const orderId = `order-${timestamp}`;
@@ -183,8 +259,8 @@ Page({
     prependOrder({
       id: orderId,
       orderNo,
-      status: "pending_receipt",
-      payStatus: "success",
+      status: "pending_payment",
+      payStatus: this.data.paymentResultMode === "failed" ? "failed" : this.data.paymentResultMode === "processing" ? "paying" : "unpaid",
       items: this.data.items.map((item) => ({ ...item })),
       address: this.data.selectedAddress,
       coupon: this.data.selectedCoupon,
@@ -203,13 +279,25 @@ Page({
     }
 
     clearCheckoutDraft();
-    this.setData({ submitting: false });
+    this.setData({
+      submitting: false,
+      submitErrorText: "",
+    });
 
     navigateWithParams(ROUTES.paymentResult, {
-      status: "success",
+      status: this.data.paymentResultMode,
       orderNo,
       amount: this.data.amountSummary.payable,
       orderId,
+      paymentMethod: this.data.selectedPaymentMethod,
     });
+  },
+  handleRetry() {
+    this.setData({
+      status: "loading",
+      mockState: null,
+      submitErrorText: "",
+    });
+    this.hydrateCheckout();
   },
 });

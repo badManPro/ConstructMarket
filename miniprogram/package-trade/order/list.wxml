@@ -21,12 +21,26 @@
     </view>
   </scroll-view>
 
-  <view wx:if="{{status === 'error'}}" class="section-card empty-card">
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">正在加载订单</view>
+    <view class="empty-card__desc">本地订单状态和筛选统计正在同步，请稍候。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
     <view class="empty-card__title">订单数据读取失败</view>
     <view class="empty-card__desc">请重试本地订单读取，若仍失败可回首页重新发起下单。</view>
     <view class="empty-card__actions">
       <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
       <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">订单已保留在本地，恢复网络后可继续查看或支付。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复页面</view>
     </view>
   </view>
 

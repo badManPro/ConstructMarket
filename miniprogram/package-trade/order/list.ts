@@ -1,10 +1,17 @@
 import { ROUTES } from "../../constants/routes";
 import type { Order } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
-import { filterOrdersByStatus, getOrderStatusDesc, getOrderStatusText, getOrderTotalQuantity, orderFilterOptions, type OrderFilterValue } from "../../utils/order";
-import { getOrders, markOrderPaid } from "../../utils/storage";
-
-type PageStatus = "loading" | "ready" | "empty" | "error";
+import { getPageStatusOverride, type PageStatus } from "../../utils/page";
+import {
+  filterOrdersByStatus,
+  getPaymentResultStatusFromOrder,
+  getOrderStatusDesc,
+  getOrderStatusText,
+  getOrderTotalQuantity,
+  orderFilterOptions,
+  type OrderFilterValue,
+} from "../../utils/order";
+import { getOrders } from "../../utils/storage";
 type OrderCardView = Order & {
   statusText: string;
   statusDesc: string;
@@ -16,6 +23,7 @@ type OrderCardView = Order & {
 Page({
   data: {
     status: "loading" as PageStatus,
+    mockState: null as PageStatus | null,
     currentFilter: "all" as OrderFilterValue,
     tabs: [] as Array<{ value: OrderFilterValue; label: string; count: number }>,
     orders: [] as OrderCardView[],
@@ -23,16 +31,35 @@ Page({
   },
   onLoad(options: Record<string, string | undefined>) {
     const filter = options.filter as OrderFilterValue | undefined;
-    if (filter && orderFilterOptions.some((item) => item.value === filter)) {
-      this.setData({
-        currentFilter: filter,
-      });
-    }
+    this.setData({
+      mockState: getPageStatusOverride(options.state),
+      currentFilter: filter && orderFilterOptions.some((item) => item.value === filter) ? filter : "all",
+    });
   },
   onShow() {
-    this.hydrateOrders();
+    this.hydrateOrders(this.data.mockState);
   },
-  hydrateOrders() {
+  hydrateOrders(override: PageStatus | null = null) {
+    if (override === "loading") {
+      this.setData({
+        status: "loading",
+        tabs: [],
+        orders: [],
+        filteredOrders: [],
+      });
+      return;
+    }
+
+    if (override && override !== "ready") {
+      this.setData({
+        status: override,
+        tabs: [],
+        orders: [],
+        filteredOrders: [],
+      });
+      return;
+    }
+
     try {
       const orders = getOrders().map((order) => ({
         ...order,
@@ -88,20 +115,17 @@ Page({
     const { id } = event.currentTarget.dataset as { id?: string };
     if (!id) return;
 
-    const order = markOrderPaid(id);
+    const order = this.data.orders.find((item) => item.id === id);
     if (!order) {
-      wx.showToast({
-        title: "订单状态更新失败",
-        icon: "none",
-      });
       return;
     }
 
     navigateWithParams(ROUTES.paymentResult, {
-      status: "success",
+      status: getPaymentResultStatusFromOrder(order),
       orderNo: order.orderNo,
       amount: order.amount.payable,
       orderId: order.id,
+      paymentMethod: order.paymentMethod,
     });
   },
   handleViewAll() {
@@ -114,6 +138,10 @@ Page({
     navigateToRoute(ROUTES.home);
   },
   handleRetry() {
+    this.setData({
+      status: "loading",
+      mockState: null,
+    });
     this.hydrateOrders();
   },
 });

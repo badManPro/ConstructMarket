@@ -8,15 +8,50 @@
   </view>
 
   <view class="result-panel">
-    <view class="result-panel__icon {{status === 'success' ? 'result-panel__icon--success' : 'result-panel__icon--failed'}}"></view>
-    <view class="result-panel__title {{status === 'success' ? 'result-panel__title--success' : 'result-panel__title--failed'}}">{{title}}</view>
-    <view class="result-panel__summary">订单号：{{orderNo}}</view>
-    <view class="result-panel__amount">实付金额：¥{{amount}}</view>
+    <view
+      class="result-panel__icon {{status === 'success' ? 'result-panel__icon--success' : status === 'failed' ? 'result-panel__icon--failed' : 'result-panel__icon--processing'}}"
+    ></view>
+    <view
+      class="result-panel__title {{status === 'success' ? 'result-panel__title--success' : status === 'failed' ? 'result-panel__title--failed' : 'result-panel__title--processing'}}"
+    >
+      {{title}}
+    </view>
+    <view class="result-panel__summary">{{summary}}</view>
+    <view wx:if="{{orderNo}}" class="result-panel__meta">订单号：{{orderNo}}</view>
+    <view class="result-panel__amount">应付金额：¥{{amount}}</view>
+    <view class="result-panel__meta">支付方式：{{paymentMethodText}}</view>
+    <view wx:if="{{reasonText}}" class="result-panel__notice">{{reasonText}}</view>
 
     <view class="result-actions">
       <view class="result-actions__ghost" bindtap="handleGoHome">返回首页</view>
-      <view wx:if="{{status === 'success'}}" class="result-actions__solid" bindtap="handleGoOrderList">查看订单</view>
-      <view wx:else class="result-actions__solid" bindtap="handleBackCheckout">返回结算</view>
+      <view class="result-actions__solid" bindtap="handlePrimaryAction">{{actionText}}</view>
+    </view>
+
+    <view wx:if="{{status !== 'success'}}" class="result-debug">
+      <view class="result-debug__label">联调切换</view>
+      <view class="chip-row result-debug__chips">
+        <view
+          class="result-debug__chip {{status === 'processing' ? 'result-debug__chip--active' : ''}}"
+          data-status="processing"
+          bindtap="handleResultSwitch"
+        >
+          支付中
+        </view>
+        <view
+          class="result-debug__chip"
+          data-status="success"
+          bindtap="handleResultSwitch"
+        >
+          支付成功
+        </view>
+        <view
+          class="result-debug__chip {{status === 'failed' ? 'result-debug__chip--active' : ''}}"
+          data-status="failed"
+          bindtap="handleResultSwitch"
+        >
+          支付失败
+        </view>
+      </view>
     </view>
   </view>
 </view>

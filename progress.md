@@ -185,3 +185,15 @@
 - 补充 `box-sizing`、`display: block` 和文本颜色，避免微信开发者工具里出现“只显示半行字，点击后偶尔恢复”的现象
 - 保留 `textarea` 的纵向 padding，但补齐 `line-height` 和基础文本样式
 - `npm run build:miniapp` 通过
+
+### Follow-up Session: 交易链路边界态联调
+- 扩展共享类型与订单工具：新增支付结果态类型，并补齐 `paying / failed / success` 文案映射
+- 扩展本地订单状态工具：新增统一支付状态更新入口，让支付结果页驱动 `pending_payment -> pending_receipt` 的状态流转
+- 更新购物车页：补齐 `loading / offline` 演示态分支，便于交易域统一 smoke
+- 更新结算页：新增 `state` 演示态支持，以及“提交失败 / 支付成功 / 支付中 / 支付失败”联调开关
+- 调整结算提交流程：提交订单后先写入 `pending_payment` 订单，再带支付结果态进入支付结果页
+- 重写支付结果页：补齐 `success / processing / failed` 三态、支付方式展示、失败重试和本地强制切换入口
+- 更新订单列表页和订单详情页：待支付订单的“继续支付”统一进入支付结果页，不再直接把订单改成已支付
+- 更新订单详情页支付信息展示：由二态文案改为 `待支付 / 支付处理中 / 已支付 / 支付失败`
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过

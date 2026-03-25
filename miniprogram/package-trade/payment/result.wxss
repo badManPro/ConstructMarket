@@ -25,6 +25,10 @@
   background: #fff1f0;
 }
 
+.result-panel__icon--processing {
+  background: #fff8e7;
+}
+
 .result-panel__title {
   font-size: 40rpx;
   font-weight: 700;
@@ -38,15 +42,37 @@
   color: #ff4a43;
 }
 
+.result-panel__title--processing {
+  color: #b45309;
+}
+
 .result-panel__summary {
-  font-size: 22rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
   color: #666666;
+  text-align: center;
 }
 
 .result-panel__amount {
   font-size: 28rpx;
   font-weight: 600;
   color: #222222;
+}
+
+.result-panel__meta {
+  font-size: 22rpx;
+  color: #666666;
+}
+
+.result-panel__notice {
+  width: 100%;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  box-sizing: border-box;
+  background: #fff7ed;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #9a3412;
 }
 
 .result-actions {
@@ -75,4 +101,34 @@
 .result-actions__solid {
   background: #ff3b30;
   color: #ffffff;
+}
+
+.result-debug {
+  width: 100%;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.result-debug__label {
+  font-size: 22rpx;
+  color: #666666;
+}
+
+.result-debug__chips {
+  margin-top: 18rpx;
+}
+
+.result-debug__chip {
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f4f4f4;
+  color: #666666;
+  font-size: 22rpx;
+}
+
+.result-debug__chip--active {
+  background: #fff1f0;
+  color: #ff4a43;
 }

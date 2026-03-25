@@ -1,6 +1,7 @@
 import { ROUTES } from "../../constants/routes";
 import type { CartAmountSummary, CartItem } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
+import { getPageStatusOverride, type PageStatus } from "../../utils/page";
 import {
   clearInvalidCartItems,
   getCartItems,
@@ -17,22 +18,48 @@ import {
   splitCartItems,
 } from "../../utils/trade";
 
-type CartStatus = "loading" | "ready" | "empty" | "error";
-
 Page({
   data: {
     title: "购物车",
     summary: "集中管理待下单商品，先打通本地加购、勾选、数量修改和结算入口。",
-    status: "loading" as CartStatus,
+    status: "loading" as PageStatus,
+    mockState: null as PageStatus | null,
     validItems: [] as CartItem[],
     invalidItems: [] as CartItem[],
     amountSummary: EMPTY_CART_AMOUNT_SUMMARY as CartAmountSummary,
     allChecked: false,
   },
-  onShow() {
-    this.hydrateCart();
+  onLoad(options: Record<string, string | undefined>) {
+    this.setData({
+      mockState: getPageStatusOverride(options.state),
+    });
   },
-  hydrateCart() {
+  onShow() {
+    this.hydrateCart(this.data.mockState);
+  },
+  hydrateCart(override: PageStatus | null = null) {
+    if (override === "loading") {
+      this.setData({
+        status: "loading",
+        validItems: [],
+        invalidItems: [],
+        amountSummary: EMPTY_CART_AMOUNT_SUMMARY,
+        allChecked: false,
+      });
+      return;
+    }
+
+    if (override && override !== "ready") {
+      this.setData({
+        status: override,
+        validItems: [],
+        invalidItems: [],
+        amountSummary: EMPTY_CART_AMOUNT_SUMMARY,
+        allChecked: false,
+      });
+      return;
+    }
+
     try {
       const items = getCartItems();
       const { validItems, invalidItems } = splitCartItems(items);
@@ -52,6 +79,10 @@ Page({
     }
   },
   handleRetry() {
+    this.setData({
+      status: "loading",
+      mockState: null,
+    });
     this.hydrateCart();
   },
   handleGoHome() {

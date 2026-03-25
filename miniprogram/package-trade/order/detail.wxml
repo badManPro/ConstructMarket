@@ -8,12 +8,26 @@
     <view wx:if="{{orderNo}}" class="page-head__sub">订单号：{{orderNo}}</view>
   </view>
 
-  <view wx:if="{{status === 'error'}}" class="section-card empty-card">
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">正在加载订单详情</view>
+    <view class="empty-card__desc">订单状态、地址和支付信息正在从本地状态恢复。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
     <view class="empty-card__title">订单读取失败</view>
     <view class="empty-card__desc">请重新加载订单详情，若仍异常可返回订单列表重试。</view>
     <view class="empty-card__actions">
       <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoOrderList">订单列表</view>
       <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">订单明细已保留在本地，恢复网络后可继续支付或联系客服。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoOrderList">订单列表</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复页面</view>
     </view>
   </view>
 
@@ -82,7 +96,7 @@
       </view>
       <view class="info-row">
         <view class="info-row__label">支付状态</view>
-        <view class="info-row__value">{{order.payStatus === 'success' ? '已支付' : '待支付'}}</view>
+        <view class="info-row__value">{{paymentStatusText}}</view>
       </view>
       <view class="info-row">
         <view class="info-row__label">订单备注</view>

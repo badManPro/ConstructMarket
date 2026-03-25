@@ -474,6 +474,17 @@ export function getHomeSections(favoriteIds: string[]) {
   };
 }
 
+export function getFavoriteProducts(favoriteIds: string[]) {
+  const ids = [...favoriteIds].reverse();
+  return ids
+    .map((id) => baseProducts.find((item) => item.id === id))
+    .filter((item): item is SearchProduct => Boolean(item))
+    .map((item) => ({
+      ...item,
+      isFavorite: true,
+    }));
+}
+
 export function searchProducts(params: {
   keyword: string;
   categoryId: string;

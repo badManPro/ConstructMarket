@@ -1,13 +1,88 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Profile Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
-  </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+<view class="screen favorite-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">收藏夹</view>
+      <view class="page-head__icon" bindtap="handleGoCart">车</view>
+    </view>
+    <view class="page-head__sub">
+      {{status === 'ready' ? '已收藏 ' + favorites.length + ' 件商品，可继续加购或进入详情。' : '管理已收藏商品，并承接快捷加购。'}}
     </view>
   </view>
+
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">收藏商品加载中</view>
+    <view class="empty-card__desc">正在整理你已标记的商品和购物车快捷操作。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">收藏夹读取失败</view>
+    <view class="empty-card__desc">请重试本地收藏数据加载，若仍异常可先返回首页继续浏览商品。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">收藏夹已预留离线占位，恢复后可继续查看收藏和快捷加购。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复内容</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前还没有收藏商品</view>
+    <view class="empty-card__desc">可以从首页、搜索结果或商品详情中收藏商品，后续会在这里统一管理。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoCart">去购物车</view>
+      <view class="empty-card__action" bindtap="handleGoHome">去首页逛逛</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view class="section-card favorite-summary-card">
+      <view class="favorite-summary-card__title">收藏概览</view>
+      <view class="favorite-summary-card__meta">共 {{favorites.length}} 件收藏商品，购物车当前 {{cartPreviewCount}} 件</view>
+      <view class="favorite-summary-card__actions">
+        <view class="favorite-summary-card__ghost" bindtap="handleGoHome">继续逛逛</view>
+        <view class="favorite-summary-card__solid" bindtap="handleGoCart">去购物车</view>
+      </view>
+    </view>
+
+    <view
+      wx:for="{{favorites}}"
+      wx:key="id"
+      class="section-card favorite-card"
+      data-id="{{item.id}}"
+      bindtap="handleOpenDetail"
+    >
+      <view class="favorite-card__body">
+        <view class="favorite-card__cover">
+          <view class="favorite-card__cover-badge">{{item.cover}}</view>
+          <view class="favorite-card__cover-brand">{{item.brand}}</view>
+          <view class="favorite-card__cover-model">{{item.model}}</view>
+        </view>
+
+        <view class="favorite-card__content">
+          <view class="favorite-card__name">{{item.name}}</view>
+          <view class="favorite-card__meta">{{item.categoryName}} · {{item.brand}} / {{item.model}}</view>
+
+          <view class="favorite-card__tags">
+            <view wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this" class="favorite-card__tag">{{tag}}</view>
+          </view>
+
+          <view class="favorite-card__price">¥{{item.price}}<text class="favorite-card__unit"> / {{item.unit}}</text></view>
+          <view class="favorite-card__stats">起订 {{item.minOrderQty}}{{item.unit}} · 销量 {{item.salesVolume}}</view>
+        </view>
+      </view>
+
+      <view class="favorite-card__actions">
+        <view class="favorite-card__ghost" data-id="{{item.id}}" catchtap="handleToggleFavorite">取消收藏</view>
+        <view class="favorite-card__solid" data-id="{{item.id}}" catchtap="handleQuickAdd">快捷加购</view>
+      </view>
+    </view>
+  </block>
 </view>

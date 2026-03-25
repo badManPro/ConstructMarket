@@ -24,7 +24,19 @@ const DEFAULT_CHECKOUT_DRAFT: CheckoutDraft = {
 };
 
 export function getFavoriteIds() {
-  return (wx.getStorageSync(FAVORITE_KEY) as string[] | undefined) ?? [];
+  const stored = wx.getStorageSync(FAVORITE_KEY) as unknown;
+  if (!Array.isArray(stored)) {
+    if (stored !== "" && stored !== null && stored !== undefined) {
+      wx.setStorageSync(FAVORITE_KEY, []);
+    }
+    return [];
+  }
+
+  const normalized = stored.filter((item): item is string => typeof item === "string");
+  if (normalized.length !== stored.length) {
+    wx.setStorageSync(FAVORITE_KEY, normalized);
+  }
+  return normalized;
 }
 
 export function toggleFavoriteId(productId: string) {
@@ -42,7 +54,19 @@ export function toggleFavoriteId(productId: string) {
 }
 
 export function getCartItems() {
-  return (wx.getStorageSync(CART_KEY) as CartItem[] | undefined) ?? [];
+  const stored = wx.getStorageSync(CART_KEY) as unknown;
+  if (!Array.isArray(stored)) {
+    if (stored !== "" && stored !== null && stored !== undefined) {
+      wx.setStorageSync(CART_KEY, []);
+    }
+    return [];
+  }
+
+  const normalized = stored.filter((item): item is CartItem => Boolean(item && typeof item === "object"));
+  if (normalized.length !== stored.length) {
+    wx.setStorageSync(CART_KEY, normalized);
+  }
+  return normalized;
 }
 
 function saveCartItems(nextItems: CartItem[]) {

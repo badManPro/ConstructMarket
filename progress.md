@@ -150,3 +150,21 @@
 - 修复一次补丁误将样式内容写入 `index.wxml` 的问题，并拆分回独立 `wxss` 文件
 - `npm run typecheck` 通过
 - `npm run build:miniapp` 通过
+
+### Follow-up Session: 收藏夹页准备
+- 重新读取 `task_plan.md`，确认当前下一步是“收藏夹页真实内容”
+- 复核 PRD 6.16，确认本轮仅需实现收藏列表、取消收藏、快捷加购、商品详情跳转和空态
+- 检查 `docs/pencil/miniapp.pen` 中收藏夹页参考，确认页面结构可收敛为轻量标题栏 + 单列商品卡列表
+- 检查当前代码后确认：`package-profile/profile/favorite.ts` 仍是占位实现，`favorite.wxss` 尚不存在，但 `toggleFavoriteId`、`getFavoriteIds`、`addCartItem` 已可直接复用
+
+### Follow-up Session: 收藏夹页真实实现
+- 扩展 `miniprogram/mock/browse.ts`，新增 `getFavoriteProducts`，将本地收藏 ID 聚合为收藏商品列表
+- 重写 `miniprogram/package-profile/profile/favorite.ts`，接入收藏读取、取消收藏、快捷加购、商品详情跳转和购物车回流
+- 重写 `miniprogram/package-profile/profile/favorite.wxml`，完成标题栏、收藏概览、商品卡列表和状态壳子
+- 新增 `miniprogram/package-profile/profile/favorite.wxss`，按 `docs/pencil` 的轻量收藏列表样式实现页面视觉
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过
+
+### Follow-up Session: 收藏夹页运行时兼容修复
+- 根据微信开发者工具报错定位到 `miniprogram/utils/storage.ts`：`getCartItems()` 直接信任本地缓存是数组，旧缓存场景会导致 `getCartCount().reduce(...)` 崩溃
+- 更新 `getCartItems()` 和 `getFavoriteIds()`，为本地缓存增加 `Array.isArray` 校验与自愈归一化；读取到脏缓存时自动重置为空数组

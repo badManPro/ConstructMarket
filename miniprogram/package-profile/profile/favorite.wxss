@@ -1,0 +1,204 @@
+.favorite-screen {
+  padding-bottom: 40rpx;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-card__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.empty-card__desc {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #666666;
+}
+
+.empty-card__actions {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 28rpx;
+}
+
+.empty-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx 30rpx;
+  border-radius: 999rpx;
+  background: #ff4a43;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.empty-card__action--ghost {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.favorite-summary-card__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.favorite-summary-card__meta {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: #666666;
+}
+
+.favorite-summary-card__actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.favorite-summary-card__ghost,
+.favorite-summary-card__solid {
+  min-width: 160rpx;
+  padding: 16rpx 0;
+  border-radius: 999rpx;
+  text-align: center;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.favorite-summary-card__ghost {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.favorite-summary-card__solid {
+  background: #ff4a43;
+  color: #ffffff;
+}
+
+.favorite-card {
+  padding-top: 22rpx;
+}
+
+.favorite-card__body {
+  display: flex;
+  gap: 18rpx;
+}
+
+.favorite-card__cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 160rpx;
+  min-height: 160rpx;
+  padding: 16rpx;
+  box-sizing: border-box;
+  border-radius: 10rpx;
+  background: #dce2e9;
+  color: #444444;
+}
+
+.favorite-card__cover-badge {
+  font-size: 20rpx;
+  color: #666666;
+}
+
+.favorite-card__cover-brand {
+  margin-top: 18rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.favorite-card__cover-model {
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  color: #888888;
+}
+
+.favorite-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.favorite-card__name {
+  font-size: 26rpx;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #222222;
+}
+
+.favorite-card__meta {
+  margin-top: 10rpx;
+  font-size: 20rpx;
+  line-height: 1.6;
+  color: #888888;
+}
+
+.favorite-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 14rpx;
+}
+
+.favorite-card__tag {
+  padding: 6rpx 12rpx;
+  border-radius: 999rpx;
+  background: #f7f7f7;
+  color: #666666;
+  font-size: 20rpx;
+}
+
+.favorite-card__price {
+  margin-top: 18rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ff4a43;
+}
+
+.favorite-card__unit {
+  font-size: 20rpx;
+  color: #888888;
+}
+
+.favorite-card__stats {
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  color: #888888;
+}
+
+.favorite-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-top: 20rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #f2f2f2;
+}
+
+.favorite-card__ghost,
+.favorite-card__solid {
+  min-width: 148rpx;
+  padding: 14rpx 0;
+  border-radius: 999rpx;
+  text-align: center;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.favorite-card__ghost {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.favorite-card__solid {
+  background: #ff4a43;
+  color: #ffffff;
+}

@@ -89,3 +89,17 @@
 - `miniprogram/pages/profile/index.ts` 已接入 `getOrders`、`getFavoriteIds`、`getAddresses`、`getInvoiceRecords`，可直接从现有本地状态形成订单摘要和服务角标
 - 我的页已补齐 `loading` / `empty` / `error` / `offline` 状态分支，并支持通过 `state` query 做演示态切换，和内容域/服务域页面保持一致
 - 当前个人中心域的下一步已前移为二级页补完：`package-profile/profile/favorite.ts` 与 `package-profile/profile/info.ts`
+
+## Follow-up Findings: 收藏夹页实现边界
+- PRD 6.16 已固定收藏夹页范围：收藏商品列表、商品卡摘要、取消收藏按钮、快捷加购按钮，以及无收藏时回首页的空态
+- `docs/pencil/miniapp.pen` 中收藏夹页视觉非常轻量，适合采用“白底标题栏 + 简洁卡片列表”的电商样式，不需要引入复杂筛选或多列瀑布流
+- 当前 `package-profile/profile/favorite.ts` 和 `favorite.wxml` 仍是纯占位实现，`favorite.wxss` 尚不存在
+- 现有收藏能力已经完整：`getFavoriteIds` / `toggleFavoriteId` 负责收藏状态，`addCartItem` 负责快捷加购，`ROUTES.productDetail` / `ROUTES.cart` 可直接承接跳转
+- 收藏夹页缺的不是底层能力，而是一个把 `baseProducts` 按 `favoriteIds` 聚合成 `favoriteProducts` 的 Mock 出口，以及页面层交互和状态壳子
+
+## Follow-up Findings: 收藏夹页真实实现
+- `miniprogram/mock/browse.ts` 已新增 `getFavoriteProducts(favoriteIds)`，按本地收藏 ID 反向聚合 `baseProducts`，让收藏页可直接复用现有商品 Mock
+- 收藏夹页快捷加购不需要弹规格层，当前按商品默认 `skuId` 和 `minOrderQty` 直接写入购物车，符合 PRD 中“快捷加购”定位
+- `package-profile/profile/favorite.ts` 已接入 `getFavoriteIds`、`toggleFavoriteId`、`addCartItem`、`getCartCount`，说明个人中心域可以继续沿用现有本地状态体系，不必新建 profile store
+- 收藏夹页已补齐 `loading` / `empty` / `error` / `offline` 分支，并支持通过 `state` query 演示异常态
+- 当前恢复点已前移到 `package-profile/profile/info.ts`，也就是个人信息页真实内容与资料编辑

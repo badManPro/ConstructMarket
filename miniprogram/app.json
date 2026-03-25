@@ -1,0 +1,102 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/category/index",
+    "pages/cart/index",
+    "pages/profile/index"
+  ],
+  "subPackages": [
+    {
+      "root": "package-catalog",
+      "pages": [
+        "search/result",
+        "product/detail"
+      ]
+    },
+    {
+      "root": "package-content",
+      "pages": [
+        "article/list",
+        "article/detail"
+      ]
+    },
+    {
+      "root": "package-trade",
+      "pages": [
+        "checkout/index",
+        "payment/result",
+        "order/list",
+        "order/detail"
+      ]
+    },
+    {
+      "root": "package-profile",
+      "pages": [
+        "profile/invoice",
+        "profile/address/list",
+        "profile/address/edit",
+        "profile/favorite",
+        "profile/coupon",
+        "profile/info"
+      ]
+    },
+    {
+      "root": "package-support",
+      "pages": [
+        "support/index",
+        "support/chat",
+        "support/faq",
+        "support/complaint"
+      ]
+    }
+  ],
+  "window": {
+    "navigationBarTitleText": "ConstructMarket",
+    "navigationBarBackgroundColor": "#F5F7FA",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F7FA",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#6B7280",
+    "selectedColor": "#0F172A",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/category/index",
+        "text": "选型"
+      },
+      {
+        "pagePath": "pages/cart/index",
+        "text": "购物车"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "preloadRule": {
+    "pages/home/index": {
+      "network": "all",
+      "packages": [
+        "package-catalog",
+        "package-content"
+      ]
+    },
+    "pages/cart/index": {
+      "network": "all",
+      "packages": [
+        "package-trade",
+        "package-profile"
+      ]
+    }
+  },
+  "lazyCodeLoading": "requiredComponents"
+}

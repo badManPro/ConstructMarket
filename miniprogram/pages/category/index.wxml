@@ -1,0 +1,30 @@
+<view class="screen">
+  <view class="hero">
+    <view class="hero__eyebrow">Catalog</view>
+    <view class="hero__title">{{title}}</view>
+    <view class="hero__subtitle">{{summary}}</view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">一级类目占位</view>
+    <view class="chip-row">
+      <view wx:for="{{categories}}" wx:key="id" class="route-chip">{{item.name}}</view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">关联页面</view>
+    <view class="link-list">
+      <view
+        wx:for="{{links}}"
+        wx:key="route"
+        class="link-card"
+        data-route="{{item.route}}"
+        bindtap="handleRouteTap"
+      >
+        <view class="link-card__title">{{item.label}}</view>
+        <view class="link-card__desc">{{item.description}}</view>
+      </view>
+    </view>
+  </view>
+</view>

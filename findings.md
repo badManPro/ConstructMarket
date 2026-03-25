@@ -66,3 +66,11 @@
 - 已新增 `docs/skills-setup.md` 记录技能用途和安装方法
 - 已新增 `scripts/install_project_skills.sh`，支持将项目内 skills 复制安装到 `${CODEX_HOME:-$HOME/.codex}/skills`
 - `skill-creator` 自带初始化脚本在当前环境缺少 `PyYAML` 依赖，因此改为手工生成最小可用 skill 结构
+
+## Follow-up Findings: 微信小程序脚手架
+- 已新增原生微信小程序工程骨架：`package.json`、`tsconfig.json`、`project.config.json`、`sitemap.json`、`miniprogram/`
+- `app.json` 已按 PRD 建立 4 个 TabBar 主包页面和 5 个业务分包
+- 已建立 `constants/routes.ts`、`types/`、`mock/`、`store/`，作为后续并行开发的共享边界
+- 已创建自定义 `custom-tab-bar`，避免在当前阶段引入图标资源阻塞
+- 已用 `npm install --cache ./.npm-cache` 规避本机全局 npm cache 权限问题
+- `npm run typecheck` 已通过，说明当前 scaffold 在静态类型层面自洽

@@ -1,0 +1,23 @@
+<view class="screen">
+  <view class="hero">
+    <view class="hero__eyebrow">Profile</view>
+    <view class="hero__title">{{title}}</view>
+    <view class="hero__subtitle">{{summary}}</view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-card__title">服务矩阵</view>
+    <view class="link-list">
+      <view
+        wx:for="{{links}}"
+        wx:key="route"
+        class="link-card"
+        data-route="{{item.route}}"
+        bindtap="handleRouteTap"
+      >
+        <view class="link-card__title">{{item.label}}</view>
+        <view class="link-card__desc">{{item.description}}</view>
+      </view>
+    </view>
+  </view>
+</view>

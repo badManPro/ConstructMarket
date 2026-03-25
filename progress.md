@@ -37,3 +37,12 @@
 - 新增 `docs/skills-setup.md`，用于记录新设备上的 skill 恢复方式
 - 新增 `scripts/install_project_skills.sh`，用于一键安装项目 skill 到本机 Codex 目录
 - 校验安装脚本语法通过：`bash -n scripts/install_project_skills.sh`
+
+### Follow-up Session: 微信小程序脚手架
+- 新增原生微信小程序工程配置：`package.json`、`tsconfig.json`、`project.config.json`、`sitemap.json`
+- 新增 `miniprogram/` 目录并建立主包、分包、路由常量、共享类型、Mock 数据和 store 入口
+- 创建 4 个 TabBar 页面和 18 个二级业务页占位
+- 安装依赖时，首次 `npm install` 因全局 npm cache 权限报 `EACCES`
+- 改用本地缓存命令 `npm install --cache ./.npm-cache` 后成功安装依赖
+- 修正 `tsconfig` 对小程序 typings 的接入方式，并将事件类型改为 `WechatMiniprogram.Event`
+- `npm run typecheck` 通过

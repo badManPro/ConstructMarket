@@ -1,0 +1,13 @@
+<view class="screen">
+  <view class="hero">
+    <view class="hero__eyebrow">Trade Package</view>
+    <view class="hero__title">{{title}}</view>
+    <view class="hero__subtitle">{{summary}}</view>
+  </view>
+  <view class="section-card">
+    <view class="section-card__title">开发清单</view>
+    <view class="bullet-list">
+      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+    </view>
+  </view>
+</view>

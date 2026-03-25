@@ -97,3 +97,11 @@ Phase B
 - [x] 为换设备场景补充安装说明文档
 - [x] 为本地环境补充一键安装脚本
 - **Status:** complete
+
+### Follow-up Extension: 微信小程序脚手架
+- [x] 初始化原生微信小程序工程骨架
+- [x] 建立主包与分包目录结构
+- [x] 建立路由常量、Mock 入口、类型定义和基础 store
+- [x] 创建 4 个 TabBar 页面与 18 个二级页占位
+- [x] 完成依赖安装与 TypeScript 静态校验
+- **Status:** complete

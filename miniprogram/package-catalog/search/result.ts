@@ -168,6 +168,8 @@ Page({
     navigateToRoute(ROUTES.home);
   },
   goCategoryPage() {
-    navigateToRoute(ROUTES.category);
+    navigateWithParams(ROUTES.category, {
+      categoryId: this.data.selectedCategoryId === "all" ? undefined : this.data.selectedCategoryId,
+    });
   },
 });

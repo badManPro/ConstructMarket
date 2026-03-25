@@ -379,10 +379,10 @@ export const homeBanners: BannerCard[] = [
 ];
 
 export const homeCategoryNav: CategoryShortcut[] = [
-  { id: "tile", name: "瓷砖石材", tagline: "大厅与公共区", route: ROUTES.searchResult, params: { categoryId: "tile", keyword: "瓷砖" } },
-  { id: "cement", name: "水泥辅材", tagline: "工地常备", route: ROUTES.searchResult, params: { categoryId: "cement", keyword: "水泥" } },
-  { id: "pipe", name: "管材管件", tagline: "冷热与排水", route: ROUTES.searchResult, params: { categoryId: "pipe", keyword: "管材" } },
-  { id: "electric", name: "电气照明", tagline: "照明与线材", route: ROUTES.searchResult, params: { categoryId: "electric", keyword: "电气" } },
+  { id: "tile", name: "瓷砖石材", tagline: "大厅与公共区", route: ROUTES.category, params: { categoryId: "tile" } },
+  { id: "cement", name: "水泥辅材", tagline: "工地常备", route: ROUTES.category, params: { categoryId: "cement" } },
+  { id: "pipe", name: "管材管件", tagline: "冷热与排水", route: ROUTES.category, params: { categoryId: "pipe" } },
+  { id: "electric", name: "电气照明", tagline: "照明与线材", route: ROUTES.category, params: { categoryId: "electric" } },
 ];
 
 export const articleEntrances: ArticleEntrance[] = [

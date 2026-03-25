@@ -91,6 +91,15 @@
 - `npm run typecheck` 通过
 - `npm run build:miniapp` 通过
 
+### Follow-up Session: 分类页真实内容
+- 扩展分类页 Mock：补齐一级类目、细分类目、采购建议和知识回流信息：`miniprogram/mock/category.ts`
+- 完成分类页真实实现：左侧一级类目、右侧细分类目宫格、当前类目说明、当前热销商品和采购建议卡
+- 补齐分类页状态态：支持 `loading`、`empty`、`error`、`offline`
+- 支持从首页与搜索结果页携带 `categoryId` 进入分类页并定位当前类目
+- 更新首页分类导航：改为先进入分类页，再由分类页承接到搜索结果和商品详情
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过
+
 ### Follow-up Session: 订单链路闭环
 - 新增本地订单 Mock：`miniprogram/mock/order.ts`
 - 新增订单工具：`miniprogram/utils/order.ts`

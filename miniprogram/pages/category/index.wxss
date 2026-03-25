@@ -1,0 +1,253 @@
+.category-screen {
+  padding-bottom: 0;
+}
+
+.category-head {
+  padding-bottom: 16rpx;
+}
+
+.category-search {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 18rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  background: #f7f7f7;
+}
+
+.category-search__icon {
+  flex-shrink: 0;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #fff1f0;
+  font-size: 20rpx;
+  color: #ff4a43;
+}
+
+.category-search__text {
+  flex: 1;
+  min-width: 0;
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.category-search__cta {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #1f1f1f;
+}
+
+.category-layout {
+  display: flex;
+  height: calc(100vh - 248rpx);
+}
+
+.category-sidebar {
+  width: 180rpx;
+  height: 100%;
+  background: #f2f2f2;
+}
+
+.category-sidebar__inner {
+  padding: 12rpx 0 140rpx;
+}
+
+.category-sidebar__item {
+  position: relative;
+  padding: 22rpx 14rpx 22rpx 20rpx;
+  border-left: 6rpx solid transparent;
+  color: #666666;
+}
+
+.category-sidebar__item--active {
+  background: #ffffff;
+  border-left-color: #ff4a43;
+  color: #1f1f1f;
+}
+
+.category-sidebar__name {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.category-sidebar__meta {
+  margin-top: 6rpx;
+  font-size: 18rpx;
+  line-height: 1.4;
+  color: #999999;
+}
+
+.category-main {
+  flex: 1;
+  height: 100%;
+}
+
+.category-main__inner {
+  padding: 0 0 152rpx;
+}
+
+.category-hero {
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff2eb, #ffffff);
+}
+
+.category-hero__eyebrow,
+.guide-card__eyebrow {
+  font-size: 20rpx;
+  color: #ff4a43;
+}
+
+.category-hero__title,
+.guide-card__title {
+  margin-top: 10rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #1f1f1f;
+}
+
+.category-hero__summary,
+.guide-card__summary {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #666666;
+}
+
+.category-hero__actions,
+.empty-card__actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.category-hero__action,
+.empty-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 176rpx;
+  padding: 18rpx 28rpx;
+  border-radius: 999rpx;
+  background: #ff4a43;
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.category-hero__action--ghost,
+.empty-card__action--ghost {
+  background: #fff1f0;
+  color: #ff4a43;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.section-head__more {
+  font-size: 22rpx;
+  color: #999999;
+}
+
+.subcategory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.subcategory-tile {
+  position: relative;
+  padding: 18rpx 18rpx 20rpx;
+  border-radius: 14rpx;
+  background: #fafafa;
+}
+
+.subcategory-tile__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 18rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #7a3b24;
+}
+
+.subcategory-tile__name {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #1f1f1f;
+}
+
+.subcategory-tile__summary {
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  color: #888888;
+}
+
+.subcategory-tile__badge {
+  position: absolute;
+  top: 18rpx;
+  right: 18rpx;
+  padding: 6rpx 10rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  font-size: 18rpx;
+  color: #ff4a43;
+}
+
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.guide-card {
+  margin-top: 16rpx;
+  background: linear-gradient(135deg, #fff8f2, #ffffff);
+}
+
+.guide-card__link {
+  margin-top: 18rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #ff4a43;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-card__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.empty-card__desc {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #666666;
+}
+
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.loading-grid__item {
+  height: 188rpx;
+  border-radius: 14rpx;
+  background: linear-gradient(135deg, #f7f7f7, #f1f1f1);
+}

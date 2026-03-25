@@ -107,10 +107,20 @@ Page({
       return;
     }
 
-    navigateToRoute(ROUTES.supportChat);
+    navigateWithParams(ROUTES.supportChat, {
+      source: "order",
+      orderId: order.id,
+      orderNo: order.orderNo,
+    });
   },
   handleContactService() {
-    navigateToRoute(ROUTES.supportChat);
+    const order = this.data.order;
+
+    navigateWithParams(ROUTES.supportChat, {
+      source: "order",
+      orderId: order?.id ?? this.data.orderId,
+      orderNo: order?.orderNo ?? this.data.orderNo,
+    });
   },
   handleGoOrderList() {
     navigateToRoute(ROUTES.orderList);

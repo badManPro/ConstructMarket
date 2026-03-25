@@ -50,6 +50,19 @@ export type Article = {
   relatedIds: string[];
 };
 
+export type ArticleTab = {
+  value: string;
+  label: string;
+  count: number;
+  desc: string;
+};
+
+export type ArticleFeedItem = Article & {
+  tone: string;
+  readingTime: string;
+  tags: string[];
+};
+
 export type Address = {
   id: string;
   receiver: string;
@@ -167,6 +180,12 @@ export type FaqItem = {
   sort: number;
 };
 
+export type FaqCategory = {
+  value: string;
+  label: string;
+  count: number;
+};
+
 export type ComplaintForm = {
   contactName: string;
   phone: string;
@@ -242,4 +261,42 @@ export type BrowseProductDetail = ProductDetail & {
   material: string;
   coverTone: string;
   recommendedIds: string[];
+};
+
+export type SupportCard = {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  badge: string;
+  route: string;
+  availability: "available" | "limited" | "closed";
+};
+
+export type ChatMessage = {
+  id: string;
+  sender: "user" | "service" | "system";
+  text: string;
+  time: string;
+  status: "sent" | "failed";
+};
+
+export type SupportQuickQuestion = {
+  id: string;
+  text: string;
+  category: string;
+};
+
+export type SupportSessionMeta = {
+  title: string;
+  subtitle: string;
+  serviceTime: string;
+  responseSla: string;
+  contextType: "general" | "product" | "order";
+};
+
+export type SupportProblemType = {
+  value: string;
+  label: string;
+  desc: string;
 };

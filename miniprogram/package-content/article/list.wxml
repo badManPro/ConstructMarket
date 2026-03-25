@@ -1,13 +1,106 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Content Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
+<view class="screen article-list-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">建材资讯</view>
+      <view class="page-head__icon"></view>
+    </view>
+    <view class="page-head__sub">{{pageSubtitle}}</view>
   </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+
+  <scroll-view class="article-tabs" scroll-x enable-flex show-scrollbar="{{false}}">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="article-tabs__item {{currentCategory === item.value ? 'article-tabs__item--active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="handleTabTap"
+    >
+      <view class="article-tabs__label">{{item.label}}</view>
+      <view class="article-tabs__count">{{item.count}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="section-card article-note">
+    <view class="section-card__title">内容导读</view>
+    <view class="section-card__meta">{{currentTabDesc}}</view>
+  </view>
+
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">资讯加载中</view>
+    <view class="empty-card__desc">正在整理当前分类下的行业文章和选型内容。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">资讯读取失败</view>
+    <view class="empty-card__desc">请重试本地内容加载，若仍异常可先返回首页继续浏览商品。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前处于离线演示态</view>
+    <view class="empty-card__desc">资讯页已预留离线占位，恢复后可继续查看列表和详情。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复内容</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前分类暂无资讯</view>
+    <view class="empty-card__desc">可以切换到其他内容分类，或先返回全部资讯继续阅读。</view>
+    <view class="empty-card__actions">
+      <view wx:if="{{currentCategory !== 'all'}}" class="empty-card__action empty-card__action--ghost" bindtap="handleViewAll">查看全部</view>
+      <view class="empty-card__action" bindtap="handleGoHome">去首页逛逛</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view
+      wx:if="{{featuredArticle}}"
+      class="section-card featured-article"
+      data-id="{{featuredArticle.id}}"
+      bindtap="handleOpenArticle"
+    >
+      <view class="featured-article__cover" style="background: {{featuredArticle.tone}};">
+        <view class="featured-article__cover-text">{{featuredArticle.cover}}</view>
+      </view>
+      <view class="featured-article__meta">{{featuredArticle.categoryLabel}} · {{featuredArticle.publishAt}}</view>
+      <view class="featured-article__title">{{featuredArticle.title}}</view>
+      <view class="featured-article__summary">{{featuredArticle.summary}}</view>
+      <view class="chip-row">
+        <view wx:for="{{featuredArticle.tags}}" wx:key="*this" class="route-chip">{{item}}</view>
+      </view>
+      <view class="featured-article__foot">
+        <view>{{featuredArticle.source}}</view>
+        <view>{{featuredArticle.readingTime}}</view>
+      </view>
+    </view>
+
+    <view
+      wx:for="{{articles}}"
+      wx:key="id"
+      class="section-card article-card"
+      data-id="{{item.id}}"
+      bindtap="handleOpenArticle"
+    >
+      <view class="article-card__body">
+        <view class="article-card__cover" style="background: {{item.tone}};">{{item.cover}}</view>
+        <view class="article-card__content">
+          <view class="article-card__meta">{{item.categoryLabel}} · {{item.publishAt}}</view>
+          <view class="article-card__title">{{item.title}}</view>
+          <view class="article-card__summary">{{item.summary}}</view>
+          <view class="article-card__foot">
+            <view>{{item.source}}</view>
+            <view>{{item.readingTime}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="article-footer">{{hasMore ? '下拉可刷新当前资讯分类' : '当前分类内容已全部展示'}}</view>
+  </block>
 </view>

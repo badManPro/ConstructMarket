@@ -31,6 +31,7 @@ export const appStore: AppState = {
   },
   supportState: {
     faqItems: [],
+    chatMessages: [],
     draftComplaint: {},
   },
   userProfile: null,

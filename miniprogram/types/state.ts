@@ -1,4 +1,4 @@
-import type { Address, CartItem, Coupon, FaqItem, Order, UserProfile } from "./models";
+import type { Address, CartItem, ChatMessage, ComplaintForm, Coupon, FaqItem, Order, UserProfile } from "./models";
 
 export type AuthState = {
   isLoggedIn: boolean;
@@ -35,7 +35,8 @@ export type OrderState = {
 
 export type SupportState = {
   faqItems: FaqItem[];
-  draftComplaint: Record<string, unknown>;
+  chatMessages: ChatMessage[];
+  draftComplaint: Partial<ComplaintForm>;
 };
 
 export type AppState = {

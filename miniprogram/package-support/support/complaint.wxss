@@ -1,0 +1,156 @@
+.complaint-screen {
+  padding-bottom: 48rpx;
+}
+
+.empty-card,
+.success-card {
+  text-align: center;
+}
+
+.empty-card__title,
+.success-card__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.empty-card__desc,
+.success-card__desc {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #666666;
+}
+
+.empty-card__actions,
+.success-card__actions {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 28rpx;
+}
+
+.empty-card__action,
+.success-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180rpx;
+  padding: 18rpx 30rpx;
+  border-radius: 999rpx;
+  background: #ff4a43;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.empty-card__action--ghost,
+.success-card__action--ghost {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  margin-top: 14rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 14rpx;
+  background: #f7f7f7;
+  box-sizing: border-box;
+  font-size: 24rpx;
+}
+
+.form-input--single {
+  margin-top: 18rpx;
+}
+
+.form-textarea {
+  min-height: 200rpx;
+}
+
+.form-error {
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  color: #ff4a43;
+}
+
+.problem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.problem-card {
+  padding: 18rpx 20rpx;
+  border: 1rpx solid #ededed;
+  border-radius: 14rpx;
+  background: #ffffff;
+}
+
+.problem-card--active {
+  border-color: #ffb7b3;
+  background: #fff1f0;
+}
+
+.problem-card__title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.problem-card__desc {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: #666666;
+}
+
+.route-chip--active {
+  background: #ff4a43;
+  color: #ffffff;
+}
+
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.image-pill,
+.image-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 999rpx;
+  background: #f4f4f4;
+  font-size: 22rpx;
+  color: #666666;
+}
+
+.image-pill__remove {
+  color: #ff4a43;
+}
+
+.image-add {
+  background: #fff1f0;
+  color: #ff4a43;
+}
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16rpx;
+  padding: 22rpx 0;
+  border-radius: 999rpx;
+  background: #ff4a43;
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.submit-button--disabled {
+  background: #ffb1ae;
+}

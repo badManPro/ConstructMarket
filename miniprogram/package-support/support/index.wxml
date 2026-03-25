@@ -1,13 +1,67 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Support Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
+<view class="screen support-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">客服系统</view>
+      <view class="page-head__icon"></view>
+    </view>
+    <view class="page-head__sub">在线咨询、FAQ 和投诉建议统一收口到这里。</view>
   </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">客服入口加载中</view>
+    <view class="empty-card__desc">正在整理在线咨询、FAQ 和投诉建议入口。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">客服入口读取失败</view>
+    <view class="empty-card__desc">请重试入口加载，若仍异常可先从“我的”页重新进入。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoBack">返回上一页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前客服暂不在线</view>
+    <view class="empty-card__desc">{{serviceTime}}</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoFaq">查看 FAQ</view>
+      <view class="empty-card__action" bindtap="handleGoComplaint">提交建议</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前暂无客服能力</view>
+    <view class="empty-card__desc">可以稍后重试，或先通过 FAQ 自助排查问题。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoFaq">查看 FAQ</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view class="section-card support-note">
+      <view class="section-card__title">服务说明</view>
+      <view class="section-card__meta">{{serviceTime}}</view>
+      <view class="support-note__desc">{{serviceNote}}</view>
+    </view>
+
+    <view
+      wx:for="{{cards}}"
+      wx:key="id"
+      class="section-card support-card"
+      data-route="{{item.route}}"
+      bindtap="handleRouteTap"
+    >
+      <view class="support-card__icon">{{item.icon}}</view>
+      <view class="support-card__content">
+        <view class="support-card__head">
+          <view class="support-card__title">{{item.title}}</view>
+          <view class="support-card__badge">{{item.badge}}</view>
+        </view>
+        <view class="support-card__desc">{{item.description}}</view>
+      </view>
+    </view>
+  </block>
 </view>

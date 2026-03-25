@@ -1,6 +1,7 @@
 import { seededOrders } from "../mock/order";
+import { defaultComplaintDraft } from "../mock/support";
 import { seededInvoiceRecords, tradeAddresses } from "../mock/trade";
-import type { Address, CartItem, CheckoutDraft, InvoiceRecord, Order } from "../types/models";
+import type { Address, CartItem, ChatMessage, CheckoutDraft, ComplaintForm, InvoiceRecord, Order } from "../types/models";
 
 const FAVORITE_KEY = "constructmarket_favorite_ids";
 const CART_KEY = "constructmarket_cart_items";
@@ -8,6 +9,8 @@ const CHECKOUT_DRAFT_KEY = "constructmarket_checkout_draft";
 const ORDER_KEY = "constructmarket_orders";
 const ADDRESS_KEY = "constructmarket_addresses";
 const INVOICE_RECORD_KEY = "constructmarket_invoice_records";
+const SUPPORT_CHAT_KEY = "constructmarket_support_chat";
+const COMPLAINT_DRAFT_KEY = "constructmarket_support_complaint_draft";
 
 const DEFAULT_CHECKOUT_DRAFT: CheckoutDraft = {
   source: "cart",
@@ -160,6 +163,93 @@ function cloneOrder(order: Order): Order {
     invoiceInfo: order.invoiceInfo ? { ...order.invoiceInfo } : null,
     amount: { ...order.amount },
   };
+}
+
+function cloneChatMessage(message: ChatMessage): ChatMessage {
+  return {
+    ...message,
+  };
+}
+
+function saveSupportChatMessages(nextMessages: ChatMessage[]) {
+  const normalizedMessages = nextMessages.map((item) => cloneChatMessage(item));
+  wx.setStorageSync(SUPPORT_CHAT_KEY, normalizedMessages);
+  return normalizedMessages;
+}
+
+export function getSupportChatMessages(seedMessages: ChatMessage[] = []) {
+  const stored = wx.getStorageSync(SUPPORT_CHAT_KEY) as ChatMessage[] | undefined;
+
+  if (Array.isArray(stored) && stored.length) {
+    return stored;
+  }
+
+  if (seedMessages.length) {
+    return saveSupportChatMessages(seedMessages);
+  }
+
+  return [];
+}
+
+export function appendSupportChatMessage(message: ChatMessage) {
+  return saveSupportChatMessages([...getSupportChatMessages(), cloneChatMessage(message)]);
+}
+
+export function patchSupportChatMessage(messageId: string, patch: Partial<ChatMessage>) {
+  let updatedMessage: ChatMessage | null = null;
+
+  const nextMessages = getSupportChatMessages().map((item) => {
+    if (item.id !== messageId) return item;
+
+    updatedMessage = {
+      ...item,
+      ...patch,
+    };
+
+    return updatedMessage;
+  });
+
+  saveSupportChatMessages(nextMessages);
+  return updatedMessage;
+}
+
+export function clearSupportChatMessages() {
+  wx.removeStorageSync(SUPPORT_CHAT_KEY);
+}
+
+function normalizeComplaintDraft(draft?: Partial<ComplaintForm> | null): ComplaintForm {
+  return {
+    ...defaultComplaintDraft,
+    ...(draft ?? {}),
+    contactName: draft?.contactName ?? "",
+    phone: draft?.phone ?? "",
+    orderNo: draft?.orderNo ?? "",
+    problemType: draft?.problemType ?? "",
+    description: draft?.description ?? "",
+    images: Array.isArray(draft?.images) ? draft.images : [],
+  };
+}
+
+export function getComplaintDraft() {
+  const stored = wx.getStorageSync(COMPLAINT_DRAFT_KEY) as Partial<ComplaintForm> | undefined;
+  return normalizeComplaintDraft(stored);
+}
+
+export function saveComplaintDraft(draft: ComplaintForm) {
+  const nextDraft = normalizeComplaintDraft(draft);
+  wx.setStorageSync(COMPLAINT_DRAFT_KEY, nextDraft);
+  return nextDraft;
+}
+
+export function patchComplaintDraft(patch: Partial<ComplaintForm>) {
+  return saveComplaintDraft({
+    ...getComplaintDraft(),
+    ...patch,
+  });
+}
+
+export function clearComplaintDraft() {
+  wx.removeStorageSync(COMPLAINT_DRAFT_KEY);
 }
 
 function getInitialOrders() {

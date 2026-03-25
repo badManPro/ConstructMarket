@@ -1,13 +1,145 @@
-<view class="screen">
-  <view class="hero">
-    <view class="hero__eyebrow">Support Package</view>
-    <view class="hero__title">{{title}}</view>
-    <view class="hero__subtitle">{{summary}}</view>
+<view class="screen complaint-screen">
+  <view class="page-head">
+    <view class="page-head__bar">
+      <view class="page-head__icon" bindtap="handleGoBack">←</view>
+      <view class="page-head__title">投诉建议</view>
+      <view class="page-head__icon"></view>
+    </view>
+    <view class="page-head__sub">可提交服务投诉、商品建议，并在本地保留草稿。</view>
   </view>
-  <view class="section-card">
-    <view class="section-card__title">开发清单</view>
-    <view class="bullet-list">
-      <view wx:for="{{checklist}}" wx:key="*this" class="bullet-list__item">{{item}}</view>
+
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">表单加载中</view>
+    <view class="empty-card__desc">正在读取本地草稿和关联订单。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">表单读取失败</view>
+    <view class="empty-card__desc">请重试投诉建议表单，若仍异常可先返回客服首页。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoSupport">客服首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前无法提交表单</view>
+    <view class="empty-card__desc">恢复后可继续提交投诉建议，当前草稿不会丢失。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoSupport">客服首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">恢复表单</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
+    <view class="empty-card__title">当前没有可用表单</view>
+    <view class="empty-card__desc">可以稍后重试，或先通过在线咨询反馈问题。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoSupport">客服首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{submitSuccess}}" class="section-card success-card">
+      <view class="success-card__title">提交成功</view>
+      <view class="success-card__desc">客服工单 {{ticketNo}} 已生成，当前版本会在本地保留提交流程演示。</view>
+      <view class="success-card__actions">
+        <view class="success-card__action success-card__action--ghost" bindtap="handleGoSupport">返回客服首页</view>
+        <view class="success-card__action" bindtap="handleCreateAnother">继续提交</view>
+      </view>
+    </view>
+
+    <block wx:else>
+      <view class="section-card">
+        <view class="section-card__title">联系人信息</view>
+        <input
+          class="form-input"
+          placeholder="请输入联系人"
+          value="{{form.contactName}}"
+          data-field="contactName"
+          bindinput="handleFieldInput"
+        />
+        <input
+          class="form-input"
+          placeholder="请输入手机号"
+          type="number"
+          maxlength="11"
+          value="{{form.phone}}"
+          data-field="phone"
+          bindinput="handleFieldInput"
+        />
+        <view wx:if="{{phoneError}}" class="form-error">请输入正确的 11 位手机号</view>
+      </view>
+
+      <view class="section-card">
+        <view class="section-card__title">关联订单</view>
+        <view class="section-card__meta">可选填，点击订单号会自动写入表单。</view>
+        <view class="chip-row">
+          <view
+            wx:for="{{relatedOrders}}"
+            wx:key="id"
+            class="route-chip {{form.orderNo === item.orderNo ? 'route-chip--active' : ''}}"
+            data-order-no="{{item.orderNo}}"
+            bindtap="handleOrderTap"
+          >
+            {{item.orderNo}}
+          </view>
+        </view>
+        <input
+          class="form-input form-input--single"
+          placeholder="或手动填写订单号"
+          value="{{form.orderNo}}"
+          data-field="orderNo"
+          bindinput="handleFieldInput"
+        />
+      </view>
+
+      <view class="section-card">
+        <view class="section-card__title">问题类型</view>
+        <view class="problem-list">
+          <view
+            wx:for="{{problemTypes}}"
+            wx:key="value"
+            class="problem-card {{form.problemType === item.value ? 'problem-card--active' : ''}}"
+            data-value="{{item.value}}"
+            bindtap="handleProblemTypeTap"
+          >
+            <view class="problem-card__title">{{item.label}}</view>
+            <view class="problem-card__desc">{{item.desc}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="section-card">
+        <view class="section-card__title">问题描述</view>
+        <textarea
+          class="form-textarea"
+          placeholder="请补充问题经过、涉及页面或希望改进的点"
+          maxlength="300"
+          auto-height
+          value="{{form.description}}"
+          data-field="description"
+          bindinput="handleFieldInput"
+        />
+      </view>
+
+      <view class="section-card">
+        <view class="section-card__title">图片凭证</view>
+        <view class="section-card__meta">支持最多 3 张本地图片占位，用于演示上传流程。</view>
+        <view class="image-list">
+          <view wx:for="{{form.images}}" wx:key="index" class="image-pill">
+            <view>{{item}}</view>
+            <view class="image-pill__remove" data-index="{{index}}" bindtap="handleRemoveImage">删除</view>
+          </view>
+          <view wx:if="{{form.images.length < 3}}" class="image-add" bindtap="handleAddImage">添加凭证</view>
+        </view>
+      </view>
+
+      <view class="section-card">
+        <view class="section-card__meta">联系人、手机号、问题类型和问题描述为必填项。</view>
+        <view class="submit-button {{!canSubmit ? 'submit-button--disabled' : ''}}" bindtap="handleSubmit">提交投诉建议</view>
+      </view>
+    </block>
+  </block>
 </view>

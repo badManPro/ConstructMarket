@@ -159,3 +159,6 @@ Phase B
   1. 先保证后续新页面都遵循 `docs/ui-reference-guideline.md`
   2. 做微信开发者工具联调和视觉验收
   3. 若开始真实接口对接，按 `docs/swagger-app-接口映射.md` 的批次 A -> B -> C 顺序推进，并在每次完成后回写进度
+- 当前微信开发者工具运行前置条件已补齐：
+  - `npm run build:miniapp` 现在除了生成 `dist/`，还会把编译后的运行时 JS 同步回 `miniprogram/`
+  - 可用 `npm run verify:source-runtime` 快速检查源码目录和编译产物是否仍然一致

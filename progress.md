@@ -225,3 +225,13 @@
   - 为 58 个页面模块补齐行级 `对接进度`
   - 为“Swagger 有接口但暂无承接”的接口补齐 `当前进度`
 - 本轮未运行 `npm run typecheck` / `npm run build:miniapp`，因为只涉及文档改造，没有代码变更
+
+### Follow-up Session: DevTools 运行时同步修复
+- 根据启动日志先锁定关键症状：`custom-tab-bar/index.js` 与 `components/business/product-card/index.js` 缺失，同时首页还报 `handleRouteTap` 方法不存在
+- 对比 `miniprogram/` 和 `dist/` 后确认根因：`dist/` 的 TS 编译产物完整，但源码目录里缺少大量运行时 JS，已有的页面 JS 也还是开发者工具初始化的占位内容
+- 新增 `scripts/verify-source-runtime-sync.mjs` 与 `npm run verify:source-runtime`，用于检查每个 `miniprogram/**/*.ts` 是否都有与 `dist/` 一致的源码侧 `.js`
+- 首次运行 `npm run verify:source-runtime` 失败，准确暴露出缺失和过期的运行时文件清单
+- 更新 `scripts/build-miniapp.mjs`：在构建 `dist/` 后，把所有 TS 编译得到的 `.js` 同步回 `miniprogram/`
+- 更新 `README.md`，补充新的构建/校验流程说明
+- 重新运行 `npm run build:miniapp`
+- 重新运行 `npm run verify:source-runtime`，结果通过：`46` 个 TypeScript 文件的源码运行时 JS 已与编译输出对齐

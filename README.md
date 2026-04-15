@@ -11,5 +11,6 @@ Project-specific Codex skills live under `skills/`.
 ## Miniapp Build
 
 - Type check: `npm run typecheck`
-- Build DevTools output: `npm run build:miniapp`
+- Build DevTools output and sync runtime JS back into `miniprogram/`: `npm run build:miniapp`
+- Verify source/runtime JS stays aligned with the compiled output: `npm run verify:source-runtime`
 - WeChat DevTools should preview `dist/` as the mini program root, with `miniprogram/` kept as the TypeScript source root.

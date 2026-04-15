@@ -6,6 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build:miniapp": "node ./scripts/build-miniapp.mjs",
+    "verify:source-runtime": "node ./scripts/verify-source-runtime-sync.mjs",
     "install:skills": "bash ./scripts/install_project_skills.sh"
   },
   "dependencies": {

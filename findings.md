@@ -139,3 +139,11 @@
 - `docs/swagger-app-接口映射.md` 已从“静态映射表”改造成“概览 + 维护规则 + 分批推进看板 + 行级进度表 + 缺口表 + 待承接接口表 + 全量接口索引”的单文档模式
 - 已按当前代码状态初始化对接进度：`48` 个 `待接入`、`1` 个 `前端待补`、`9` 个 `后端阻塞`
 - 后续真实接口对接可直接按批次推进：A. 首页 / 选型 / 搜索结果，B. 商品详情 / 收藏加购，C. 购物车 / 地址 / 发票基础能力，D. 下单 / 支付 / 订单域，E. 个人中心，F. 资讯 / 客服 / 投诉建议
+
+## Follow-up Findings: DevTools 启动报错根因
+- 当前仓库的正确运行时代码来自 TypeScript 编译产物；`dist/` 经过 `npm run build:miniapp` 后，`custom-tab-bar/index.js`、`components/business/product-card/index.js` 以及所有页面/工具模块都能完整产出
+- 启动时报错的直接原因不是组件路径写错，而是源码目录 `miniprogram/` 下的运行时 `.js` 长期未与 `.ts` 同步：部分文件缺失，部分页面仍停留在开发者工具初始化生成的占位 JS
+- 这解释了两类现象为何同时出现：
+  - `module ... is not defined`：缺少 `custom-tab-bar` / 业务组件的实际 JS 文件
+  - `handleRouteTap` 不存在：页面真实逻辑写在 `.ts`，但运行时执行的是旧占位 `index.js`
+- 解决方式应落在构建链路，而不是逐页补丁：构建完成后把 `dist` 中编译出的 JS 同步回 `miniprogram/`，保证开发者工具无论预览 `dist/` 还是直接加载源码目录，都不会再读到过期运行时代码

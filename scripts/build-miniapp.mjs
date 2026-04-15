@@ -34,6 +34,43 @@ function copyStaticAssets(fromDir, toDir) {
   }
 }
 
+function walkTypeScriptRuntimeFiles(dirPath, files = []) {
+  for (const entry of readdirSync(dirPath)) {
+    const absolutePath = path.join(dirPath, entry);
+    const stats = statSync(absolutePath);
+
+    if (stats.isDirectory()) {
+      walkTypeScriptRuntimeFiles(absolutePath, files);
+      continue;
+    }
+
+    if (!absolutePath.endsWith(".ts") || absolutePath.endsWith(".d.ts")) {
+      continue;
+    }
+
+    files.push(absolutePath);
+  }
+
+  return files;
+}
+
+function syncCompiledRuntimeJs(fromDir, toDir) {
+  const runtimeEntries = walkTypeScriptRuntimeFiles(toDir);
+
+  for (const tsPath of runtimeEntries) {
+    const relativePath = path.relative(toDir, tsPath).replace(/\.ts$/, ".js");
+    const compiledJsPath = path.join(fromDir, relativePath);
+    const sourceJsPath = path.join(toDir, relativePath);
+
+    if (!existsSync(compiledJsPath)) {
+      throw new Error(`Missing compiled runtime output: ${compiledJsPath}`);
+    }
+
+    ensureDir(path.dirname(sourceJsPath));
+    cpSync(compiledJsPath, sourceJsPath);
+  }
+}
+
 if (!existsSync(sourceDir)) {
   throw new Error(`Missing source miniprogram directory: ${sourceDir}`);
 }
@@ -49,5 +86,7 @@ execFileSync(
     stdio: "inherit",
   },
 );
+
+syncCompiledRuntimeJs(outputDir, sourceDir);
 
 console.log(`Built miniapp output -> ${outputDir}`);

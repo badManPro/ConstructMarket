@@ -162,3 +162,55 @@ Phase B
 - 当前微信开发者工具运行前置条件已补齐：
   - `npm run build:miniapp` 现在除了生成 `dist/`，还会把编译后的运行时 JS 同步回 `miniprogram/`
   - 可用 `npm run verify:source-runtime` 快速检查源码目录和编译产物是否仍然一致
+
+## Follow-up Task: 真实接口联调分批计划
+
+### Goal
+基于现有 Swagger 映射文档和小程序工程结构，输出一份可执行的真实接口联调任务文档，明确联调前置基座、每一批的接入范围、建议改动文件、完成标准、人工验证步骤，以及完成本批后下一批该接什么。
+
+### Current Phase
+Phase C
+
+### Phases
+#### Phase A: Audit
+- [x] 复核 `docs/swagger-app-接口映射.md`、`docs/handoff-status.md` 和现有 planning files
+- [x] 复核工程结构，确认当前页面主要直接依赖 `mock/*` 与 `utils/storage.ts`
+- [x] 识别真实联调前的关键前置：请求层为空、服务层为空、`/user/*` 接口缺少鉴权承接
+- **Status:** complete
+
+#### Phase B: Planning
+- [x] 设计联调前置批与 A-F 业务批次顺序
+- [x] 为每一批明确接口范围、建议文件、进入条件、退出标准和下一批衔接关系
+- [x] 为每一批补齐人工验证步骤和文档回写要求
+- **Status:** complete
+
+#### Phase C: Delivery
+- [x] 输出任务文档到 `docs/plans/2026-04-15-api-integration-batches.md`
+- [x] 将关键发现和恢复点同步到 `findings.md` 与 `progress.md`
+- [x] 完成文档自检，确认每批均包含“人工验证”和“下一批”说明
+- **Status:** complete
+
+### Key Questions
+1. 如何在不破坏当前 Mock 可演示链路的前提下切入真实接口？
+2. 哪些批次可以先接公共接口，哪些必须等鉴权/测试 token 就绪后再推进？
+3. 每一批完成后，如何用最少的人工步骤确认可以安全进入下一批？
+
+### Decisions Made
+| Decision | Rationale |
+|----------|-----------|
+| 先补联调前置批，再执行 A-F 业务批次 | 当前仓库没有真实请求层、服务层或 token 管理，直接逐页切接口会造成重复改造 |
+| 页面不直接请求 Swagger 接口，而是统一经由 `services/*` + adapter 层 | 当前页面直接依赖 `mock/*`，引入一层服务封装可以最小化页面改动并保留 Mock fallback |
+| 批次顺序继续沿用 `A -> B -> C -> D -> E -> F`，但增加 `S0` 前置批 | `A` 主要是公共浏览接口，最适合先验证请求链路；后续多个批次依赖 `/user/*` 鉴权 |
+| 每批完成后必须先回写 `docs/swagger-app-接口映射.md` 第 1、3、4 节，再进入下一批 | 当前接口映射文档已经承担进度看板职责，若不及时回写，后续恢复点会漂移 |
+| 后端缺口模块继续保留 Mock，并在任务文档与页面上保持 `开发中` 标记 | 资讯详情、优惠券、创建订单、FAQ、在线客服会话等缺口当前无法通过前端单独闭合 |
+
+### Current Resume Point
+- 本次已新增任务文档：`docs/plans/2026-04-15-api-integration-batches.md`
+- 文档中已拆出 `S0` 联调前置批，以及 `A-F` 六个业务批次
+- 每批都已写明：
+  - 要接的接口与页面范围
+  - 建议新增/修改的文件
+  - 完成标准
+  - 人工验证步骤
+  - 完成本批后下一批该接什么
+- 若后续正式开始真实接口联调，优先从 `S0` 开始，而不是直接改首页或商品详情页

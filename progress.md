@@ -235,3 +235,16 @@
 - 更新 `README.md`，补充新的构建/校验流程说明
 - 重新运行 `npm run build:miniapp`
 - 重新运行 `npm run verify:source-runtime`，结果通过：`46` 个 TypeScript 文件的源码运行时 JS 已与编译输出对齐
+
+### Follow-up Session: 真实接口联调批次计划
+- 重新读取 `docs/swagger-app-接口映射.md`、`docs/handoff-status.md`、`task_plan.md`、`findings.md`、`progress.md`，确认用户当前目标不是立即接代码，而是先产出定制化联调任务文档
+- 复核工程结构，确认当前没有 `wx.request` 封装、API config、service 层或 repository 层；页面仍主要直接依赖 `mock/*` 与 `utils/storage.ts`
+- 识别接口联调的关键前置约束：当前没有登录页和 token 管理，但 `B/C/D/E/F` 多个批次会命中 `/user/*` 接口，因此需要先补联调前置批
+- 新增 `docs/plans/2026-04-15-api-integration-batches.md`，把真实接口联调拆成 `S0 + A-F` 七个批次，并为每批补齐：
+  - 接口范围与目标页面
+  - 建议创建/修改的文件
+  - 完成标准
+  - 人工验证步骤
+  - 完成本批后下一批该接什么
+- 同步更新 `task_plan.md` 与 `findings.md`，记录本轮恢复点和批次规划依据
+- 本轮未运行 `npm run typecheck` / `npm run build:miniapp`，因为仅新增与更新文档，没有代码变更

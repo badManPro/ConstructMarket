@@ -283,3 +283,21 @@
   - `npm run test:node`
   - `npm run verify:source-runtime`
 - 回写 `docs/swagger-app-接口映射.md`，将 `S0` 标记为已完成，并将下一步前移到 `A. 首页 / 选型 / 搜索结果`
+
+### Follow-up Session: currentEnv 运行时刷新修复
+- 根据用户反馈“`getApp().globalData.currentEnv` 仍是 `mock`”复查 `miniprogram/app.ts`
+- 定位根因：`getApiConfig()` 在模块初始化时只执行一次；若 storage 在 DevTools 中晚于小程序启动才写入，`globalData` 不会自动刷新
+- 先新增红测：`tests/api/app-runtime.test.cjs`
+- 首次运行 `node --test tests/api/app-runtime.test.cjs` 失败，符合预期：`miniprogram/app-runtime.js` 尚不存在
+- 新增 `miniprogram/app-runtime.ts`，集中管理初始化默认值和运行时配置刷新
+- 更新 `miniprogram/app.ts`：
+  - 启动时刷新 runtime config
+  - 前后台切换时刷新 runtime config
+  - 暴露 `getApp().refreshRuntimeConfig()` 供 DevTools 手动刷新
+- 更新 `README.md`，在 storage 注入示例后补充 `getApp().refreshRuntimeConfig()`
+- 顺序执行并通过：
+  - `node --test tests/api/app-runtime.test.cjs`
+  - `npm run typecheck`
+  - `npm run build:miniapp`
+  - `npm run test:node`
+  - `npm run verify:source-runtime`

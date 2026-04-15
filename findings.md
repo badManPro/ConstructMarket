@@ -171,3 +171,12 @@
   - `constructmarket_api_base_url`
   - `constructmarket_dev_token`
 - `docs/swagger-app-接口映射.md` 现在可以把下一步明确前移到 `A. 首页 / 选型 / 搜索结果`
+
+## Follow-up Findings: currentEnv 刷新时序问题
+- `miniprogram/app.ts` 原先在模块顶层执行 `getApiConfig()`，因此 `globalData.currentEnv` 只会在小程序首次加载时读取一次 storage
+- 若在微信开发者工具里先启动小程序，再执行 `wx.setStorageSync("constructmarket_api_mode", "hybrid")`，`getApp().globalData.currentEnv` 仍会保持旧值 `mock`
+- 这个现象不是 storage 写入失败，而是读取时序问题
+- 当前已修复为：
+  - 新增 `miniprogram/app-runtime.ts`
+  - `onLaunch` 和 `onShow` 都会刷新 runtime config
+  - 可在控制台手动执行 `getApp().refreshRuntimeConfig()` 后立即查看最新 `globalData`

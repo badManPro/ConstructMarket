@@ -1,14 +1,17 @@
-import { getApiConfig } from "./api/config";
+import { applyApiRuntimeConfig, createInitialGlobalData } from "./app-runtime";
 
-const apiConfig = getApiConfig();
+const globalData = createInitialGlobalData();
 
 App({
-  globalData: {
-    appName: "ConstructMarket",
-    currentEnv: apiConfig.mode,
-    apiBaseUrl: apiConfig.baseUrl,
+  globalData,
+  refreshRuntimeConfig() {
+    return applyApiRuntimeConfig(globalData);
   },
   onLaunch() {
+    const apiConfig = applyApiRuntimeConfig(globalData);
     console.info(`ConstructMarket miniapp scaffold launched in ${apiConfig.mode} mode`);
+  },
+  onShow() {
+    applyApiRuntimeConfig(globalData);
   },
 });

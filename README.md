@@ -35,10 +35,12 @@ Recommended local setup in WeChat DevTools console:
 ```js
 wx.setStorageSync("constructmarket_api_mode", "hybrid");
 wx.setStorageSync("constructmarket_dev_token", "your-test-token");
+getApp().refreshRuntimeConfig();
 ```
 
 Optional override for non-default gateway:
 
 ```js
 wx.setStorageSync("constructmarket_api_base_url", "http://106.15.108.65:8085/api");
+getApp().refreshRuntimeConfig();
 ```

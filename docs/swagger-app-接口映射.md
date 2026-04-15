@@ -12,14 +12,15 @@
 | 当前小程序页面数 | `22` 个页面路由 |
 | 用户端接口数 | `63` 个 |
 | 管理端接口数 | `164` 个 |
+| 联调前置批 `S0` | `已完成` |
 | 当前真实接口对接进度 | `0 / 58` 个页面模块已完成真实接口接入 |
 | 当前进度拆分 | `48` 待接入，`1` 前端待补，`9` 后端阻塞 |
-| 当前推荐起手批次 | `A. 首页 / 选型 / 搜索结果`，`B. 商品详情 / 收藏加购` |
+| 当前推荐起手批次 | `A. 首页 / 选型 / 搜索结果` |
 
 > 说明：
 > 1. 当前仓库是用户端微信小程序，只需要承接 `app` 分组。
 > 2. `plat` 分组属于后台/管理端接口，当前仓库没有管理后台页面，因此不纳入本轮接入范围。
-> 3. 当前代码里还没有真实 API 请求层，现状是“页面大多已用 Mock 跑通，但真实接口尚未接入”。
+> 3. 当前已完成 `S0` 联调前置基座：`api/config`、`api/request`、`api/modules/*`、`api/adapters/*`、`services/*` 已落库，并补齐了 Node 侧 smoke tests。
 > 4. 后续每完成一批接口对接，优先更新第 1、3、4 节；第 7 节只作为接口索引，不作为真实进度看板。
 
 ## 2. 维护规则与状态定义
@@ -44,6 +45,7 @@
 
 | 批次 | 范围 | 模块数 | 当前进度 | 主要接口 | 主要阻塞 | 建议顺序 |
 | --- | --- | --- | --- | --- | --- | --- |
+| S0 | 联调前置基座 | 1 | `1/1 已完成` | `api/config`、`api/request`、`api/modules/*`、`api/adapters/*`、`services/*` | 无 | 0 |
 | A | 首页 / 选型 / 搜索结果 | 12 | `0/12 已完成`，`12` 待接入 | `home/banners`、`home/categories`、`home/new-arrival-products`、`home/hot-recommend-products`、`home/news-articles`、`home/search-products`、`dict/*` | 无 | 1 |
 | B | 商品详情 / 收藏加购 / 浏览记录 | 7 | `0/7 已完成`，`7` 待接入 | `product/detail`、`product/specs`、`merchant/detail`、`favorite/*`、`user/cart`、`user/browse/*`、`consult-messages` | 无 | 2 |
 | C | 购物车 / 地址 / 发票基础能力 | 10 | `0/10 已完成`，`10` 待接入 | `user/cart*`、`user/address*`、`user/invoice/titles*`、`user/invoice/records*` | 无 | 3 |

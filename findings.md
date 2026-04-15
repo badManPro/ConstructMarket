@@ -156,3 +156,18 @@
 - `D. 下单 / 支付结果 / 订单域` 不能完整闭环，主要受三个 Swagger 缺口影响：缺少优惠券接口、缺少支付方式配置接口、缺少创建订单接口；任务文档中应明确该批次只能做“可接部分 + Mock 保留部分”
 - `F. 资讯 / 客服 / 投诉建议` 同样不能一次性全部切真实接口；资讯详情、FAQ、在线咨询会话历史与客服回复仍是后端阻塞，只能把资讯列表、投诉建议提交、图片上传等可接部分先落掉
 - 已新增详细任务文档：`docs/plans/2026-04-15-api-integration-batches.md`
+
+## Follow-up Findings: S0 联调前置批已完成
+- 当前仓库已新增真实接口联调基座，不再是“完全没有请求层”的状态：
+  - `miniprogram/api/config.ts`：统一 `API_MODE`、`baseUrl`、开发 token 注入
+  - `miniprogram/api/request.ts`：统一 header、超时、业务错误和网络错误归一化
+  - `miniprogram/api/modules/*`：按 `home/product/trade/profile/content/support` 分域拆分接口入口
+  - `miniprogram/api/adapters/*`：为后续 DTO -> 页面 ViewModel 转换预留稳定层
+  - `miniprogram/services/*`：建立页面侧统一读取入口，当前以 Mock shell 和 `browse` 域的 remote/hybrid 起步
+- 由于当前没有登录页，`S0` 采用“开发 token + storage 注入”的方式承接 `/user/*` 接口联调，而不是反向先补登录页
+- 已新增 Node 侧 smoke tests：`tests/api/config.test.cjs`、`tests/api/request.test.cjs`、`tests/api/browse-service.test.cjs`
+- `README.md` 已补齐以下联调说明：
+  - `constructmarket_api_mode`
+  - `constructmarket_api_base_url`
+  - `constructmarket_dev_token`
+- `docs/swagger-app-接口映射.md` 现在可以把下一步明确前移到 `A. 首页 / 选型 / 搜索结果`

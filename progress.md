@@ -248,3 +248,38 @@
   - 完成本批后下一批该接什么
 - 同步更新 `task_plan.md` 与 `findings.md`，记录本轮恢复点和批次规划依据
 - 本轮未运行 `npm run typecheck` / `npm run build:miniapp`，因为仅新增与更新文档，没有代码变更
+
+### Follow-up Session: S0 联调前置批实现
+- 先按 TDD 新增 Node 侧红测：
+  - `tests/api/config.test.cjs`
+  - `tests/api/request.test.cjs`
+  - `tests/api/browse-service.test.cjs`
+- 首次运行 `node --test tests/api/*.test.cjs` 失败，原因符合预期：`miniprogram/api/config.js`、`miniprogram/api/request.js`、`miniprogram/services/browse.js` 尚不存在
+- 新增真实接口联调基座：
+  - `miniprogram/api/config.ts`
+  - `miniprogram/api/request.ts`
+  - `miniprogram/api/modules/home.ts`
+  - `miniprogram/api/modules/product.ts`
+  - `miniprogram/api/modules/trade.ts`
+  - `miniprogram/api/modules/profile.ts`
+  - `miniprogram/api/modules/content.ts`
+  - `miniprogram/api/modules/support.ts`
+  - `miniprogram/api/adapters/browse.ts`
+  - `miniprogram/api/adapters/content.ts`
+  - `miniprogram/api/adapters/profile.ts`
+  - `miniprogram/api/adapters/trade.ts`
+  - `miniprogram/api/adapters/support.ts`
+  - `miniprogram/services/browse.ts`
+  - `miniprogram/services/trade.ts`
+  - `miniprogram/services/profile.ts`
+  - `miniprogram/services/content.ts`
+  - `miniprogram/services/support.ts`
+- 更新 `miniprogram/app.ts`，让 `globalData.currentEnv` 直接读取新的 API mode
+- 更新 `package.json`，新增 `npm run test:node`
+- 更新 `README.md`，补齐 `API_MODE` / `baseUrl` / `dev token` 联调说明
+- 执行并通过：
+  - `npm run typecheck`
+  - `npm run build:miniapp`
+  - `npm run test:node`
+  - `npm run verify:source-runtime`
+- 回写 `docs/swagger-app-接口映射.md`，将 `S0` 标记为已完成，并将下一步前移到 `A. 首页 / 选型 / 搜索结果`

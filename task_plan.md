@@ -213,4 +213,10 @@ Phase C
   - 完成标准
   - 人工验证步骤
   - 完成本批后下一批该接什么
-- 若后续正式开始真实接口联调，优先从 `S0` 开始，而不是直接改首页或商品详情页
+- 当前已完成 `S0` 联调前置批：
+  - 新增 `miniprogram/api/config.ts`、`miniprogram/api/request.ts`
+  - 新增 `miniprogram/api/modules/*`、`miniprogram/api/adapters/*`、`miniprogram/services/*`
+  - `README.md` 已补齐联调 token 与 `API_MODE` 配置说明
+  - `package.json` 已新增 `npm run test:node`
+  - 已通过 `npm run typecheck`、`npm run build:miniapp`、`npm run test:node`、`npm run verify:source-runtime`
+- 当前下一步：进入 `A. 首页 / 选型 / 搜索结果`

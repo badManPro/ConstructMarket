@@ -301,3 +301,34 @@
   - `npm run build:miniapp`
   - `npm run test:node`
   - `npm run verify:source-runtime`
+
+### Follow-up Session: A 批首页/选型/搜索结果实现
+- 先按 TDD 新增红测：
+  - `tests/api/browse-service.test.cjs` 新增首页远端聚合、分类页远端分类树/热销、搜索筛选枚举与远端搜索兼容测试
+  - `tests/api/home-api.test.cjs` 新增 `search-products` 的 `POST + query` 编码测试
+- 首次运行 `node --test tests/api/browse-service.test.cjs tests/api/home-api.test.cjs` 失败，命中预期缺口：
+  - Banner 标题仍按旧 mock 字段取值
+  - 分类页和搜索筛选壳子仍是纯 mock
+  - `search-products` 还没有把 query 参数编码进 POST URL
+- A 批代码落库：
+  - 更新 `miniprogram/api/modules/home.ts`，让 `search-products` 改为 `POST` 且 query 参数拼进 URL
+  - 更新 `miniprogram/api/adapters/browse.ts`，补齐 Banner 字段、`{ product, skuList }` 商品 DTO、分组资讯 DTO 的适配
+  - 重写 `miniprogram/services/browse.ts`，新增远端分类树、搜索筛选壳子、分类页热销聚合，以及真实搜索结果上的本地兼容细筛
+  - 重写 `miniprogram/pages/home/index.ts`、`miniprogram/pages/category/index.ts`、`miniprogram/package-catalog/search/result.ts`，统一切到 `services/browse` 的异步 hydrate
+  - 更新 `miniprogram/pages/home/index.wxml`、`miniprogram/pages/home/index.wxss`、`miniprogram/package-catalog/search/result.wxml`，补齐 `loading / empty / error / offline` 壳子
+- live API 校验结论已并入实现：
+  - `home/news-articles` 是分组对象
+  - `search-products` 返回嵌套商品 DTO
+  - 搜索接口暂不提供 `material/minOrder` 显式后端筛选参数
+- 顺序执行并通过：
+  - `npm run typecheck`
+  - `npm run build:miniapp`
+  - `node --test tests/api/browse-service.test.cjs tests/api/home-api.test.cjs`
+  - `npm run test:node`
+  - `npm run verify:source-runtime`
+- 当前 A 批文档状态已回写为 `进行中`：代码和自动化验证已完成，尚待微信开发者工具对首页、选型页、搜索结果页做人工走查后再改为 `已完成`
+
+### Follow-up Session: A 批人工走查待办固化
+- 已将 `A 批 DevTools Smoke Checklist（2026-04-16）` 写入 `docs/plans/2026-04-15-api-integration-batches.md`
+- 已在 `task_plan.md` 增加显式阻断：下次继续开发前，先提醒用户完成或明确跳过 A 批人工走查
+- 当前仍未完成的事项不是代码实现，而是 DevTools 人工验证与结果回写

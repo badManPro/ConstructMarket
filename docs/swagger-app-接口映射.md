@@ -14,14 +14,15 @@
 | 管理端接口数 | `164` 个 |
 | 联调前置批 `S0` | `已完成` |
 | 当前真实接口对接进度 | `0 / 58` 个页面模块已完成真实接口接入 |
-| 当前进度拆分 | `48` 待接入，`1` 前端待补，`9` 后端阻塞 |
-| 当前推荐起手批次 | `A. 首页 / 选型 / 搜索结果` |
+| 当前进度拆分 | `37` 待接入，`11` 进行中，`1` 前端待补，`9` 后端阻塞 |
+| 当前推荐起手批次 | `A. 首页 / 选型 / 搜索结果（进行中）` |
 
 > 说明：
 > 1. 当前仓库是用户端微信小程序，只需要承接 `app` 分组。
 > 2. `plat` 分组属于后台/管理端接口，当前仓库没有管理后台页面，因此不纳入本轮接入范围。
 > 3. 当前已完成 `S0` 联调前置基座：`api/config`、`api/request`、`api/modules/*`、`api/adapters/*`、`services/*` 已落库，并补齐了 Node 侧 smoke tests。
-> 4. 后续每完成一批接口对接，优先更新第 1、3、4 节；第 7 节只作为接口索引，不作为真实进度看板。
+> 4. A 批代码已落库并通过自动化验证，但尚未完成微信开发者工具人工走查，因此当前统一标记为 `进行中`，暂不提前改成 `已完成`。
+> 5. 后续每完成一批接口对接，优先更新第 1、3、4 节；第 7 节只作为接口索引，不作为真实进度看板。
 
 ## 2. 维护规则与状态定义
 
@@ -46,7 +47,7 @@
 | 批次 | 范围 | 模块数 | 当前进度 | 主要接口 | 主要阻塞 | 建议顺序 |
 | --- | --- | --- | --- | --- | --- | --- |
 | S0 | 联调前置基座 | 1 | `1/1 已完成` | `api/config`、`api/request`、`api/modules/*`、`api/adapters/*`、`services/*` | 无 | 0 |
-| A | 首页 / 选型 / 搜索结果 | 12 | `0/12 已完成`，`12` 待接入 | `home/banners`、`home/categories`、`home/new-arrival-products`、`home/hot-recommend-products`、`home/news-articles`、`home/search-products`、`dict/*` | 无 | 1 |
+| A | 首页 / 选型 / 搜索结果 | 12 | `0/12 已完成`，`11` 进行中，`1` 待接入 | `home/banners`、`home/categories`、`home/new-arrival-products`、`home/hot-recommend-products`、`home/news-articles`、`home/search-products`、`dict/*` | `采购建议` 仍待切 `news/page` | 1 |
 | B | 商品详情 / 收藏加购 / 浏览记录 | 7 | `0/7 已完成`，`7` 待接入 | `product/detail`、`product/specs`、`merchant/detail`、`favorite/*`、`user/cart`、`user/browse/*`、`consult-messages` | 无 | 2 |
 | C | 购物车 / 地址 / 发票基础能力 | 10 | `0/10 已完成`，`10` 待接入 | `user/cart*`、`user/address*`、`user/invoice/titles*`、`user/invoice/records*` | 无 | 3 |
 | D | 下单 / 支付结果 / 订单域 | 10 | `0/10 已完成`，`7` 待接入，`3` 后端阻塞 | `user/orders`、`user/orders/detail`、`user/orders/pay`、`confirm-receipt`、`after-sale` | 优惠券接口、支付方式配置接口、创建订单接口 | 4 |
@@ -64,18 +65,18 @@
 
 | 页面 | 路由 | 模块 | 建议对接接口 | 接口条件 | 对接进度 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 首页 | `pages/home/index` | Banner 轮播 | `GET /v1/app/home/banners` | 可直接对接 | `待接入` | 直接替换当前本地 Banner 数据 |
-| 首页 | `pages/home/index` | 快捷选型 / 分类导航 | `GET /v1/app/home/categories` | 可直接对接 | `待接入` | 同时供首页和选型页复用 |
-| 首页 | `pages/home/index` | 尖货榜单 / 新品区 | `GET /v1/app/home/new-arrival-products` | 可直接对接 | `待接入` | 可承接当前“尖货榜单 / 限时抢”模块 |
-| 首页 | `pages/home/index` | 热门商品推荐 | `GET /v1/app/home/hot-recommend-products` | 可直接对接 | `待接入` | 商品卡结构可直接复用 |
-| 首页 | `pages/home/index` | 搜索跳转 | `POST /v1/app/home/search-products` | 可直接对接 | `待接入` | 首页只负责带词跳转，结果页真正请求 |
-| 首页 | `pages/home/index` | 建材资讯入口 | `GET /v1/app/home/news-articles`、`POST /v1/app/news/page` | 可组合对接 | `待接入` | 首页取轻量资讯流，列表页取完整分页数据 |
-| 选型 | `pages/category/index` | 一级类目 / 二级类目 | `GET /v1/app/home/categories` | 可直接对接 | `待接入` | 当前左右分栏结构可直接吃分类树 |
-| 选型 | `pages/category/index` | 当前热销 | `POST /v1/app/home/search-products` | 可直接对接 | `待接入` | 通过类目 ID / 关键词过滤当前热销列表 |
-| 选型 | `pages/category/index` | 采购建议 | `POST /v1/app/news/page` | 可组合对接 | `待接入` | 可按类目维度做资讯推荐，但没有独立“采购建议”接口 |
-| 搜索结果 | `package-catalog/search/result` | 搜索、排序、筛选结果 | `POST /v1/app/home/search-products` | 可直接对接 | `待接入` | 结果列表、排序和筛选条件都应落到该接口 |
-| 搜索结果 | `package-catalog/search/result` | 更多类目抽屉 | `GET /v1/app/home/categories` | 可直接对接 | `待接入` | 类目切换数据来自分类接口 |
-| 搜索结果 | `package-catalog/search/result` | 筛选项枚举 | `GET /v1/app/dict/simple-list`、`GET /v1/app/dict/tree-list` | 可组合对接 | `待接入` | 当前价格 / 材质 / 起订量仍是本地静态项，可后续字典化 |
+| 首页 | `pages/home/index` | Banner 轮播 | `GET /v1/app/home/banners` | 可直接对接 | `进行中` | 已切到 `services/browse`，Banner 数据来自真实接口，待 DevTools 走查 |
+| 首页 | `pages/home/index` | 快捷选型 / 分类导航 | `GET /v1/app/home/categories` | 可直接对接 | `进行中` | 已和选型页共用真实分类树，待 DevTools 走查 |
+| 首页 | `pages/home/index` | 尖货榜单 / 新品区 | `GET /v1/app/home/new-arrival-products` | 可直接对接 | `进行中` | 已适配 `{ product, skuList }` 嵌套 DTO，待 DevTools 走查 |
+| 首页 | `pages/home/index` | 热门商品推荐 | `GET /v1/app/home/hot-recommend-products` | 可直接对接 | `进行中` | 已切真实推荐流，待 DevTools 走查 |
+| 首页 | `pages/home/index` | 搜索跳转 | `POST /v1/app/home/search-products` | 可直接对接 | `进行中` | 首页仍只负责带词跳转，结果页已切到真实搜索接口 |
+| 首页 | `pages/home/index` | 建材资讯入口 | `GET /v1/app/home/news-articles`、`POST /v1/app/news/page` | 可组合对接 | `进行中` | 首页入口已改读 `home/news-articles` 分组返回，列表页仍待后续新闻域联调 |
+| 选型 | `pages/category/index` | 一级类目 / 二级类目 | `GET /v1/app/home/categories` | 可直接对接 | `进行中` | 左右结构已切到真实分类树，元数据文案改为通用生成态 |
+| 选型 | `pages/category/index` | 当前热销 | `POST /v1/app/home/search-products` | 可直接对接 | `进行中` | 已按类目 ID 打真实热销搜索，请求参数改为 `POST + query` |
+| 选型 | `pages/category/index` | 采购建议 | `POST /v1/app/news/page` | 可组合对接 | `待接入` | 当前仍使用本地生成的类目建议文案，尚未切 `news/page` |
+| 搜索结果 | `package-catalog/search/result` | 搜索、排序、筛选结果 | `POST /v1/app/home/search-products` | 可直接对接 | `进行中` | 已切真实搜索；价格区间走服务端，`minOrder/material` 暂由前端兼容细筛 |
+| 搜索结果 | `package-catalog/search/result` | 更多类目抽屉 | `GET /v1/app/home/categories` | 可直接对接 | `进行中` | 抽屉数据已来自真实分类树，并保留子类目 ID 透传 |
+| 搜索结果 | `package-catalog/search/result` | 筛选项枚举 | `GET /v1/app/dict/simple-list`、`GET /v1/app/dict/tree-list` | 可组合对接 | `进行中` | 已接入字典接口并保留 mock fallback，待根据真实字典值补精确映射 |
 | 商品详情 | `package-catalog/product/detail` | 商品主信息 | `GET /v1/app/product/detail` | 可直接对接 | `待接入` | 包含图集、标题、价格、起订量、服务说明 |
 | 商品详情 | `package-catalog/product/detail` | 店铺信息 | `GET /v1/app/merchant/detail` | 可直接对接 | `待接入` | 承接当前“店铺信息”卡片 |
 | 商品详情 | `package-catalog/product/detail` | 规格参数 | `GET /v1/app/product/specs` | 可直接对接 | `待接入` | 对应规格弹层和商品参数区 |

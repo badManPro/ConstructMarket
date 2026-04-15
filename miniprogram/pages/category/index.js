@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const routes_1 = require("../../constants/routes");
-const category_1 = require("../../mock/category");
+const browse_1 = require("../../services/browse");
 const navigate_1 = require("../../utils/navigate");
 const storage_1 = require("../../utils/storage");
 const page_1 = require("../../utils/page");
@@ -19,63 +19,77 @@ Page({
         categoryProducts: [],
     },
     onLoad(options) {
-        const selectedCategoryId = (0, category_1.normalizeRootCategoryId)(options.categoryId);
+        const selectedCategoryId = typeof options.categoryId === "string" ? options.categoryId : "";
         const mockState = (0, page_1.getPageStatusOverride)(options.state);
         this.setData({
             selectedCategoryId,
             mockState: mockState ?? "",
         });
-        this.hydrateCategoryPage(selectedCategoryId, mockState);
+        void this.hydrateCategoryPage(selectedCategoryId, mockState);
     },
     onShow() {
         if (!this.data.selectedCategoryId || this.data.mockState)
             return;
-        this.hydrateCategoryPage(this.data.selectedCategoryId);
+        void this.hydrateCategoryPage(this.data.selectedCategoryId);
     },
     onPullDownRefresh() {
-        this.hydrateCategoryPage(this.data.selectedCategoryId);
+        void this.hydrateCategoryPage(this.data.selectedCategoryId);
     },
-    hydrateCategoryPage(categoryId, override = null) {
-        const selectedCategoryId = (0, category_1.normalizeRootCategoryId)(categoryId ?? this.data.selectedCategoryId);
-        const pageData = (0, category_1.getCategoryPageData)(selectedCategoryId, (0, storage_1.getFavoriteIds)());
-        const pageSubtitle = `${pageData.currentCategory.name} · ${pageData.subCategories.length} 个细分类目`;
-        if (override === "loading") {
+    async hydrateCategoryPage(categoryId, override = null) {
+        const browseService = (0, browse_1.createBrowseService)();
+        const selectedCategoryId = categoryId ?? this.data.selectedCategoryId;
+        try {
+            const pageData = await browseService.getCategoryShellData(selectedCategoryId, (0, storage_1.getFavoriteIds)());
+            const currentCategory = pageData.currentCategory;
+            const pageSubtitle = currentCategory ? `${currentCategory.name} · ${pageData.subCategories.length} 个细分类目` : "选型";
+            if (override === "loading") {
+                this.setData({
+                    status: "loading",
+                    selectedCategoryId: pageData.selectedCategoryId,
+                    rootCategories: pageData.rootCategories,
+                    currentCategory: pageData.currentCategory,
+                    pageSubtitle: currentCategory ? `${currentCategory.name} · 加载中` : "选型内容加载中",
+                    searchPlaceholder: currentCategory?.searchHint ?? "建材 / 品牌 / 型号",
+                });
+                wx.stopPullDownRefresh();
+                return;
+            }
+            if (override && override !== "ready") {
+                this.setData({
+                    status: override,
+                    selectedCategoryId: pageData.selectedCategoryId,
+                    rootCategories: pageData.rootCategories,
+                    currentCategory: pageData.currentCategory,
+                    subCategories: override === "empty" ? [] : pageData.subCategories,
+                    categoryProducts: [],
+                    pageSubtitle: currentCategory ? `${currentCategory.name} · 状态异常` : "选型状态异常",
+                    searchPlaceholder: currentCategory?.searchHint ?? "建材 / 品牌 / 型号",
+                });
+                wx.stopPullDownRefresh();
+                return;
+            }
             this.setData({
-                status: "loading",
+                status: pageData.subCategories.length || pageData.categoryProducts.length ? "ready" : "empty",
                 selectedCategoryId: pageData.selectedCategoryId,
                 rootCategories: pageData.rootCategories,
                 currentCategory: pageData.currentCategory,
-                pageSubtitle: `${pageData.currentCategory.name} · 加载中`,
-                searchPlaceholder: pageData.currentCategory.searchHint,
+                subCategories: pageData.subCategories,
+                categoryProducts: pageData.categoryProducts,
+                pageSubtitle,
+                searchPlaceholder: currentCategory?.searchHint ?? "建材 / 品牌 / 型号",
             });
-            wx.stopPullDownRefresh();
-            return;
         }
-        if (override && override !== "ready") {
+        catch {
             this.setData({
-                status: override,
-                selectedCategoryId: pageData.selectedCategoryId,
-                rootCategories: pageData.rootCategories,
-                currentCategory: pageData.currentCategory,
-                subCategories: override === "empty" ? [] : pageData.subCategories,
+                status: "error",
+                subCategories: [],
                 categoryProducts: [],
-                pageSubtitle: override === "empty" ? `${pageData.currentCategory.name} · 暂无商品` : `${pageData.currentCategory.name} · 状态异常`,
-                searchPlaceholder: pageData.currentCategory.searchHint,
+                pageSubtitle: "选型内容加载失败",
             });
-            wx.stopPullDownRefresh();
-            return;
         }
-        this.setData({
-            status: pageData.subCategories.length || pageData.categoryProducts.length ? "ready" : "empty",
-            selectedCategoryId: pageData.selectedCategoryId,
-            rootCategories: pageData.rootCategories,
-            currentCategory: pageData.currentCategory,
-            subCategories: pageData.subCategories,
-            categoryProducts: pageData.categoryProducts,
-            pageSubtitle,
-            searchPlaceholder: pageData.currentCategory.searchHint,
-        });
-        wx.stopPullDownRefresh();
+        finally {
+            wx.stopPullDownRefresh();
+        }
     },
     handleSearchTap() {
         const currentCategory = this.data.currentCategory;
@@ -95,7 +109,7 @@ Page({
             mockState: "",
             status: "loading",
         });
-        this.hydrateCategoryPage(id);
+        void this.hydrateCategoryPage(id);
     },
     handleSubCategoryTap(event) {
         const { categoryId, keyword } = event.currentTarget.dataset;
@@ -117,7 +131,7 @@ Page({
         if (!id)
             return;
         (0, storage_1.toggleFavoriteId)(id);
-        this.hydrateCategoryPage(this.data.selectedCategoryId);
+        void this.hydrateCategoryPage(this.data.selectedCategoryId);
     },
     handleOpenAllResults() {
         const currentCategory = this.data.currentCategory;
@@ -141,7 +155,7 @@ Page({
             mockState: "",
             status: "loading",
         });
-        this.hydrateCategoryPage(this.data.selectedCategoryId);
+        void this.hydrateCategoryPage(this.data.selectedCategoryId);
     },
     handleGoHome() {
         (0, navigate_1.navigateToRoute)(routes_1.ROUTES.home);

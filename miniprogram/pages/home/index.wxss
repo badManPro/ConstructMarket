@@ -55,6 +55,35 @@
   margin: 16rpx 24rpx 0;
 }
 
+.home-state-card {
+  text-align: center;
+}
+
+.home-state-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.home-state-actions__ghost,
+.home-state-actions__solid {
+  flex: 1;
+  padding: 20rpx 0;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.home-state-actions__ghost {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.home-state-actions__solid {
+  background: #ff4a43;
+  color: #ffffff;
+}
+
 .banner-swiper {
   height: 240rpx;
 }

@@ -220,10 +220,77 @@ npm run verify:source-runtime
 4. 断网或手动让请求失败，确认页面进入 `error` / `offline` 分支而不是白屏。
 5. 回写 [`docs/swagger-app-接口映射.md`](/Users/casper/Documents/project/mall-applet/docs/swagger-app-接口映射.md) 的 A 批状态。
 
+**A 批 DevTools Smoke Checklist Status:** `未完成`
+
+**A 批 DevTools Smoke Checklist（2026-04-16）:**
+
+前置：
+1. 运行 `npm run build:miniapp`，确保 `dist/` 与 `miniprogram/` 运行时代码同步。
+2. 微信开发者工具打开 `dist/`。
+3. 在 DevTools Console 执行：
+
+```js
+wx.setStorageSync("constructmarket_api_mode", "remote");
+wx.setStorageSync("constructmarket_api_base_url", "http://106.15.108.65:8085/api");
+getApp().refreshRuntimeConfig();
+```
+
+4. 若出现合法域名校验错误，先在开发者工具启用“开发环境不校验请求域名、TLS 版本及 HTTPS 证书”，然后重新编译。
+5. 打开 `Network` 面板，建议勾选保留日志。
+
+首页：
+1. 进入 `/pages/home/index`。
+2. 确认页面正常渲染，且不是旧 mock 的固定首页内容。
+3. 确认 Network 中至少出现并返回成功：
+   - `GET /v1/app/home/banners`
+   - `GET /v1/app/home/categories`
+   - `GET /v1/app/home/new-arrival-products`
+   - `GET /v1/app/home/hot-recommend-products`
+   - `GET /v1/app/home/news-articles`
+4. 点击一个热词，确认跳转到搜索结果页且关键词回填。
+5. 点击一个分类卡片，确认可进入选型页。
+6. 点击一个商品卡片，确认可进入商品详情页，说明真实 `productId` 已透传。
+
+选型页：
+1. 从首页分类卡进入，或直接打开 `/pages/category/index?categoryId=1`。
+2. 确认 Network 中出现：
+   - `GET /v1/app/home/categories`
+   - `POST /v1/app/home/search-products?...categoryId=<当前类目ID>&sortType=sales_desc&pageIndex=1&pageSize=6`
+3. 切换左侧一级类目，确认右侧子类目和“当前热销”一起刷新。
+4. 点击一个二级类目，确认跳到搜索结果页，并带上 `categoryId` 与 `keyword`。
+5. 记录一个事实：当前“采购建议”卡仍未切 `news/page`，不算走查通过项。
+
+搜索结果页：
+1. 直接打开 `/package-catalog/search/result?keyword=电钻&categoryId=1`。
+2. 确认 Network 中出现：
+   - `GET /v1/app/home/categories`
+   - `GET /v1/app/dict/simple-list`
+   - `GET /v1/app/dict/tree-list`
+   - `POST /v1/app/home/search-products?...keyword=电钻&categoryId=1&pageIndex=1&pageSize=20`
+3. 确认关键词回填、类目 chip、更多类目抽屉、商品结果列表都正常显示。
+4. 依次切换“销量 / 价格升序 / 价格降序”，确认每次都重新请求 `search-products`，且 `sortType` 变化正确。
+5. 打开筛选抽屉，只选价格区间，确认 Network 带上 `minPrice` / `maxPrice`，且结果数量变化。
+6. 再选 `material` 或 `minOrder`，确认列表变化即可；当前实现允许这两项只在前端对真实结果做兼容细筛，不要求 Network 出现对应参数。
+7. 打开“查看更多类目”抽屉，切换类目后确认重新请求搜索接口，抽屉关闭，列表刷新。
+
+失败态：
+1. 将 `constructmarket_api_base_url` 临时改成错误地址并执行 `getApp().refreshRuntimeConfig()`。
+2. 分别重进首页、选型页、搜索结果页。
+3. 确认三页都进入 `error` 态，而不是白屏或无限 loading。
+4. 用 `?state=offline` 打开三页，确认 `offline` 占位仍然存在。
+
+通过标准：
+1. 首页、选型页、搜索结果页都能看到真实 Network 请求。
+2. 类目切换、排序、价格筛选都能驱动真实搜索接口。
+3. 页面失败时能进入 `error` / `offline` 壳子。
+4. 若上述项目全部通过，再把 A 批状态从 `进行中` 改为 `已完成`。
+5. 若仍有问题，先在 `progress.md` 记录失败现象，不进入 B 批。
+
 **Next Batch:** `B. 商品详情 / 收藏加购 / 浏览记录`
 
 进入条件：
 - 搜索结果页拿到的真实 `productId`、`skuId`、`categoryId` 已可直接传给商品详情和收藏/加购动作
+- A 批 DevTools Smoke Checklist 已人工走查并记录结果
 
 ## 5. 批次 B
 

@@ -1,14 +1,10 @@
 import { ROUTES } from "../../constants/routes";
-import {
-  getCategoryPageData,
-  normalizeRootCategoryId,
-  type CatalogRootCategory,
-  type CatalogSubCategory,
-} from "../../mock/category";
+import { createBrowseService } from "../../services/browse";
 import type { SearchProduct } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
 import { getFavoriteIds, toggleFavoriteId } from "../../utils/storage";
 import { getPageStatusOverride, type PageStatus } from "../../utils/page";
+import type { CatalogRootCategory, CatalogSubCategory } from "../../mock/category";
 
 Page({
   data: {
@@ -24,7 +20,7 @@ Page({
     categoryProducts: [] as SearchProduct[],
   },
   onLoad(options: Record<string, string | undefined>) {
-    const selectedCategoryId = normalizeRootCategoryId(options.categoryId);
+    const selectedCategoryId = typeof options.categoryId === "string" ? options.categoryId : "";
     const mockState = getPageStatusOverride(options.state);
 
     this.setData({
@@ -32,59 +28,72 @@ Page({
       mockState: mockState ?? "",
     });
 
-    this.hydrateCategoryPage(selectedCategoryId, mockState);
+    void this.hydrateCategoryPage(selectedCategoryId, mockState);
   },
   onShow() {
     if (!this.data.selectedCategoryId || this.data.mockState) return;
-    this.hydrateCategoryPage(this.data.selectedCategoryId);
+    void this.hydrateCategoryPage(this.data.selectedCategoryId);
   },
   onPullDownRefresh() {
-    this.hydrateCategoryPage(this.data.selectedCategoryId);
+    void this.hydrateCategoryPage(this.data.selectedCategoryId);
   },
-  hydrateCategoryPage(categoryId?: string, override: PageStatus | null = null) {
-    const selectedCategoryId = normalizeRootCategoryId(categoryId ?? this.data.selectedCategoryId);
-    const pageData = getCategoryPageData(selectedCategoryId, getFavoriteIds());
-    const pageSubtitle = `${pageData.currentCategory.name} · ${pageData.subCategories.length} 个细分类目`;
+  async hydrateCategoryPage(categoryId?: string, override: PageStatus | null = null) {
+    const browseService = createBrowseService();
+    const selectedCategoryId = categoryId ?? this.data.selectedCategoryId;
 
-    if (override === "loading") {
+    try {
+      const pageData = await browseService.getCategoryShellData(selectedCategoryId, getFavoriteIds());
+      const currentCategory = pageData.currentCategory;
+      const pageSubtitle = currentCategory ? `${currentCategory.name} · ${pageData.subCategories.length} 个细分类目` : "选型";
+
+      if (override === "loading") {
+        this.setData({
+          status: "loading",
+          selectedCategoryId: pageData.selectedCategoryId,
+          rootCategories: pageData.rootCategories,
+          currentCategory: pageData.currentCategory,
+          pageSubtitle: currentCategory ? `${currentCategory.name} · 加载中` : "选型内容加载中",
+          searchPlaceholder: currentCategory?.searchHint ?? "建材 / 品牌 / 型号",
+        });
+        wx.stopPullDownRefresh();
+        return;
+      }
+
+      if (override && override !== "ready") {
+        this.setData({
+          status: override,
+          selectedCategoryId: pageData.selectedCategoryId,
+          rootCategories: pageData.rootCategories,
+          currentCategory: pageData.currentCategory,
+          subCategories: override === "empty" ? [] : pageData.subCategories,
+          categoryProducts: [],
+          pageSubtitle: currentCategory ? `${currentCategory.name} · 状态异常` : "选型状态异常",
+          searchPlaceholder: currentCategory?.searchHint ?? "建材 / 品牌 / 型号",
+        });
+        wx.stopPullDownRefresh();
+        return;
+      }
+
       this.setData({
-        status: "loading",
+        status: pageData.subCategories.length || pageData.categoryProducts.length ? "ready" : "empty",
         selectedCategoryId: pageData.selectedCategoryId,
         rootCategories: pageData.rootCategories,
         currentCategory: pageData.currentCategory,
-        pageSubtitle: `${pageData.currentCategory.name} · 加载中`,
-        searchPlaceholder: pageData.currentCategory.searchHint,
+        subCategories: pageData.subCategories,
+        categoryProducts: pageData.categoryProducts,
+        pageSubtitle,
+        searchPlaceholder: currentCategory?.searchHint ?? "建材 / 品牌 / 型号",
       });
-      wx.stopPullDownRefresh();
-      return;
-    }
-
-    if (override && override !== "ready") {
+    } catch {
       this.setData({
-        status: override,
-        selectedCategoryId: pageData.selectedCategoryId,
-        rootCategories: pageData.rootCategories,
-        currentCategory: pageData.currentCategory,
-        subCategories: override === "empty" ? [] : pageData.subCategories,
+        status: "error",
+        subCategories: [],
         categoryProducts: [],
-        pageSubtitle: override === "empty" ? `${pageData.currentCategory.name} · 暂无商品` : `${pageData.currentCategory.name} · 状态异常`,
-        searchPlaceholder: pageData.currentCategory.searchHint,
+        pageSubtitle: "选型内容加载失败",
       });
+    } finally {
       wx.stopPullDownRefresh();
-      return;
     }
-
-    this.setData({
-      status: pageData.subCategories.length || pageData.categoryProducts.length ? "ready" : "empty",
-      selectedCategoryId: pageData.selectedCategoryId,
-      rootCategories: pageData.rootCategories,
-      currentCategory: pageData.currentCategory,
-      subCategories: pageData.subCategories,
-      categoryProducts: pageData.categoryProducts,
-      pageSubtitle,
-      searchPlaceholder: pageData.currentCategory.searchHint,
-    });
-    wx.stopPullDownRefresh();
   },
   handleSearchTap() {
     const currentCategory = this.data.currentCategory;
@@ -104,7 +113,7 @@ Page({
       status: "loading",
     });
 
-    this.hydrateCategoryPage(id);
+    void this.hydrateCategoryPage(id);
   },
   handleSubCategoryTap(event: WechatMiniprogram.Event) {
     const { categoryId, keyword } = event.currentTarget.dataset as {
@@ -135,7 +144,7 @@ Page({
     const { id } = event.detail ?? {};
     if (!id) return;
     toggleFavoriteId(id);
-    this.hydrateCategoryPage(this.data.selectedCategoryId);
+    void this.hydrateCategoryPage(this.data.selectedCategoryId);
   },
   handleOpenAllResults() {
     const currentCategory = this.data.currentCategory;
@@ -159,7 +168,7 @@ Page({
       mockState: "",
       status: "loading",
     });
-    this.hydrateCategoryPage(this.data.selectedCategoryId);
+    void this.hydrateCategoryPage(this.data.selectedCategoryId);
   },
   handleGoHome() {
     navigateToRoute(ROUTES.home);

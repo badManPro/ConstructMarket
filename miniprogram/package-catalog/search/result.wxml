@@ -21,64 +21,89 @@
     </view>
   </view>
 
-  <view class="section-card">
-    <view class="search-summary">相关的类目：{{relatedCategories.length - 1}} 个</view>
-
-    <view class="toolbar-row">
-      <view class="toolbar-row__action" bindtap="openCategoryDrawer">查看更多</view>
-    </view>
-
-    <scroll-view class="category-scroll" scroll-x enable-flex>
-      <view class="category-scroll__inner">
-        <view
-          wx:for="{{relatedCategories}}"
-          wx:key="id"
-          class="category-pill {{selectedCategoryId === item.id ? 'category-pill--active' : ''}}"
-          data-id="{{item.id}}"
-          bindtap="handleCategoryTap"
-        >
-          {{item.name}}
-        </view>
-      </view>
-    </scroll-view>
-
-    <view class="sort-row">
-      <view
-        wx:for="{{sortOptions}}"
-        wx:key="value"
-        class="sort-pill {{selectedSort === item.value ? 'sort-pill--active' : ''}}"
-        data-value="{{item.value}}"
-        bindtap="handleSortTap"
-      >
-        {{item.label}}
-      </view>
-      <view class="sort-pill sort-pill--filter" bindtap="openFilterDrawer">筛选</view>
-    </view>
-
-    <view class="results-meta">共 {{resultCount}} 个结果，关键词：{{keyword || '全部商品'}}</view>
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="section-card__title">搜索结果加载中</view>
+    <view class="section-card__meta">关键词、排序和筛选条件正在请求真实商品列表。</view>
   </view>
 
-  <view wx:if="{{productList.length > 0}}" class="product-list search-product-list">
-    <product-card
-      wx:for="{{productList}}"
-      wx:key="id"
-      item="{{item}}"
-      bindtapcard="handleProductTap"
-      bindfavorite="handleFavoriteTap"
-    />
-  </view>
-
-  <view wx:else class="section-card empty-card">
-    <view class="section-card__title">暂无匹配商品</view>
-    <view class="section-card__meta">当前关键词或筛选条件过严，可以重置后继续浏览。</view>
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="section-card__title">搜索结果读取失败</view>
+    <view class="section-card__meta">可以重试当前条件，或先回到首页继续浏览。</view>
     <view class="empty-actions">
-      <view class="empty-actions__ghost" bindtap="resetSearch">重置筛选</view>
-      <view class="empty-actions__solid" bindtap="goHome">返回首页</view>
-    </view>
-    <view class="empty-actions empty-actions--single">
-      <view class="empty-actions__link" bindtap="goCategoryPage">进入选型页查看更多类目</view>
+      <view class="empty-actions__ghost" bindtap="goHome">返回首页</view>
+      <view class="empty-actions__solid" bindtap="handleRetry">重新加载</view>
     </view>
   </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="section-card__title">当前处于离线演示态</view>
+    <view class="section-card__meta">恢复网络后即可继续加载真实搜索结果。</view>
+    <view class="empty-actions">
+      <view class="empty-actions__ghost" bindtap="goHome">返回首页</view>
+      <view class="empty-actions__solid" bindtap="handleRetry">恢复内容</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view class="section-card">
+      <view class="search-summary">相关的类目：{{relatedCategories.length - 1}} 个</view>
+
+      <view class="toolbar-row">
+        <view class="toolbar-row__action" bindtap="openCategoryDrawer">查看更多</view>
+      </view>
+
+      <scroll-view class="category-scroll" scroll-x enable-flex>
+        <view class="category-scroll__inner">
+          <view
+            wx:for="{{relatedCategories}}"
+            wx:key="id"
+            class="category-pill {{selectedCategoryId === item.id ? 'category-pill--active' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="handleCategoryTap"
+          >
+            {{item.name}}
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="sort-row">
+        <view
+          wx:for="{{sortOptions}}"
+          wx:key="value"
+          class="sort-pill {{selectedSort === item.value ? 'sort-pill--active' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="handleSortTap"
+        >
+          {{item.label}}
+        </view>
+        <view class="sort-pill sort-pill--filter" bindtap="openFilterDrawer">筛选</view>
+      </view>
+
+      <view class="results-meta">共 {{resultCount}} 个结果，关键词：{{keyword || '全部商品'}}</view>
+    </view>
+
+    <view wx:if="{{productList.length > 0}}" class="product-list search-product-list">
+      <product-card
+        wx:for="{{productList}}"
+        wx:key="id"
+        item="{{item}}"
+        bindtapcard="handleProductTap"
+        bindfavorite="handleFavoriteTap"
+      />
+    </view>
+
+    <view wx:else class="section-card empty-card">
+      <view class="section-card__title">暂无匹配商品</view>
+      <view class="section-card__meta">当前关键词或筛选条件过严，可以重置后继续浏览。</view>
+      <view class="empty-actions">
+        <view class="empty-actions__ghost" bindtap="resetSearch">重置筛选</view>
+        <view class="empty-actions__solid" bindtap="goHome">返回首页</view>
+      </view>
+      <view class="empty-actions empty-actions--single">
+        <view class="empty-actions__link" bindtap="goCategoryPage">进入选型页查看更多类目</view>
+      </view>
+    </view>
+  </block>
 
   <view wx:if="{{showCategoryDrawer}}" class="category-drawer-mask" bindtap="closeCategoryDrawer">
     <view class="category-drawer" catchtap="closeCategoryDrawer">

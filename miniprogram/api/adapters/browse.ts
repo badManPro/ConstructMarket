@@ -37,6 +37,9 @@ function pickString(source: Record<string, unknown>, keys: string[], fallback = 
     if (typeof value === "string" && value.trim()) {
       return value.trim();
     }
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return String(value);
+    }
   }
 
   return fallback;
@@ -76,61 +79,120 @@ function pickStringArray(source: Record<string, unknown>, keys: string[], fallba
     if (Array.isArray(value)) {
       return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
     }
+    if (typeof value === "string" && value.trim()) {
+      return value
+        .split(/[,\n]/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
   }
 
   return fallback;
 }
 
+function flattenProductRecord(source: Record<string, unknown>) {
+  const product = isRecord(source.product) ? source.product : source;
+  const skuList = Array.isArray(source.skuList)
+    ? source.skuList.filter((item): item is Record<string, unknown> => isRecord(item))
+    : [];
+  const primarySku = skuList[0] ?? {};
+  const brandInfo = isRecord(product.brandInfo) ? product.brandInfo : {};
+  const categoryInfo = isRecord(product.categoryInfo) ? product.categoryInfo : {};
+
+  return {
+    ...source,
+    ...product,
+    ...primarySku,
+    brandName: pickString(brandInfo, ["brandName", "name"], ""),
+    categoryName: pickString(categoryInfo, ["categoryName", "name"], ""),
+    categoryCode: pickString(categoryInfo, ["categoryCode"], pickString(source, ["categoryCode"], "")),
+    skuId: pickString(primarySku, ["id", "skuCode"], pickString(source, ["skuId"], "")),
+    skuName: pickString(primarySku, ["skuName"], ""),
+    imageUrl: pickString(primarySku, ["imageUrl"], pickString(product, ["coverImageUrl", "imageUrl"], "")),
+    salePrice: pickNumber(primarySku, ["salePrice"], pickNumber(product, ["salePrice"], 0)),
+    salesQty: pickNumber(primarySku, ["salesQty"], pickNumber(product, ["salesQty"], 0)),
+    stockQty: pickNumber(primarySku, ["stockQty"], pickNumber(product, ["stockQty"], 0)),
+  };
+}
+
+function getBannerRoute(item: Record<string, unknown>): {
+  route: BannerCard["route"];
+  params?: Record<string, string>;
+} {
+  const linkTypeCode = pickString(item, ["linkTypeCode"]).toUpperCase();
+  const linkTargetValue = pickString(item, ["linkTargetValue"]);
+  const keyword = pickString(item, ["keyword", "bannerTitle", "title"], "");
+
+  if (linkTypeCode === "INTERNAL" && /category/i.test(linkTargetValue)) {
+    return {
+      route: ROUTES.category,
+    };
+  }
+
+  return {
+    route: ROUTES.searchResult,
+    params: keyword ? { keyword } : undefined,
+  };
+}
+
 function mapSearchProduct(source: Record<string, unknown>, favoriteIds: string[]): SearchProduct {
-  const id = pickString(source, ["id", "productId", "spuId"], `product-${Math.random().toString(36).slice(2, 8)}`);
+  const record = flattenProductRecord(source);
+  const productSource = isRecord(source.product) ? source.product : record;
+  const id = pickString(productSource, ["id", "productId", "spuId"], `product-${Math.random().toString(36).slice(2, 8)}`);
   const favorites = new Set(favoriteIds);
 
   return {
     id,
-    spuId: pickString(source, ["spuId", "productSpuId"], id),
-    skuId: pickString(source, ["skuId", "defaultSkuId"], `${id}-sku`),
-    name: pickString(source, ["name", "productName", "title"], "建材商品"),
-    cover: pickString(source, ["cover", "coverUrl", "imageUrl", "image"], "建材商品"),
-    brand: pickString(source, ["brand", "brandName"], "ConstructMarket"),
-    model: pickString(source, ["model", "specName", "specText"], "默认规格"),
-    price: pickNumber(source, ["price", "salePrice", "minPrice"], 0),
-    unit: pickString(source, ["unit", "unitName"], "件"),
-    minOrderQty: pickNumber(source, ["minOrderQty", "minQuantity"], 1),
-    salesVolume: pickNumber(source, ["salesVolume", "salesCount"], 0),
-    stockStatus: pickString(source, ["stockStatus", "stockDesc"], "现货"),
-    tags: pickStringArray(source, ["tags", "serviceTags"], []),
-    supportInvoice: pickBoolean(source, ["supportInvoice", "invoiceSupported"], true),
-    isFavorite: favorites.has(id),
-    categoryId: pickString(source, ["categoryId", "categoryCode"], "all"),
-    categoryName: pickString(source, ["categoryName", "categoryLabel"], "建材分类"),
-    material: pickString(source, ["material", "materialCode"], "all"),
-    coverTone: pickString(source, ["coverTone"], "linear-gradient(135deg, #334155, #64748b)"),
+    spuId: pickString(record, ["spuId", "productSpuId", "productSpuNo"], id),
+    skuId: pickString(record, ["skuId", "defaultSkuId", "skuCode"], `${id}-sku`),
+    name: pickString(record, ["name", "productName", "title"], "建材商品"),
+    cover: pickString(record, ["cover", "coverUrl", "coverImageUrl", "imageUrl", "image"], "建材商品"),
+    brand: pickString(record, ["brand", "brandName"], "ConstructMarket"),
+    model: pickString(record, ["model", "skuName", "specName", "specText"], "默认规格"),
+    price: pickNumber(record, ["price", "salePrice", "minPrice", "marketPrice"], 0),
+    unit: pickString(record, ["unit", "unitName"], "件"),
+    minOrderQty: pickNumber(record, ["minOrderQty", "minQuantity"], 1),
+    salesVolume: pickNumber(record, ["salesVolume", "salesCount", "salesQty"], 0),
+    stockStatus:
+      pickString(record, ["stockStatus", "stockDesc"], "") || (pickNumber(record, ["stockQty"], 0) > 0 ? "现货" : "待补货"),
+    tags: pickStringArray(record, ["tags", "serviceTags", "tagNames"], []),
+    supportInvoice: pickBoolean(record, ["supportInvoice", "invoiceSupported"], true),
+    isFavorite: favorites.has(id) || pickBoolean(record, ["isFavorite", "isFavorited"], false),
+    categoryId: pickString(record, ["categoryId", "categoryCode"], "all"),
+    categoryName: pickString(record, ["categoryName", "categoryLabel"], "建材分类"),
+    material: pickString(record, ["material", "materialCode"], "all"),
+    coverTone: pickString(record, ["coverTone"], "linear-gradient(135deg, #334155, #64748b)"),
   };
 }
 
 export function adaptBannerCards(input: unknown): BannerCard[] {
-  return extractArray(input).map((item, index) => ({
-    id: pickString(item, ["id", "bannerId"], `banner-${index + 1}`),
-    eyebrow: pickString(item, ["eyebrow", "tag", "label"], "精选推荐"),
-    title: pickString(item, ["title", "name"], "建材采购专题"),
-    subtitle: pickString(item, ["subtitle", "summary", "description"], "真实接口 Banner 数据"),
-    actionText: pickString(item, ["actionText", "buttonText"], "立即查看"),
-    accent: pickString(item, ["accent", "themeColor"], "linear-gradient(135deg, #f97316, #fb923c)"),
-    route: ROUTES.searchResult,
-    params: {
-      keyword: pickString(item, ["keyword", "title"], ""),
-    },
-  }));
+  return extractArray(input).map((item, index) => {
+    const routeConfig = getBannerRoute(item);
+
+    return {
+      id: pickString(item, ["id", "bannerId"], `banner-${index + 1}`),
+      eyebrow: pickString(item, ["eyebrow", "tag", "label", "linkTypeCode"], "精选推荐"),
+      title: pickString(item, ["title", "name", "bannerTitle"], "建材采购专题"),
+      subtitle: pickString(item, ["subtitle", "summary", "description", "bannerDesc"], "真实接口 Banner 数据"),
+      actionText: pickString(item, ["actionText", "buttonText"], "立即查看"),
+      accent: pickString(item, ["accent", "themeColor"], "linear-gradient(135deg, #f97316, #fb923c)"),
+      route: routeConfig.route,
+      params: routeConfig.params,
+    };
+  });
 }
 
 export function adaptCategoryShortcuts(input: unknown): CategoryShortcut[] {
   return extractArray(input).map((item, index) => {
     const id = pickString(item, ["id", "categoryId", "code"], `category-${index + 1}`);
+    const children = extractArray(item.children)
+      .map((child) => pickString(child, ["name", "categoryName", "label"], ""))
+      .filter(Boolean);
 
     return {
       id,
       name: pickString(item, ["name", "categoryName", "label"], `分类 ${index + 1}`),
-      tagline: pickString(item, ["tagline", "summary", "description"], "查看当前类目商品"),
+      tagline: pickString(item, ["tagline", "summary", "description"], children.slice(0, 2).join(" / ") || "查看当前类目商品"),
       route: ROUTES.category,
       params: {
         categoryId: id,
@@ -144,19 +206,35 @@ export function adaptSearchProducts(input: unknown, favoriteIds: string[] = []):
 }
 
 export function adaptArticleEntrances(input: unknown): ArticleEntrance[] {
-  return extractArray(input).map((item, index) => {
+  const items = Array.isArray(input)
+    ? input
+    : isRecord(input)
+      ? [
+          ...extractArray(input.industryNews),
+          ...extractArray(input.productKnowledge),
+          ...extractArray(input.decorationGuides),
+        ]
+      : [];
+
+  return items.map((item, index) => {
     const id = pickString(item, ["id", "articleId", "newsId"], `article-${index + 1}`);
-    const category = pickString(item, ["category", "categoryCode"], "industry_news");
+    const categoryCode = pickString(item, ["category", "categoryCode"], "industry_news");
+    const categoryLabel =
+      {
+        industry_news: "行业新闻",
+        product_knowledge: "产品知识",
+        renovation_guide: "装修指南",
+      }[categoryCode] ?? categoryCode;
 
     return {
       id,
-      category,
-      title: pickString(item, ["title", "name"], "建材资讯"),
-      summary: pickString(item, ["summary", "subtitle", "description"], "查看最新建材资讯"),
+      category: categoryLabel,
+      title: pickString(item, ["title", "name", "titleText"], "建材资讯"),
+      summary: pickString(item, ["summary", "subtitle", "description", "summaryText"], "查看最新建材资讯"),
       route: ROUTES.articleDetail,
       params: {
         id,
-        category,
+        category: categoryCode,
       },
     };
   });

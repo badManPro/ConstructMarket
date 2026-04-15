@@ -180,3 +180,11 @@
   - 新增 `miniprogram/app-runtime.ts`
   - `onLaunch` 和 `onShow` 都会刷新 runtime config
   - 可在控制台手动执行 `getApp().refreshRuntimeConfig()` 后立即查看最新 `globalData`
+
+## Follow-up Findings: A 批真实接口实现
+- 已用 live Swagger 与真实接口样本确认 A 批公共接口无需鉴权即可联调：`home/banners`、`home/categories`、`home/new-arrival-products`、`home/hot-recommend-products`、`home/news-articles`
+- `/v1/app/home/search-products` 的真实形态是 `POST` 请求，但筛选条件走 query 参数；直接用 `GET` 会返回 `Request method 'GET' is not supported`
+- `home/new-arrival-products`、`home/hot-recommend-products`、`home/search-products` 返回的是 `{ product, skuList }` 嵌套 DTO，而不是页面原先假设的扁平商品对象
+- `home/news-articles` 返回的是 `{ industryNews, productKnowledge, decorationGuides }` 分组对象，因此首页资讯入口需要先拍平后再转 ViewModel
+- 当前线上分类数据已不是建材场景种子，而是更泛的工业品分类（例如电动工具、劳保用品、手动工具）；分类页不能继续复用原来的建材 mock 文案，只能生成通用类目说明
+- 搜索接口当前没有 `material` / `minOrder` 的显式后端参数，因此本轮实现采用“价格区间走服务端、`material/minOrder` 先由前端在真实结果上兼容细筛”的折中方案

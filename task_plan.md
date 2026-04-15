@@ -219,4 +219,14 @@ Phase C
   - `README.md` 已补齐联调 token 与 `API_MODE` 配置说明
   - `package.json` 已新增 `npm run test:node`
   - 已通过 `npm run typecheck`、`npm run build:miniapp`、`npm run test:node`、`npm run verify:source-runtime`
-- 当前下一步：进入 `A. 首页 / 选型 / 搜索结果`
+- 当前已完成 `A. 首页 / 选型 / 搜索结果` 的代码接入与自动化验证：
+  - `home` / `category` / `search/result` 已切到 `services/browse`
+  - `search-products` 已按 Swagger 实际形态改为 `POST + query`
+  - Node 侧红测与 smoke tests 已覆盖首页聚合、分类树、热销搜索和筛选壳子
+- 当前阻断项：
+  - `A 批 DevTools Smoke Checklist` 仍未完成
+  - 下次开始任何新实现前，必须先提醒用户完成或明确跳过这轮走查，不能直接进入 `B. 商品详情 / 收藏加购 / 浏览记录`
+- 当前下一步：
+  1. 按 `docs/plans/2026-04-15-api-integration-batches.md` 中的 `A 批 DevTools Smoke Checklist（2026-04-16）` 完成人工走查
+  2. 将走查结果回写到 `progress.md`
+  3. 若走查通过，再把 A 批改成 `已完成`，并进入 `B. 商品详情 / 收藏加购 / 浏览记录`

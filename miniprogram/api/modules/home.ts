@@ -5,6 +5,30 @@ type HomeApiDependencies = {
   config?: Partial<ApiConfig>;
 };
 
+function buildQueryPath(path: string, params: Record<string, unknown>) {
+  const queryParts: string[] = [];
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item !== undefined && item !== null && item !== "") {
+          queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(item))}`);
+        }
+      });
+      return;
+    }
+
+    queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+  });
+
+  const query = queryParts.join("&");
+  return query ? `${path}?${query}` : path;
+}
+
 export function createHomeApi(dependencies: HomeApiDependencies = {}) {
   const config = dependencies.config;
 
@@ -51,9 +75,8 @@ export function createHomeApi(dependencies: HomeApiDependencies = {}) {
     },
     searchProducts(data: Record<string, unknown>) {
       return apiRequest<unknown>({
-        path: "/v1/app/home/search-products",
+        path: buildQueryPath("/v1/app/home/search-products", data),
         method: "POST",
-        data,
         config,
         requireAuth: false,
       });

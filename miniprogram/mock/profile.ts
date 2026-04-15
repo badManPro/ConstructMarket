@@ -14,6 +14,7 @@ export type ProfileOrderShortcut = {
 export type ProfileServiceItem = RouteLink & {
   badge: string;
   emphasis?: boolean;
+  developing?: boolean;
 };
 
 export type ProfileServiceSection = {
@@ -153,6 +154,7 @@ function buildServiceSections(params: {
           route: ROUTES.coupon,
           badge: couponCount ? `${couponCount} 张可用` : "暂无可用券",
           emphasis: couponCount > 0,
+          developing: true,
         },
       ],
     },

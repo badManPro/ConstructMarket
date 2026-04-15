@@ -21,6 +21,7 @@ export const supportCards: SupportCard[] = [
     badge: "平均 2 分钟内响应",
     route: ROUTES.supportChat,
     availability: "available",
+    developing: true,
   },
   {
     id: "support-faq",
@@ -30,6 +31,7 @@ export const supportCards: SupportCard[] = [
     badge: "自助排查更快",
     route: ROUTES.supportFaq,
     availability: "available",
+    developing: true,
   },
   {
     id: "support-complaint",

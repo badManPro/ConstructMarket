@@ -92,7 +92,10 @@
           bindtap="handleRouteTap"
         >
           <view class="service-item__body">
-            <view class="service-item__title">{{service.label}}</view>
+            <view class="service-item__title title-with-badge">
+              <text>{{service.label}}</text>
+              <text wx:if="{{service.developing}}" class="developing-badge">开发中</text>
+            </view>
             <view class="service-item__desc">{{service.description}}</view>
           </view>
           <view class="service-item__meta">

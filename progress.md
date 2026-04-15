@@ -197,3 +197,20 @@
 - 更新订单详情页支付信息展示：由二态文案改为 `待支付 / 支付处理中 / 已支付 / 支付失败`
 - `npm run typecheck` 通过
 - `npm run build:miniapp` 通过
+
+### Follow-up Session: Swagger 接口对齐
+- 读取 Swagger UI 页面、初始化脚本和 `swagger-config`，确认用户端文档地址为 `http://106.15.108.65:8085/api/v3/api-docs/app`
+- 结构化提取 `app` 分组全部 `63` 个接口，并确认 `plat` 分组有 `164` 个后台接口
+- 对照 `miniprogram/app.json` 的 `22` 个页面路由，完成“页面/模块 -> 接口 -> 缺口”逐项映射
+- 新增 `docs/swagger-app-接口映射.md`，整理页面接入总表、接口缺口表、暂无页面承接接口表，以及用户端全量接口清单
+- 在以下页面/模块补充 `开发中` 标记：
+  - 我的页的“优惠券”入口
+  - 优惠券页标题
+  - 客服系统页中的“在线咨询 / 常见问题”卡片
+  - 在线咨询页标题
+  - FAQ 页标题
+  - 资讯详情页“正文内容”标题
+  - 结算页“优惠券 / 提交订单”标题
+- 新增全局样式工具：`title-with-badge`、`developing-badge`
+- `npm run typecheck` 通过
+- `npm run build:miniapp` 通过

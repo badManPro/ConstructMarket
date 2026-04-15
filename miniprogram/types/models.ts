@@ -281,6 +281,7 @@ export type SupportCard = {
   badge: string;
   route: string;
   availability: "available" | "limited" | "closed";
+  developing?: boolean;
 };
 
 export type ChatMessage = {

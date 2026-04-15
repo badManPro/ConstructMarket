@@ -2,7 +2,10 @@
   <view class="page-head">
     <view class="page-head__bar">
       <view class="page-head__icon" bindtap="handleGoBack">←</view>
-      <view class="page-head__title">在线咨询</view>
+      <view class="page-head__title title-with-badge">
+        <text>在线咨询</text>
+        <text class="developing-badge">开发中</text>
+      </view>
       <view class="page-head__icon"></view>
     </view>
     <view class="page-head__sub">{{sessionMeta.subtitle}}</view>

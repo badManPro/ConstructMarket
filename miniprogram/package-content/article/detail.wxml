@@ -52,7 +52,10 @@
     </view>
 
     <view class="section-card">
-      <view class="section-card__title">正文内容</view>
+      <view class="section-card__title title-with-badge">
+        <text>正文内容</text>
+        <text class="developing-badge">开发中</text>
+      </view>
       <view wx:for="{{paragraphs}}" wx:key="index" class="article-paragraph">{{item}}</view>
     </view>
 

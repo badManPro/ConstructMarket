@@ -57,7 +57,10 @@
       <view class="support-card__icon">{{item.icon}}</view>
       <view class="support-card__content">
         <view class="support-card__head">
-          <view class="support-card__title">{{item.title}}</view>
+          <view class="support-card__title title-with-badge">
+            <text>{{item.title}}</text>
+            <text wx:if="{{item.developing}}" class="developing-badge">开发中</text>
+          </view>
           <view class="support-card__badge">{{item.badge}}</view>
         </view>
         <view class="support-card__desc">{{item.description}}</view>

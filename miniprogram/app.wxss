@@ -29,6 +29,25 @@ page {
   color: #1f1f1f;
 }
 
+.title-with-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.developing-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: #fff7e8;
+  color: #d97706;
+  font-size: 20rpx;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
 .page-head__icon {
   min-width: 40rpx;
   font-size: 26rpx;

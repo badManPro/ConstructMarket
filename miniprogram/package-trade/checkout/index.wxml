@@ -72,7 +72,10 @@
     <view class="section-card" data-route="/package-profile/profile/coupon" bindtap="handleRouteTap">
       <view class="trade-row">
         <view class="trade-row__main">
-          <view class="trade-row__label">优惠券</view>
+          <view class="trade-row__label title-with-badge">
+            <text>优惠券</text>
+            <text class="developing-badge">开发中</text>
+          </view>
           <view wx:if="{{selectedCoupon}}" class="trade-row__value">{{selectedCoupon.name}}</view>
           <view wx:if="{{selectedCoupon}}" class="trade-row__desc">已抵扣 ¥{{selectedCoupon.amount}}，门槛 ¥{{selectedCoupon.threshold}}</view>
           <view wx:elif="{{recommendedCoupon}}" class="trade-row__desc">推荐 {{recommendedCoupon.name}}，当前可抵扣 ¥{{recommendedCoupon.amount}}</view>
@@ -133,7 +136,10 @@
       <view class="section-card__title">联调模拟</view>
 
       <view class="debug-row">
-        <view class="trade-row__label">提交订单</view>
+        <view class="trade-row__label title-with-badge">
+          <text>提交订单</text>
+          <text class="developing-badge">开发中</text>
+        </view>
         <view class="chip-row">
           <view
             class="debug-chip {{submitMode === 'normal' ? 'debug-chip--active' : ''}}"

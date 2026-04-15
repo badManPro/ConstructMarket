@@ -54,6 +54,11 @@
   - 支付结果页补齐 `success / processing / failed` 三态与本地强制切换
   - 订单列表页与订单详情页的“继续支付”统一进入支付结果页
   - 购物车、结算、订单列表、订单详情补齐 `loading / error / offline` 演示态
+- 已将 Swagger 文档改造成进度看板：
+  - 文档位置：[`docs/swagger-app-接口映射.md`](./swagger-app-接口映射.md)
+  - 当前真实接口基线：`0 / 58` 个页面模块已完成
+  - 当前状态拆分：`48` 待接入、`1` 前端待补、`9` 后端阻塞
+  - 已内置分批推进顺序：A 首页 / 选型 / 搜索结果，B 商品详情 / 收藏加购，C 购物车 / 地址 / 发票基础能力
 - 已再次通过本地校验：
   - `npm run typecheck`
   - `npm run build:miniapp`
@@ -101,6 +106,7 @@
 
 未完成：
 - 微信开发者工具实际联调和视觉验收
+- 真实接口按批次接入
 
 ## 下一步建议
 
@@ -112,6 +118,7 @@
 
 1. 继续保证后续改动遵循 `docs/ui-reference-guideline.md`
 2. 做微信开发者工具联调和视觉验收
+3. 若开始真实接口对接，按 [`docs/swagger-app-接口映射.md`](./swagger-app-接口映射.md) 的批次 A -> B -> C 顺序推进，并在每次完成后更新第 1、3、4 节
 
 ## 新设备启动步骤
 
@@ -142,3 +149,4 @@ npm run typecheck
 - [`docs/handoff-status.md`](./handoff-status.md)
 - [`docs/ui-reference-guideline.md`](./ui-reference-guideline.md)
 - [`docs/PRD-建材市场小程序前端.md`](./PRD-建材市场小程序前端.md)
+- [`docs/swagger-app-接口映射.md`](./swagger-app-接口映射.md)

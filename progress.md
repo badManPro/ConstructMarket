@@ -214,3 +214,14 @@
 - 新增全局样式工具：`title-with-badge`、`developing-badge`
 - `npm run typecheck` 通过
 - `npm run build:miniapp` 通过
+
+### Follow-up Session: 接口对接文档进度化
+- 重新读取 `docs/swagger-app-接口映射.md`、`task_plan.md`、`findings.md`、`progress.md`，确认需要把接口文档改造成可持续更新的进度看板
+- 复核 `miniprogram/` 当前还没有真实 API 层或 `wx.request` 调用，确认真实接口接入基线应为 `0 / 58`
+- 重构 `docs/swagger-app-接口映射.md`：
+  - 新增文档概览和真实对接进度总览
+  - 新增状态定义和维护规则
+  - 新增 6 个批次的分批推进看板
+  - 为 58 个页面模块补齐行级 `对接进度`
+  - 为“Swagger 有接口但暂无承接”的接口补齐 `当前进度`
+- 本轮未运行 `npm run typecheck` / `npm run build:miniapp`，因为只涉及文档改造，没有代码变更

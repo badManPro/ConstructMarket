@@ -2,24 +2,11 @@
   <view class="home-header">
     <view class="home-header__row">
       <view class="home-header__city">{{cityLabel}} ▾</view>
-      <view class="home-header__badge">{{messageBadge}}</view>
     </view>
 
     <view class="home-search" bindtap="handleSearchTap">
       <view class="home-search__icon">搜索</view>
       <view class="home-search__text">搜索建材 / 品牌 / 型号</view>
-    </view>
-
-    <view class="chip-row home-chip-row">
-      <view
-        wx:for="{{keywordSuggestions}}"
-        wx:key="*this"
-        class="route-chip"
-        data-keyword="{{item}}"
-        bindtap="handleKeywordTap"
-      >
-        {{item}}
-      </view>
     </view>
   </view>
 
@@ -67,12 +54,13 @@
             bindtap="handleBannerTap"
           >
             <image wx:if="{{banner.imageUrl}}" class="banner-card__image" src="{{banner.imageUrl}}" mode="aspectFill" />
-            <view wx:if="{{banner.imageUrl}}" class="banner-card__scrim"></view>
+            <view class="banner-card__scrim"></view>
+            <view wx:if="{{!banner.imageUrl}}" class="banner-card__glow"></view>
             <view class="banner-card__content">
               <view class="banner-card__eyebrow">{{banner.eyebrow}}</view>
               <view class="banner-card__title">{{banner.title}}</view>
               <view wx:if="{{banner.subtitle}}" class="banner-card__subtitle">{{banner.subtitle}}</view>
-              <view class="banner-card__action">{{banner.actionText}}</view>
+              <view class="banner-card__action banner-card__action--solid">{{banner.actionText}}</view>
             </view>
           </view>
         </swiper-item>

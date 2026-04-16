@@ -193,7 +193,7 @@ function getBannerActionText(link, item) {
         return explicit;
     }
     if (link.linkType === "external") {
-        return "打开活动";
+        return "立即前往";
     }
     if (link.route === routes_1.ROUTES.category) {
         return "查看分类";

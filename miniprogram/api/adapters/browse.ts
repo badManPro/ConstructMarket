@@ -236,7 +236,7 @@ function getBannerActionText(
   }
 
   if (link.linkType === "external") {
-    return "打开活动";
+    return "立即前往";
   }
 
   if (link.route === ROUTES.category) {

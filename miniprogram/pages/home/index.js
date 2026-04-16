@@ -18,9 +18,7 @@ Page({
         title: "建材采购首页",
         summary: "围绕工程采购场景组织主材、辅材和资讯导流，优先打通浏览到商品详情的前半链路。",
         cityLabel: "杭州",
-        messageBadge: "消息 99+",
         searchKeyword: "42.5R 水泥",
-        keywordSuggestions: [],
         banners: [],
         categoryNav: [],
         campaignProducts: [],
@@ -49,7 +47,6 @@ Page({
         if (override && override !== "ready") {
             this.setData({
                 status: override,
-                keywordSuggestions: [],
                 banners: [],
                 categoryNav: [],
                 campaignProducts: [],
@@ -67,7 +64,6 @@ Page({
                 homeData.articleEntrances.length;
             this.setData({
                 status: hasContent ? "ready" : "empty",
-                keywordSuggestions: homeData.keywordSuggestions,
                 banners: homeData.banners,
                 categoryNav: withShortName(homeData.categoryNav),
                 campaignProducts: homeData.campaignProducts,
@@ -78,7 +74,6 @@ Page({
         catch {
             this.setData({
                 status: "error",
-                keywordSuggestions: [],
                 banners: [],
                 categoryNav: [],
                 campaignProducts: [],
@@ -89,13 +84,6 @@ Page({
     },
     handleSearchTap() {
         (0, navigate_1.navigateWithParams)(routes_1.ROUTES.searchResult, { keyword: this.data.searchKeyword });
-    },
-    handleKeywordTap(event) {
-        const { keyword } = event.currentTarget.dataset;
-        if (!keyword)
-            return;
-        this.setData({ searchKeyword: keyword });
-        (0, navigate_1.navigateWithParams)(routes_1.ROUTES.searchResult, { keyword });
     },
     handleBannerTap(event) {
         const { route, params } = event.currentTarget.dataset;

@@ -208,3 +208,129 @@
   - 收藏域口径不同（商品收藏 vs 商品+店铺收藏）
   - 客服域产品形态不同（帮助说明/官网咨询 vs 客服中心/FAQ/聊天/投诉）
 - 官网内容、协议和隐私页不适合优先原生重写；更稳妥的对齐方式是让 web 继续作为内容载体，由小程序 `webview` 承接
+
+## Follow-up Findings: 选型 Tab 对齐 mall-web Products（进行中）
+- 小程序 `选型` tab 的真实入口是 `miniprogram/pages/category/index`，当前它在导航层被定义为 TabBar 页面，而不是搜索结果子页
+- `mall-web` 中与其最接近的 web 基线页是 `src/views/Products.vue`，其路由入口为 `/products`
+- 当前小程序 `选型` tab 与 web `Products` 的角色并不完全一致：
+  - 小程序更偏“分类导航 + 当前分类热销”
+  - web 更偏“商品列表 + 左侧分类树 + 顶部筛选摘要”
+- 这意味着本轮改造重点不应是强行复制 web 布局，而是把接口来源、商品信息口径和分类字段对齐到 web，再在小程序 tab 场景下做信息重组
+- 下一步调研必须覆盖 3 层：
+  - web 页面层：`Products.vue` 实际展示哪些字段
+  - web 数据层：`api/index.ts`、`stores/products.ts`、类型定义怎样组织请求和返回
+  - 小程序数据层：`pages/category/index.ts`、`services/browse.ts`、`api/adapters/browse.ts` 当前怎么组装分类页数据
+
+## Follow-up Findings: 选型 Tab 对齐 mall-web Products（第一轮代码读取）
+- web `Products.vue` 当前直接请求 3 类数据：
+  - `getCategories()`：左侧分类树
+  - `listHomeBrands()`：品牌筛选项
+  - `searchProducts(params)`：商品分页列表
+- web 商品列表请求参数由页面直接组装，关键参数为：
+  - `page` / `pageSize`
+  - `keyword`
+  - `categoryId`
+  - `brandId`（字符串数组）
+  - `minPrice` / `maxPrice`
+  - `sortType`
+- web 页面通过路由 query 持久化筛选条件，当前 URL 参数包括：
+  - `keyword`
+  - `category`
+  - `brand`
+  - `minPrice`
+  - `maxPrice`
+  - `sort`
+  - `page`
+- web `searchProducts()` 的接口地址是 `/v1/app/home/search-products`，调用方式是 `POST form`，说明 `Products.vue` 实际也在复用首页搜索接口，而不是单独的商品列表接口
+- web `SearchParams` 类型里声明了 `brand` 和 `brandId` 两套品牌字段，但 `Products.vue` 实际传的是 `brandId`; 这说明品牌筛选已经按接口口径对齐到 ID，而不是品牌名
+- web 当前消费的商品列表结果是标准分页结构：`list / total / page / pageSize / totalPages`
+- 小程序 `pages/category/index.ts` 当前只调用一个聚合入口：`browseService.getCategoryShellData(selectedCategoryId, favoriteIds)`
+- 小程序 `getCategoryShellData()` 在 remote 模式下当前只做两件事：
+  - 调 `homeApi.getCategories()` 生成一级/二级分类树
+  - 再用当前一级类目调一次 `homeApi.searchProducts({ categoryId, sortType: "sales_desc", pageSize: 6 })`，取前 `3` 条做“当前热销”
+- 小程序当前选型页没有承接 web `Products` 的以下能力：
+  - 品牌筛选
+  - 价格筛选
+  - 排序切换
+  - 分页
+  - 当前筛选项摘要
+  - 商品列表主视图
+- 小程序选型页当前展示字段集中在 3 组：
+  - 分类树：`rootCategories / subCategories`
+  - 当前类目引导信息：`summary / sceneTags / guideTitle / guideSummary / articleTitle`
+  - 热销商品：`categoryProducts`
+- 小程序 remote 分类树和商品列表已经部分复用与 web 相同的后端接口，但页面信息组织仍然沿用 tab 导航页思路，因此本轮更像“从分类导航页向商品列表入口页靠拢”的改造，而不是简单字段补齐
+
+## Follow-up Findings: 选型 Tab 对齐 mall-web Products（第二轮代码读取）
+- web `Products` 页最终展示字段并不只来自 `Products.vue` 自身模板，真正落到商品卡上的字段来自 `src/components/ProductCard.vue`：
+  - 图片：`product.image`
+  - 标签：`product.tags`
+  - 低库存提示：`product.stock` + `product.unit`
+  - 品牌：`product.brand`
+  - 商品名：`product.name`
+  - 规格摘要：`product.specifications[].value`
+  - 价格：`product.price` / `product.originalPrice`
+  - 销量：`product.salesCount`
+  - 评分：`product.rating`
+- web 分类侧栏 `Sidebar.vue` 实际只消费分类树的 `id / name / children` 和品牌列表的 `id / name`，没有依赖分类说明、采购建议这类扩展字段
+- web `mapHomeCategory()` 直接把 `/v1/app/home/categories` 返回映射为 `Category`，核心字段是：
+  - `id`
+  - `parentId`
+  - `categoryCode`
+  - `categoryName -> name`
+  - `categoryLevel`
+  - `imageUrl`
+  - `sortNo`
+  - `children`
+- web `mapHomeHotRecommendProduct()` 最终仍走 `mapProductDetailToProduct()`，说明 `/v1/app/home/search-products`、`/hot-recommend-products`、`/new-arrival-products` 在 web 端都被收敛成同一个 `Product` 结构
+- 小程序 `SearchProduct` 当前字段是：
+  - `id / spuId / skuId`
+  - `name / cover / brand / model`
+  - `price / unit / minOrderQty / salesVolume`
+  - `stockStatus / tags / supportInvoice / isFavorite`
+  - `categoryId / categoryName / material / coverTone`
+- 小程序 `components/business/product-card` 当前实际展示字段是：
+  - 顶部封面区只显示 `cover` 文本、`brand`、`model`
+  - 正文区显示 `name`
+  - 副信息显示 `categoryName + brand/model`
+  - 底部显示 `price / unit / minOrderQty / salesVolume`
+  - 不显示 web 卡片里的真实图片、原价、评分、库存提醒、规格值列表
+- 小程序现有 `package-catalog/search/result` 页面已经具备 web `Products` 的大部分能力：
+  - 关键词搜索
+  - 分类切换
+  - 排序切换
+  - 筛选抽屉
+  - 商品列表
+- 小程序 `search/result` 当前仍与 web `Products` 有两个关键缺口：
+  - 缺少品牌筛选及 `listHomeBrands()` 请求链
+  - 商品卡展示信息仍沿用小程序 `SearchProduct` 口径，没有体现 web 商品卡的图片/原价/评分/库存信息
+- 小程序 `createHomeApi()` 当前没有 `getBrands()` 能力，`createBrowseService()` 也没有品牌过滤参数透传，这会是本轮对齐的核心改造点
+- 因此本轮最稳妥的实现方向应为：
+  - `选型` tab 页面改为复用 `search/result` 的查询与列表能力
+  - 在 browse service / home api 层补品牌筛选数据和请求参数
+  - 在小程序商品卡或选型页列表中补齐更接近 web `Products` 的展示字段
+
+## Follow-up Findings: 选型 Tab 对齐 mall-web Products（已落地）
+- `选型` tab 最终没有继续沿用旧的 `getCategoryShellData()` 页面模型，而是改为复用 `search/result` 的商品列表能力
+- 小程序现在已经具备 web `Products` 页缺失的品牌筛选基础能力：
+  - `createHomeApi()` 新增 `getBrands()`
+  - `getSearchFilterShell()` 新增 `brandOptions`
+  - `searchProductsPage()` 新增 `selectedBrandIds -> brandId` 请求透传
+- `SearchProduct` / 商品卡字段已向 web 收敛，新增或补齐：
+  - `brandId`
+  - `specText`
+  - `originalPrice`
+  - `rating`
+  - `stock`
+- `pages/category/index` 当前主视图已变为：
+  - 搜索框
+  - 分类 chips / 全部分类抽屉
+  - 品牌 chips
+  - 排序行
+  - 当前筛选项摘要
+  - 商品列表
+- 当前仍保留的小程序差异是有意为之：
+  - 不做桌面左侧固定侧栏
+  - 不做桌面分页按钮
+  - 价格/材质/起订量继续放在小程序筛选抽屉里
+- 共享 `product-card` 已补齐 web 商品卡关键展示信息，因此 `search/result` 与新的 `选型` tab 会同时获得更高信息密度

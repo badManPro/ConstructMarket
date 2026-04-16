@@ -40,6 +40,14 @@ function createHomeApi(dependencies = {}) {
                 requireAuth: false,
             });
         },
+        getBrands() {
+            return (0, request_1.apiRequest)({
+                path: "/v1/app/home/brands",
+                method: "GET",
+                config,
+                requireAuth: false,
+            });
+        },
         getNewArrivalProducts() {
             return (0, request_1.apiRequest)({
                 path: "/v1/app/home/new-arrival-products",

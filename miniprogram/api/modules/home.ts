@@ -49,6 +49,14 @@ export function createHomeApi(dependencies: HomeApiDependencies = {}) {
         requireAuth: false,
       });
     },
+    getBrands() {
+      return apiRequest<unknown[]>({
+        path: "/v1/app/home/brands",
+        method: "GET",
+        config,
+        requireAuth: false,
+      });
+    },
     getNewArrivalProducts() {
       return apiRequest<unknown[]>({
         path: "/v1/app/home/new-arrival-products",

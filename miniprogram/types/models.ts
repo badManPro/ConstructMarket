@@ -12,15 +12,20 @@ export type ProductCard = {
   id: string;
   spuId: string;
   skuId: string;
+  brandId?: string;
   name: string;
   cover: string;
   brand: string;
   model: string;
+  specText?: string;
   price: number;
+  originalPrice?: number;
   unit: string;
   minOrderQty: number;
   salesVolume: number;
   stockStatus: string;
+  stock?: number;
+  rating?: number;
   tags: string[];
   supportInvoice: boolean;
   isFavorite: boolean;
@@ -259,6 +264,11 @@ export type FilterOption = {
   value: string;
   label: string;
   desc?: string;
+};
+
+export type BrandFilterOption = {
+  id: string;
+  name: string;
 };
 
 export type SearchProduct = ProductCard & {

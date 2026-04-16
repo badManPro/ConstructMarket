@@ -273,6 +273,18 @@ test("createBrowseService returns remote search shell and keeps search filters u
           children: [],
         },
       ],
+      getBrands: async () => [
+        {
+          id: "11",
+          brandCode: "MT",
+          brandName: "牧田",
+        },
+        {
+          id: "22",
+          brandCode: "DC",
+          brandName: "东成",
+        },
+      ],
       getDictSimpleList: async () => [
         {
           dictTypeCode: "product_material",
@@ -302,12 +314,16 @@ test("createBrowseService returns remote search shell and keeps search filters u
               coverImageUrl: "cutter.png",
               unitName: "台",
               salePrice: 268,
+              marketPrice: 329,
+              ratingScore: 4.8,
+              stockQty: 8,
               salesQty: 91,
               tagNames: "热销",
               categoryInfo: {
                 categoryName: "电动工具",
               },
               brandInfo: {
+                id: "11",
                 brandName: "牧田",
               },
             },
@@ -328,12 +344,16 @@ test("createBrowseService returns remote search shell and keeps search filters u
               coverImageUrl: "grind.png",
               unitName: "台",
               salePrice: 89,
+              marketPrice: 109,
+              ratingScore: 4.2,
+              stockQty: 18,
               salesQty: 20,
               tagNames: "入门",
               categoryInfo: {
                 categoryName: "电动工具",
               },
               brandInfo: {
+                id: "22",
                 brandName: "东成",
               },
             },
@@ -356,6 +376,7 @@ test("createBrowseService returns remote search shell and keeps search filters u
     keyword: "切割",
     categoryId: "1",
     sortOption: "price_desc",
+    selectedBrandIds: ["11"],
     filterState: {
       priceRange: "premium",
       minOrder: "all",
@@ -367,12 +388,27 @@ test("createBrowseService returns remote search shell and keeps search filters u
   assert.equal(filterShell.source, "remote");
   assert.equal(filterShell.relatedCategories[1].id, "1");
   assert.equal(filterShell.materialOptions[1].value, "metal");
+  assert.deepEqual(filterShell.brandOptions, [
+    {
+      id: "11",
+      name: "牧田",
+    },
+    {
+      id: "22",
+      name: "东成",
+    },
+  ]);
   assert.equal(result.source, "remote");
   assert.equal(result.productList.length, 1);
   assert.equal(result.productList[0].id, "901");
+  assert.equal(result.productList[0].originalPrice, 329);
+  assert.equal(result.productList[0].rating, 4.8);
+  assert.equal(result.productList[0].stock, 8);
+  assert.equal(result.productList[0].specText, "标准款");
   assert.deepEqual(captured[0], {
     keyword: "切割",
     categoryId: 1,
+    brandId: [11],
     sortType: "price_desc",
     minPrice: 200,
     pageIndex: 1,

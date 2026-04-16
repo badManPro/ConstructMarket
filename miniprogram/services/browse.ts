@@ -1,5 +1,6 @@
 import {
   articleEntrances,
+  brandFilterOptions,
   defaultSearchFilterState,
   getFavoriteProducts,
   getHomeSections,
@@ -16,12 +17,13 @@ import {
   sortOptions,
 } from "../mock/browse";
 import { getCategoryPageData, type CatalogRootCategory, type CatalogSubCategory } from "../mock/category";
-import type { FilterOption, SearchFilterState, SearchProduct } from "../types/models";
+import type { BrandFilterOption, FilterOption, SearchFilterState, SearchProduct } from "../types/models";
 import { getFavoriteIds } from "../utils/storage";
 import { getApiConfig, shouldAllowMockFallback, shouldUseRemote, type ApiConfig } from "../api/config";
 import {
   adaptArticleEntrances,
   adaptBannerCards,
+  adaptBrandOptions,
   adaptCategoryShortcuts,
   adaptProductDetail,
   adaptSearchProducts,
@@ -127,12 +129,21 @@ function buildMockSearchFilterShell() {
   return {
     source: "mock" as const,
     relatedCategories,
+    brandOptions: brandFilterOptions,
     sortOptions,
     priceOptions: priceFilterOptions,
     quantityOptions: minOrderFilterOptions,
     materialOptions: materialFilterOptions,
     filterState: { ...defaultSearchFilterState },
   };
+}
+
+function ensureBrandOptions(options: BrandFilterOption[], fallback: BrandFilterOption[]) {
+  if (options.length) {
+    return options;
+  }
+
+  return fallback;
 }
 
 function buildGenericSubCategory(
@@ -217,6 +228,7 @@ function buildRemoteSearchParams(params: {
   keyword: string;
   categoryId: string;
   sortOption: string;
+  selectedBrandIds?: string[];
   filterState: SearchFilterState;
 }) {
   const requestParams: Record<string, unknown> = {
@@ -234,6 +246,9 @@ function buildRemoteSearchParams(params: {
   }
   if (remoteCategoryId !== undefined && params.categoryId !== "all") {
     requestParams.categoryId = remoteCategoryId;
+  }
+  if (params.selectedBrandIds?.length) {
+    requestParams.brandId = params.selectedBrandIds.map((item) => toRemoteId(item) ?? item);
   }
   if (params.filterState.priceRange === "budget") {
     requestParams.maxPrice = 100;
@@ -255,10 +270,12 @@ function refineSearchProducts(
     keyword: string;
     categoryId: string;
     sortOption: string;
+    selectedBrandIds?: string[];
     filterState: SearchFilterState;
   },
 ) {
   const keyword = params.keyword.trim().toLowerCase();
+  const selectedBrandIds = params.selectedBrandIds ?? [];
 
   let next = products.filter((item) => {
     const matchesKeyword =
@@ -268,6 +285,9 @@ function refineSearchProducts(
         .toLowerCase()
         .includes(keyword);
     const matchesCategory = params.categoryId === "all" || item.categoryId === params.categoryId;
+    const matchesBrand =
+      !selectedBrandIds.length ||
+      selectedBrandIds.includes(item.brandId ?? item.brand);
     const matchesPrice =
       params.filterState.priceRange === "all" ||
       (params.filterState.priceRange === "budget" && item.price < 100) ||
@@ -280,7 +300,7 @@ function refineSearchProducts(
       (params.filterState.minOrder === "qty50" && item.minOrderQty <= 50);
     const matchesMaterial = params.filterState.material === "all" || item.material === params.filterState.material;
 
-    return matchesKeyword && matchesCategory && matchesPrice && matchesOrder && matchesMaterial;
+    return matchesKeyword && matchesCategory && matchesBrand && matchesPrice && matchesOrder && matchesMaterial;
   });
 
   if (params.sortOption === "sales_desc") {
@@ -418,6 +438,7 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
       keyword: string;
       categoryId: string;
       sortOption: string;
+      selectedBrandIds?: string[];
       filterState: SearchFilterState;
       favoriteIds?: string[];
     }) {
@@ -573,8 +594,9 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
       }
 
       try {
-        const [categories, simpleItems, treeItems] = await Promise.all([
+        const [categories, brands, simpleItems, treeItems] = await Promise.all([
           homeApi.getCategories(),
+          homeApi.getBrands(),
           homeApi.getDictSimpleList(),
           homeApi.getDictTreeList(),
         ]);
@@ -588,6 +610,7 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
         return {
           source: "remote" as const,
           relatedCategories: buildRelatedCategories(rootCategories),
+          brandOptions: ensureBrandOptions(adaptBrandOptions(brands), brandFilterOptions),
           sortOptions,
           priceOptions: remoteFilterOptions.priceOptions,
           quantityOptions: remoteFilterOptions.quantityOptions,

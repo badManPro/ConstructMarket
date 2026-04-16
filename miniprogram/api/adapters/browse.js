@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.adaptBannerCards = adaptBannerCards;
 exports.adaptCategoryShortcuts = adaptCategoryShortcuts;
 exports.adaptSearchProducts = adaptSearchProducts;
+exports.adaptBrandOptions = adaptBrandOptions;
 exports.adaptArticleEntrances = adaptArticleEntrances;
 exports.adaptProductDetail = adaptProductDetail;
 const routes_1 = require("../../constants/routes");
@@ -221,22 +222,29 @@ function getBannerSubtitle(item, link) {
 }
 function mapSearchProduct(source, favoriteIds) {
     const record = flattenProductRecord(source);
-    const productSource = isRecord(source.product) ? source.product : record;
+    const productRecord = isRecord(source.product) ? source.product : null;
+    const productSource = productRecord ?? record;
+    const brandInfo = productRecord && isRecord(productRecord.brandInfo) ? productRecord.brandInfo : {};
     const id = pickString(productSource, ["id", "productId", "spuId"], `product-${Math.random().toString(36).slice(2, 8)}`);
     const favorites = new Set(favoriteIds);
     return {
         id,
         spuId: pickString(record, ["spuId", "productSpuId", "productSpuNo"], id),
         skuId: pickString(record, ["skuId", "defaultSkuId", "skuCode"], `${id}-sku`),
+        brandId: pickString(record, ["brandId"], pickString(brandInfo, ["id", "brandCode"], "")),
         name: pickString(record, ["name", "productName", "title"], "建材商品"),
         cover: pickString(record, ["cover", "coverUrl", "coverImageUrl", "imageUrl", "image"], "建材商品"),
         brand: pickString(record, ["brand", "brandName"], "ConstructMarket"),
         model: pickString(record, ["model", "skuName", "specName", "specText"], "默认规格"),
+        specText: pickString(record, ["specText", "skuName", "model"], ""),
         price: pickNumber(record, ["price", "salePrice", "minPrice", "marketPrice"], 0),
+        originalPrice: pickNumber(record, ["originalPrice", "marketPrice"], 0) || undefined,
         unit: pickString(record, ["unit", "unitName"], "件"),
         minOrderQty: pickNumber(record, ["minOrderQty", "minQuantity"], 1),
         salesVolume: pickNumber(record, ["salesVolume", "salesCount", "salesQty"], 0),
         stockStatus: pickString(record, ["stockStatus", "stockDesc"], "") || (pickNumber(record, ["stockQty"], 0) > 0 ? "现货" : "待补货"),
+        stock: pickNumber(record, ["stock", "stockQty"], 0),
+        rating: pickNumber(record, ["rating", "ratingScore"], 0) || undefined,
         tags: pickStringArray(record, ["tags", "serviceTags", "tagNames"], []),
         supportInvoice: pickBoolean(record, ["supportInvoice", "invoiceSupported"], true),
         isFavorite: favorites.has(id) || pickBoolean(record, ["isFavorite", "isFavorited"], false),
@@ -287,6 +295,18 @@ function adaptCategoryShortcuts(input) {
 }
 function adaptSearchProducts(input, favoriteIds = []) {
     return extractArray(input).map((item) => mapSearchProduct(item, favoriteIds));
+}
+function adaptBrandOptions(input) {
+    return extractArray(input)
+        .map((item) => {
+        const id = pickString(item, ["id", "brandId", "brandCode"], "");
+        const name = pickString(item, ["brandName", "name"], "");
+        if (!id || !name) {
+            return null;
+        }
+        return { id, name };
+    })
+        .filter((item) => Boolean(item));
 }
 function adaptArticleEntrances(input) {
     const items = Array.isArray(input)

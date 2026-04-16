@@ -1,137 +1,159 @@
-<view class="screen category-screen">
-  <view class="page-head category-head">
+<view class="screen category-products-screen">
+  <view class="page-head category-products-head">
     <view class="page-head__bar">
-      <view class="page-head__title">选型</view>
-      <view class="page-head__icon"></view>
+      <view class="page-head__title">{{title}}</view>
+      <view class="page-head__icon" bindtap="openFilterDrawer">筛选</view>
     </view>
-
-    <view class="category-search" bindtap="handleSearchTap">
-      <view class="category-search__icon">搜索</view>
-      <view class="category-search__text">搜索 {{searchPlaceholder}}</view>
-      <view class="category-search__cta">去结果页</view>
-    </view>
-
-    <view class="page-head__sub">{{pageSubtitle}}</view>
+    <view class="page-head__sub">{{summary}}</view>
   </view>
 
-  <view class="category-layout">
-    <scroll-view class="category-sidebar" scroll-y show-scrollbar="{{false}}">
-      <view class="category-sidebar__inner">
+  <view class="section-card search-panel-card">
+    <view class="search-panel">
+      <input
+        class="search-panel__input"
+        placeholder="搜索型号、品牌或品类"
+        value="{{inputKeyword}}"
+        confirm-type="search"
+        bindinput="handleKeywordInput"
+        bindconfirm="handleSearchConfirm"
+      />
+      <view class="search-panel__button" bindtap="handleSearchConfirm">搜索</view>
+    </view>
+  </view>
+
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="section-card__title">选型结果加载中</view>
+    <view class="section-card__meta">分类、品牌、排序和筛选条件正在同步商品列表。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="section-card__title">选型内容读取失败</view>
+    <view class="section-card__meta">可先返回首页继续浏览，或重试当前筛选条件。</view>
+    <view class="empty-actions">
+      <view class="empty-actions__ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-actions__solid" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
+    <view class="section-card__title">当前处于离线演示态</view>
+    <view class="section-card__meta">恢复网络后即可继续加载品牌和商品列表。</view>
+    <view class="empty-actions">
+      <view class="empty-actions__ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-actions__solid" bindtap="handleRetry">恢复内容</view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view class="section-card category-shell-card">
+      <view class="search-summary">共 {{resultCount}} 个结果</view>
+
+      <view class="toolbar-row">
+        <view class="toolbar-row__action" bindtap="openCategoryDrawer">全部分类</view>
+        <view class="toolbar-row__action toolbar-row__action--reset" bindtap="handleResetAll">重置筛选</view>
+      </view>
+
+      <scroll-view class="category-scroll" scroll-x enable-flex>
+        <view class="category-scroll__inner">
+          <view
+            wx:for="{{relatedCategories}}"
+            wx:key="id"
+            class="category-pill {{selectedCategoryId === item.id ? 'category-pill--active' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="handleCategoryTap"
+          >
+            {{item.name}}
+          </view>
+        </view>
+      </scroll-view>
+
+      <view wx:if="{{brandOptions.length > 0}}" class="brand-row">
+        <view class="brand-row__label">品牌</view>
+        <scroll-view class="brand-scroll" scroll-x enable-flex>
+          <view class="brand-scroll__inner">
+            <view
+              wx:for="{{brandOptions}}"
+              wx:key="id"
+              class="brand-pill {{item.selected ? 'brand-pill--active' : ''}}"
+              data-id="{{item.id}}"
+              bindtap="handleBrandTap"
+            >
+              {{item.name}}
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="sort-row">
         <view
-          wx:for="{{rootCategories}}"
-          wx:key="id"
-          class="category-sidebar__item {{selectedCategoryId === item.id ? 'category-sidebar__item--active' : ''}}"
-          data-id="{{item.id}}"
-          bindtap="handleRootCategoryTap"
+          wx:for="{{sortOptions}}"
+          wx:key="value"
+          class="sort-pill {{selectedSort === item.value ? 'sort-pill--active' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="handleSortTap"
         >
-          <view class="category-sidebar__name">{{item.name}}</view>
-          <view class="category-sidebar__meta">{{item.summary}}</view>
+          {{item.label}}
+        </view>
+        <view class="sort-pill sort-pill--filter" bindtap="openFilterDrawer">筛选</view>
+      </view>
+
+      <view wx:if="{{activeFilterTags.length > 0}}" class="active-tags">
+        <view wx:for="{{activeFilterTags}}" wx:key="key" class="active-tag">
+          <text class="active-tag__label">{{item.label}}：</text>{{item.value}}
         </view>
       </view>
-    </scroll-view>
 
-    <scroll-view class="category-main" scroll-y show-scrollbar="{{false}}">
-      <view class="category-main__inner">
-        <view wx:if="{{status === 'loading'}}" class="section-card">
-          <view class="section-card__title">正在整理当前类目</view>
-          <view class="section-card__meta">左侧类目、右侧细分类目和热销商品正在同步加载。</view>
-          <view class="loading-grid">
-            <view wx:for="{{loadingSkeleton}}" wx:key="*this" class="loading-grid__item"></view>
-          </view>
-        </view>
+      <view class="results-meta">关键词：{{keyword || '全部商品'}} · 已按 web Products 页口径对齐核心信息</view>
+    </view>
 
-        <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
-          <view class="empty-card__title">分类内容读取失败</view>
-          <view class="empty-card__desc">可先返回首页继续浏览，或重试当前类目内容加载。</view>
-          <view class="empty-card__actions">
-            <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
-            <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
-          </view>
-        </view>
+    <view wx:if="{{productList.length > 0}}" class="product-list search-product-list">
+      <product-card
+        wx:for="{{productList}}"
+        wx:key="id"
+        item="{{item}}"
+        bindtapcard="handleProductTap"
+        bindfavorite="handleFavoriteTap"
+      />
+    </view>
 
-        <view wx:elif="{{status === 'offline'}}" class="section-card empty-card">
-          <view class="empty-card__title">当前处于离线演示态</view>
-          <view class="empty-card__desc">离线占位已保留，恢复后可继续查看当前类目的细分和热销商品。</view>
-          <view class="empty-card__actions">
-            <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
-            <view class="empty-card__action" bindtap="handleRetry">恢复内容</view>
-          </view>
-        </view>
-
-        <view wx:elif="{{status === 'empty'}}" class="section-card empty-card">
-          <view class="empty-card__title">该分类暂无商品</view>
-          <view class="empty-card__desc">可以切换其他一级类目，或直接回到搜索结果页查看全部建材。</view>
-          <view class="empty-card__actions">
-            <view class="empty-card__action empty-card__action--ghost" bindtap="handleSearchTap">查看结果页</view>
-            <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
-          </view>
-        </view>
-
-        <block wx:else>
-          <view wx:if="{{currentCategory}}" class="section-card category-hero">
-            <view class="category-hero__eyebrow">当前类目</view>
-            <view class="category-hero__title">{{currentCategory.name}}</view>
-            <view class="category-hero__summary">{{currentCategory.summary}}</view>
-
-            <view class="chip-row">
-              <view wx:for="{{currentCategory.sceneTags}}" wx:key="*this" class="route-chip">{{item}}</view>
-            </view>
-
-            <view class="category-hero__actions">
-              <view class="category-hero__action category-hero__action--ghost" bindtap="handleOpenArticle">采购知识</view>
-              <view class="category-hero__action" bindtap="handleOpenAllResults">查看全部结果</view>
-            </view>
-          </view>
-
-          <view class="section-card">
-            <view class="section-head">
-              <view class="section-card__title">细分类目</view>
-              <view class="section-head__more">{{subCategories.length}} 个</view>
-            </view>
-
-            <view class="subcategory-grid">
-              <view
-                wx:for="{{subCategories}}"
-                wx:key="id"
-                class="subcategory-tile"
-                data-category-id="{{item.routeCategoryId}}"
-                data-keyword="{{item.searchKeyword}}"
-                bindtap="handleSubCategoryTap"
-              >
-                <view class="subcategory-tile__icon" style="background: {{item.iconTone}};">{{item.icon}}</view>
-                <view class="subcategory-tile__name">{{item.name}}</view>
-                <view class="subcategory-tile__summary">{{item.summary}}</view>
-                <view class="subcategory-tile__badge">{{item.badge}}</view>
-              </view>
-            </view>
-          </view>
-
-          <view class="section-card">
-            <view class="section-head">
-              <view class="section-card__title">当前热销</view>
-              <view class="section-head__more" bindtap="handleOpenAllResults">查看全部 ></view>
-            </view>
-
-            <view wx:if="{{currentCategory}}" class="section-card__meta">{{currentCategory.guideTitle}}</view>
-            <view class="product-list">
-              <product-card
-                wx:for="{{categoryProducts}}"
-                wx:key="id"
-                item="{{item}}"
-                bindtapcard="handleProductTap"
-                bindfavorite="handleFavoriteTap"
-              />
-            </view>
-          </view>
-
-          <view wx:if="{{currentCategory}}" class="section-card guide-card" bindtap="handleOpenArticle">
-            <view class="guide-card__eyebrow">采购建议</view>
-            <view class="guide-card__title">{{currentCategory.guideTitle}}</view>
-            <view class="guide-card__summary">{{currentCategory.guideSummary}}</view>
-            <view class="guide-card__link">{{currentCategory.articleTitle}} ></view>
-          </view>
-        </block>
+    <view wx:else class="section-card empty-card">
+      <view class="section-card__title">暂无匹配商品</view>
+      <view class="section-card__meta">当前分类、品牌或筛选条件较严，可先重置后继续浏览。</view>
+      <view class="empty-actions">
+        <view class="empty-actions__ghost" bindtap="handleResetAll">重置筛选</view>
+        <view class="empty-actions__solid" bindtap="handleGoHome">返回首页</view>
       </view>
-    </scroll-view>
+    </view>
+  </block>
+
+  <view wx:if="{{showCategoryDrawer}}" class="category-drawer-mask" bindtap="closeCategoryDrawer">
+    <view class="category-drawer" catchtap="closeCategoryDrawer">
+      <view class="category-drawer__title">全部分类</view>
+      <view class="category-drawer__grid">
+        <view
+          wx:for="{{relatedCategories}}"
+          wx:key="id"
+          class="category-drawer__chip {{selectedCategoryId === item.id ? 'category-drawer__chip--active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="handleCategoryTap"
+        >
+          <view class="category-drawer__thumb"></view>
+          <view class="category-drawer__label">{{item.name}}</view>
+          <view class="category-drawer__count">{{item.count}} 件</view>
+        </view>
+      </view>
+      <view class="category-drawer__submit" bindtap="closeCategoryDrawer">继续浏览</view>
+    </view>
   </view>
+
+  <filter-drawer
+    visible="{{showFilterDrawer}}"
+    value="{{filterState}}"
+    priceOptions="{{priceOptions}}"
+    quantityOptions="{{quantityOptions}}"
+    materialOptions="{{materialOptions}}"
+    bindclose="closeFilterDrawer"
+    bindapply="handleFilterApply"
+    bindreset="handleFilterReset"
+  />
 </view>

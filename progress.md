@@ -359,3 +359,55 @@
   - `mall-web` 路由到小程序页面映射
   - 小程序独有页索引
   - 重点不一致项与后续检索锚点
+
+### Follow-up Session: 选型 Tab 对齐 mall-web Products 启动
+- 已确认本轮目标是“先调研、后文档、再改代码”，不直接跳进实现
+- 已读取 `miniprogram/app.json`，确认 `选型` tab 页面入口是 `miniprogram/pages/category/index`
+- 已读取 `../mall-web/src/router/index.ts`，确认 web 对齐基线页入口是 `/products`
+- 已用全局检索确认本轮重点文件范围：
+  - web：`../mall-web/src/views/Products.vue`、`../mall-web/src/api/index.ts`、`../mall-web/src/stores/products.ts`
+  - 小程序：`miniprogram/pages/category/index.ts`、`miniprogram/services/browse.ts`、`miniprogram/api/adapters/browse.ts`
+- 下一步将先梳理 web 的接口请求、返回结构和页面取值，再回看小程序当前选型页的接口链和展示字段
+
+### Follow-up Session: 选型 Tab 对齐 mall-web Products 第一轮读取
+- 已读取 web 页面主文件：`../mall-web/src/views/Products.vue`
+- 已读取 web 数据层文件：`../mall-web/src/api/index.ts`、`../mall-web/src/stores/products.ts`、`../mall-web/src/types/index.ts`
+- 已读取小程序分类页主文件：`miniprogram/pages/category/index.ts`、`miniprogram/pages/category/index.wxml`
+- 已读取小程序浏览服务与 adapter：`miniprogram/services/browse.ts`、`miniprogram/api/adapters/browse.ts`
+- 当前确认的核心差异：
+  - web `Products` 是完整商品列表页，带分类/品牌/价格/排序/分页
+  - 小程序 `选型` tab 是分类导航页，只带分类树、当前热销和采购建议
+  - 两端底层接口已经有部分重合，都是围绕 `/v1/app/home/categories` 和 `/v1/app/home/search-products`
+- 下一步需要补的读取项：
+  - web `Sidebar.vue` 和 `ProductCard.vue`，确认页面最终展示字段
+  - web 侧 `mapHomeCategory` / `mapHomeHotRecommendProduct` 映射函数，确认后端返回如何转成页面模型
+
+### Follow-up Session: 选型 Tab 对齐 mall-web Products 第二轮读取
+- 已读取 web 组件文件：`../mall-web/src/components/Sidebar.vue`、`../mall-web/src/components/ProductCard.vue`
+- 已读取 web 映射函数：`../mall-web/src/api/index.ts` 中的 `mapHomeCategory`、`mapHomeHotRecommendProduct`
+- 已读取小程序现有搜索结果页：`miniprogram/package-catalog/search/result.ts`、`result.wxml`
+- 已确认当前最重要的架构判断：
+  - 小程序已有的 `search/result` 页面，已经承担了“关键词 + 分类 + 排序 + 筛选 + 商品列表”能力
+  - `选型` tab 与 web `Products` 的差距，更多是“没复用这套能力 + 没接品牌筛选 + 商品卡字段展示偏简化”
+- 已确认小程序当前 `createHomeApi()` 还没有 `getBrands()`，browse service 也没有品牌过滤参数透传
+- 下一步将进入文档阶段：先把 web / 小程序的请求、返回、展示字段和改造方案写成正式文档，再按文档落代码
+
+### Follow-up Session: 选型 Tab 对齐 mall-web Products 文档与实现
+- 已新增正式对齐文档：`docs/plans/2026-04-17-category-tab-products-alignment.md`
+- 已按 TDD 先更新 `tests/api/browse-service.test.cjs`，新增品牌筛选与商品字段映射断言
+- 首次执行 `node --test tests/api/browse-service.test.cjs` 失败，命中预期缺口：
+  - `getSearchFilterShell()` 不返回 `brandOptions`
+  - `searchProductsPage()` 未透传 `brandId`
+  - `SearchProduct` 缺少 `originalPrice / rating / stock / specText`
+- 最终实现落库：
+  - `miniprogram/api/modules/home.ts` 新增 `getBrands()`
+  - `miniprogram/services/browse.ts` 新增品牌筛选壳子与品牌过滤透传
+  - `miniprogram/api/adapters/browse.ts` 补齐更接近 web 的商品字段映射
+  - `miniprogram/pages/category/index.*` 重写为 Products 风格列表页
+  - `miniprogram/components/business/product-card/*` 补齐商品图承载、规格摘要、原价、评分和低库存提示
+- 已顺序执行并通过：
+  - `node --test tests/api/browse-service.test.cjs`
+  - `npm run typecheck`
+  - `npm run build:miniapp`
+  - `npm run test:node`
+  - `npm run verify:source-runtime`

@@ -2,6 +2,7 @@ import { ROUTES } from "../constants/routes";
 import type {
   ArticleEntrance,
   BannerCard,
+  BrandFilterOption,
   BrowseProductDetail,
   CategoryShortcut,
   FilterOption,
@@ -459,6 +460,12 @@ export const materialFilterOptions: FilterOption[] = [
   { value: "light", label: "照明" },
 ];
 
+export const brandFilterOptions: BrandFilterOption[] = [...new Set(baseProducts.map((item) => item.brand))]
+  .map((brand) => ({
+    id: brand,
+    name: brand,
+  }));
+
 export const defaultSearchFilterState: SearchFilterState = {
   priceRange: "all",
   minOrder: "all",
@@ -495,10 +502,11 @@ export function searchProducts(params: {
   keyword: string;
   categoryId: string;
   sortOption: string;
+  selectedBrandIds?: string[];
   filterState: SearchFilterState;
   favoriteIds: string[];
 }) {
-  const { keyword, categoryId, sortOption, filterState, favoriteIds } = params;
+  const { keyword, categoryId, sortOption, selectedBrandIds = [], filterState, favoriteIds } = params;
   const normalizedKeyword = keyword.trim().toLowerCase();
 
   let next = withFavoriteState(baseProducts, favoriteIds).filter((item) => {
@@ -509,6 +517,7 @@ export function searchProducts(params: {
         .toLowerCase()
         .includes(normalizedKeyword);
     const matchesCategory = categoryId === "all" || item.categoryId === categoryId;
+    const matchesBrand = !selectedBrandIds.length || selectedBrandIds.includes(item.brandId ?? item.brand);
     const matchesPrice =
       filterState.priceRange === "all" ||
       (filterState.priceRange === "budget" && item.price < 100) ||
@@ -521,7 +530,7 @@ export function searchProducts(params: {
       (filterState.minOrder === "qty50" && item.minOrderQty <= 50);
     const matchesMaterial = filterState.material === "all" || item.material === filterState.material;
 
-    return matchesKeyword && matchesCategory && matchesPrice && matchesOrder && matchesMaterial;
+    return matchesKeyword && matchesCategory && matchesBrand && matchesPrice && matchesOrder && matchesMaterial;
   });
 
   if (sortOption === "sales_desc") {

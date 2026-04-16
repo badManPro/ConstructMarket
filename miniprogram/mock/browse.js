@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defaultSearchFilterState = exports.materialFilterOptions = exports.minOrderFilterOptions = exports.priceFilterOptions = exports.sortOptions = exports.relatedCategories = exports.articleEntrances = exports.homeCategoryNav = exports.homeBanners = exports.hotSearchKeywords = void 0;
+exports.defaultSearchFilterState = exports.brandFilterOptions = exports.materialFilterOptions = exports.minOrderFilterOptions = exports.priceFilterOptions = exports.sortOptions = exports.relatedCategories = exports.articleEntrances = exports.homeCategoryNav = exports.homeBanners = exports.hotSearchKeywords = void 0;
 exports.getHomeSections = getHomeSections;
 exports.getFavoriteProducts = getFavoriteProducts;
 exports.searchProducts = searchProducts;
@@ -446,6 +446,11 @@ exports.materialFilterOptions = [
     { value: "wire", label: "线材" },
     { value: "light", label: "照明" },
 ];
+exports.brandFilterOptions = [...new Set(baseProducts.map((item) => item.brand))]
+    .map((brand) => ({
+    id: brand,
+    name: brand,
+}));
 exports.defaultSearchFilterState = {
     priceRange: "all",
     minOrder: "all",
@@ -475,7 +480,7 @@ function getFavoriteProducts(favoriteIds) {
     }));
 }
 function searchProducts(params) {
-    const { keyword, categoryId, sortOption, filterState, favoriteIds } = params;
+    const { keyword, categoryId, sortOption, selectedBrandIds = [], filterState, favoriteIds } = params;
     const normalizedKeyword = keyword.trim().toLowerCase();
     let next = withFavoriteState(baseProducts, favoriteIds).filter((item) => {
         const matchesKeyword = !normalizedKeyword ||
@@ -484,6 +489,7 @@ function searchProducts(params) {
                 .toLowerCase()
                 .includes(normalizedKeyword);
         const matchesCategory = categoryId === "all" || item.categoryId === categoryId;
+        const matchesBrand = !selectedBrandIds.length || selectedBrandIds.includes(item.brandId ?? item.brand);
         const matchesPrice = filterState.priceRange === "all" ||
             (filterState.priceRange === "budget" && item.price < 100) ||
             (filterState.priceRange === "mid" && item.price >= 100 && item.price < 200) ||
@@ -493,7 +499,7 @@ function searchProducts(params) {
             (filterState.minOrder === "qty20" && item.minOrderQty <= 20) ||
             (filterState.minOrder === "qty50" && item.minOrderQty <= 50);
         const matchesMaterial = filterState.material === "all" || item.material === filterState.material;
-        return matchesKeyword && matchesCategory && matchesPrice && matchesOrder && matchesMaterial;
+        return matchesKeyword && matchesCategory && matchesBrand && matchesPrice && matchesOrder && matchesMaterial;
     });
     if (sortOption === "sales_desc") {
         next = [...next].sort((a, b) => b.salesVolume - a.salesVolume);

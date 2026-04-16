@@ -80,12 +80,19 @@ function buildMockSearchFilterShell() {
     return {
         source: "mock",
         relatedCategories: browse_1.relatedCategories,
+        brandOptions: browse_1.brandFilterOptions,
         sortOptions: browse_1.sortOptions,
         priceOptions: browse_1.priceFilterOptions,
         quantityOptions: browse_1.minOrderFilterOptions,
         materialOptions: browse_1.materialFilterOptions,
         filterState: { ...browse_1.defaultSearchFilterState },
     };
+}
+function ensureBrandOptions(options, fallback) {
+    if (options.length) {
+        return options;
+    }
+    return fallback;
 }
 function buildGenericSubCategory(item, parentId, index) {
     const id = normalizeId(item.id ?? item.categoryId ?? item.categoryCode, `${parentId}-${index + 1}`);
@@ -166,6 +173,9 @@ function buildRemoteSearchParams(params) {
     if (remoteCategoryId !== undefined && params.categoryId !== "all") {
         requestParams.categoryId = remoteCategoryId;
     }
+    if (params.selectedBrandIds?.length) {
+        requestParams.brandId = params.selectedBrandIds.map((item) => toRemoteId(item) ?? item);
+    }
     if (params.filterState.priceRange === "budget") {
         requestParams.maxPrice = 100;
     }
@@ -180,6 +190,7 @@ function buildRemoteSearchParams(params) {
 }
 function refineSearchProducts(products, params) {
     const keyword = params.keyword.trim().toLowerCase();
+    const selectedBrandIds = params.selectedBrandIds ?? [];
     let next = products.filter((item) => {
         const matchesKeyword = !keyword ||
             [item.name, item.brand, item.model, item.categoryName]
@@ -187,6 +198,8 @@ function refineSearchProducts(products, params) {
                 .toLowerCase()
                 .includes(keyword);
         const matchesCategory = params.categoryId === "all" || item.categoryId === params.categoryId;
+        const matchesBrand = !selectedBrandIds.length ||
+            selectedBrandIds.includes(item.brandId ?? item.brand);
         const matchesPrice = params.filterState.priceRange === "all" ||
             (params.filterState.priceRange === "budget" && item.price < 100) ||
             (params.filterState.priceRange === "mid" && item.price >= 100 && item.price < 200) ||
@@ -196,7 +209,7 @@ function refineSearchProducts(products, params) {
             (params.filterState.minOrder === "qty20" && item.minOrderQty <= 20) ||
             (params.filterState.minOrder === "qty50" && item.minOrderQty <= 50);
         const matchesMaterial = params.filterState.material === "all" || item.material === params.filterState.material;
-        return matchesKeyword && matchesCategory && matchesPrice && matchesOrder && matchesMaterial;
+        return matchesKeyword && matchesCategory && matchesBrand && matchesPrice && matchesOrder && matchesMaterial;
     });
     if (params.sortOption === "sales_desc") {
         next = [...next].sort((left, right) => right.salesVolume - left.salesVolume);
@@ -441,8 +454,9 @@ function createBrowseService(dependencies = {}) {
                 return buildMockSearchFilterShell();
             }
             try {
-                const [categories, simpleItems, treeItems] = await Promise.all([
+                const [categories, brands, simpleItems, treeItems] = await Promise.all([
                     homeApi.getCategories(),
+                    homeApi.getBrands(),
                     homeApi.getDictSimpleList(),
                     homeApi.getDictTreeList(),
                 ]);
@@ -455,6 +469,7 @@ function createBrowseService(dependencies = {}) {
                 return {
                     source: "remote",
                     relatedCategories: buildRelatedCategories(rootCategories),
+                    brandOptions: ensureBrandOptions((0, browse_2.adaptBrandOptions)(brands), browse_1.brandFilterOptions),
                     sortOptions: browse_1.sortOptions,
                     priceOptions: remoteFilterOptions.priceOptions,
                     quantityOptions: remoteFilterOptions.quantityOptions,

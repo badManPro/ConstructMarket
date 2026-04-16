@@ -287,3 +287,66 @@ Phase C
   - 小程序独有页索引
   - 重点不一致项
   - 后续检索锚点
+
+## Follow-up Task: 选型 Tab 对齐 mall-web Products
+
+### Goal
+以 `../mall-web/src/views/Products.vue` 为基线，先调研 web 端接口请求、接口返回与页面实际取用字段，再对照小程序 `选型` tab 当前实现，输出详细对齐文档，最后再落地小程序接口调用和页面展示字段调整。
+
+### Current Phase
+Phase D
+
+### Phases
+#### Phase A: Research
+- [x] 确认 web `Products.vue` 直接/间接调用的接口、请求参数和触发时机
+- [x] 确认接口返回结构以及 web 页面实际消费的字段
+- [x] 确认小程序 `pages/category/index` 与相关 service 当前请求链和展示字段
+- **Status:** complete
+
+#### Phase B: Documentation
+- [x] 输出一份对齐文档，包含 web / 小程序对照、字段映射、差异项、改造清单
+- [x] 明确哪些字段直接复用，哪些字段需要兼容兜底，哪些交互保持小程序差异
+- **Status:** complete
+
+#### Phase C: Implementation
+- [x] 按文档调整小程序 `选型` tab 的接口调用
+- [x] 按文档调整小程序页面展示信息与文案
+- [x] 补齐必要的类型、adapter 或 service 映射
+- **Status:** complete
+
+#### Phase D: Verification
+- [x] 运行静态校验与必要的构建验证
+- [x] 复核页面展示是否与调研文档一致
+- [x] 回写 planning files 和对齐文档中的最终结果
+- **Status:** complete
+
+### Key Questions
+1. web `Products.vue` 的商品列表页到底由哪些接口共同驱动，分别承载分类树、筛选项和商品列表的哪部分信息？
+2. web 页面真正展示了哪些商品/分类字段，哪些返回字段其实没有被页面消费？
+3. 小程序 `选型` tab 当前更接近“分类导航页”还是“商品列表页”，与 web Products 的差异应该如何收敛？
+
+### Decisions Made
+| Decision | Rationale |
+|----------|-----------|
+| 先做接口和字段调研，再改代码 | 用户已明确要求“先写调研和文档，再落实代码” |
+| 对齐基线锁定为 `mall-web` 的 `Products.vue` 页面，而不是整个 web 站点分类体系 | 本轮目标聚焦在小程序 `选型` tab 调整适配 |
+| 小程序页面可保留 tab 场景下的交互壳子，但接口数据和核心信息口径优先向 web 看齐 | 保持小程序导航结构不变，同时减少商品信息口径分叉 |
+
+### Current Resume Point
+- 已完成调研文档：`docs/plans/2026-04-17-category-tab-products-alignment.md`
+- 已完成数据层改造：
+  - `miniprogram/api/modules/home.ts` 新增 `getBrands()`
+  - `miniprogram/services/browse.ts` 新增品牌筛选壳子与 `brandId` 透传
+  - `miniprogram/api/adapters/browse.ts` 补齐 `originalPrice / rating / stock / specText`
+- 已完成页面层改造：
+  - `miniprogram/pages/category/index.*` 已切为 Products 风格商品列表页
+  - `miniprogram/components/business/product-card/*` 已按 web 商品卡补齐关键信息
+- 已完成验证：
+  - `node --test tests/api/browse-service.test.cjs`
+  - `npm run typecheck`
+  - `npm run build:miniapp`
+  - `npm run test:node`
+  - `npm run verify:source-runtime`
+- 当前下一步：
+  1. 在微信开发者工具里人工走查 `选型` tab 的分类、品牌、排序、筛选和空态
+  2. 若视觉还需继续贴近 web，再决定是否把 `search/result` 同步为同一版筛选头部布局

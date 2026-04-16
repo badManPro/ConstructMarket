@@ -230,3 +230,60 @@ Phase C
   1. 按 `docs/plans/2026-04-15-api-integration-batches.md` 中的 `A 批 DevTools Smoke Checklist（2026-04-16）` 完成人工走查
   2. 将走查结果回写到 `progress.md`
   3. 若走查通过，再把 A 批改成 `已完成`，并进入 `B. 商品详情 / 收藏加购 / 浏览记录`
+
+## Follow-up Task: mall-web 对齐走查与代理修正
+
+### Goal
+读取同级目录 `../mall-web`，将其本地 `localhost` 接口代理改为与当前小程序一致的远程地址，并在当前仓库内输出一份“mall-web vs mall-applet”的模块对齐走查文档，明确双方已有模块、差异模块、可对齐模块和当前不一致点。
+
+### Current Phase
+Phase C
+
+### Phases
+#### Phase A: Audit
+- [x] 确认小程序当前远程接口基线与 `mall-web` 当前代理配置
+- [x] 盘点 `mall-web` 页面/模块结构
+- [x] 盘点当前小程序页面/模块结构
+- **Status:** complete
+
+#### Phase B: Change & Analysis
+- [x] 修改 `mall-web` 的代理目标
+- [x] 建立 web / 小程序模块对照表
+- [x] 按模块分类输出“一致 / 可对齐 / 不一致 / 各自独有”
+- **Status:** complete
+
+#### Phase C: Delivery
+- [x] 将对齐文档写入当前仓库 `docs/`
+- [x] 自检文档可检索性与分类完整性
+- **Status:** complete
+
+### Key Questions
+1. `mall-web` 当前实际走的是哪套构建配置与代理入口？
+2. 两个项目的模块边界应该按“页面路由”还是“业务域”做主表？
+3. 哪些差异是终端形态差异，哪些是功能缺失，哪些只是命名不一致？
+
+### Decisions Made
+| Decision | Rationale |
+|----------|-----------|
+| 对齐文档写在当前仓库，不写入 `mall-web` | 用户已明确要求 |
+| 以“小程序当前远程地址”为代理目标真值 | 用户要求 web 跟小程序对齐远程地址 |
+| 对齐文档同时保留“按业务域”和“按页面/模块”两层索引 | 方便后续人工和 AI 查询 |
+| `mall-web` 的协议/隐私/官网内容优先通过小程序 `webview` 承接 | 这些页面当前更像内容载体，不适合优先原生重做 |
+| 订单域在继续对齐前必须先整理状态映射 | 两端状态模型明显不同，直接比页面会持续错位 |
+
+### Current Resume Point
+- `mall-web` 代理已改到 `http://106.15.108.65:8085`
+- 已修改文件：
+  - `../mall-web/vite.config.ts`
+  - `../mall-web/.env.development`
+  - `../mall-web/.env.test`
+  - `../mall-web/.env.production`
+- 已完成构建校验：`cd ../mall-web && npm run build` 通过
+- 当前正式对齐文档：`docs/mall-web-小程序模块对齐走查.md`
+- 文档已包含：
+  - 代理调整说明
+  - 业务域对照总表
+  - web 路由到小程序页面映射
+  - 小程序独有页索引
+  - 重点不一致项
+  - 后续检索锚点

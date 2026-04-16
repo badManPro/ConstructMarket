@@ -332,3 +332,30 @@
 - 已将 `A 批 DevTools Smoke Checklist（2026-04-16）` 写入 `docs/plans/2026-04-15-api-integration-batches.md`
 - 已在 `task_plan.md` 增加显式阻断：下次继续开发前，先提醒用户完成或明确跳过 A 批人工走查
 - 当前仍未完成的事项不是代码实现，而是 DevTools 人工验证与结果回写
+
+### Follow-up Session: mall-web 对齐走查启动
+- 已确认目标 `mall-web` 位于当前仓库同级目录：`../mall-web`
+- 已读取小程序远程接口配置，确认默认远端基线为 `http://106.15.108.65:8085/api`
+- 已读取 `mall-web/vite.config.ts`，确认其开发代理默认仍指向 `http://127.0.0.1:8080`
+- 已将本轮任务写入 `task_plan.md` / `findings.md`
+- 下一步：
+  - 继续盘点 `mall-web` 页面与业务模块
+  - 盘点当前小程序路由与业务模块
+  - 修改 `mall-web` 代理并产出当前仓库内的对齐文档
+
+### Follow-up Session: mall-web 对齐走查完成
+- 已更新 `mall-web` 代理目标到与小程序一致的远端主机 `http://106.15.108.65:8085`
+- 已修改：
+  - `../mall-web/vite.config.ts`
+  - `../mall-web/.env.development`
+  - `../mall-web/.env.test`
+  - `../mall-web/.env.production`
+- 已执行 `cd ../mall-web && npm run build`，构建通过
+- 已将构建产生的临时 `../mall-web/dist` 删除，避免在 web 仓库残留无关产物
+- 已新增当前仓库文档：`docs/mall-web-小程序模块对齐走查.md`
+- 文档内已落地：
+  - 代理改动说明
+  - 业务域对照总表
+  - `mall-web` 路由到小程序页面映射
+  - 小程序独有页索引
+  - 重点不一致项与后续检索锚点

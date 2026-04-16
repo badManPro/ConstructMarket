@@ -225,8 +225,11 @@ export type BannerCard = {
   subtitle: string;
   actionText: string;
   accent: string;
-  route: string;
+  imageUrl: string;
+  linkType: "internal" | "external" | "none";
+  route?: string;
   params?: Record<string, string>;
+  externalUrl?: string;
 };
 
 export type CategoryShortcut = {

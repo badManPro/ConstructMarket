@@ -1,0 +1,32 @@
+.webview-screen {
+  padding-top: 24rpx;
+}
+
+.webview-state-card {
+  text-align: center;
+}
+
+.webview-state-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.webview-state-actions__ghost,
+.webview-state-actions__solid {
+  flex: 1;
+  padding: 20rpx 0;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.webview-state-actions__ghost {
+  background: #f4f4f4;
+  color: #666666;
+}
+
+.webview-state-actions__solid {
+  background: #ff4a43;
+  color: #ffffff;
+}

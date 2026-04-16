@@ -57,21 +57,25 @@
 
   <block wx:else>
     <view class="home-banner-wrap">
-      <swiper class="banner-swiper" indicator-dots circular autoplay interval="4200">
-        <view wx:for="{{banners}}" wx:key="id" wx:for-item="banner">
+      <swiper class="banner-swiper" indicator-dots circular autoplay interval="4200" duration="360">
+        <swiper-item wx:for="{{banners}}" wx:key="id" wx:for-item="banner">
           <view
-            class="banner-card"
+            class="banner-card {{banner.imageUrl ? 'banner-card--image' : 'banner-card--text'}}"
             style="background: {{banner.accent}};"
             data-route="{{banner.route}}"
             data-params="{{banner.params}}"
             bindtap="handleBannerTap"
           >
-            <view class="banner-card__eyebrow">{{banner.eyebrow}}</view>
-            <view class="banner-card__title">{{banner.title}}</view>
-            <view class="banner-card__subtitle">{{banner.subtitle}}</view>
-            <view class="banner-card__action">{{banner.actionText}}</view>
+            <image wx:if="{{banner.imageUrl}}" class="banner-card__image" src="{{banner.imageUrl}}" mode="aspectFill" />
+            <view wx:if="{{banner.imageUrl}}" class="banner-card__scrim"></view>
+            <view class="banner-card__content">
+              <view class="banner-card__eyebrow">{{banner.eyebrow}}</view>
+              <view class="banner-card__title">{{banner.title}}</view>
+              <view wx:if="{{banner.subtitle}}" class="banner-card__subtitle">{{banner.subtitle}}</view>
+              <view class="banner-card__action">{{banner.actionText}}</view>
+            </view>
           </view>
-        </view>
+        </swiper-item>
       </swiper>
     </view>
 

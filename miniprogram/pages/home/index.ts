@@ -110,6 +110,7 @@ Page({
       route?: string;
       params?: Record<string, string>;
     };
+
     if (!route) return;
     navigateWithParams(route, params ?? {});
   },

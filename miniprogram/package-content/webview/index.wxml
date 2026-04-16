@@ -1,0 +1,13 @@
+<web-view wx:if="{{status === 'ready'}}" src="{{url}}" binderror="handleLoadError" />
+
+<view wx:else class="screen webview-screen">
+  <view class="section-card webview-state-card">
+    <view class="section-card__title">外部页面暂时无法打开</view>
+    <view class="section-card__meta">{{errorMessage || "请稍后重试，或返回首页继续浏览。"}}</view>
+    <view class="webview-state-actions">
+      <view class="webview-state-actions__ghost" bindtap="handleGoBack">返回上一页</view>
+      <view wx:if="{{url}}" class="webview-state-actions__solid" bindtap="handleRetry">重新加载</view>
+      <view wx:else class="webview-state-actions__solid" bindtap="handleGoHome">回到首页</view>
+    </view>
+  </view>
+</view>

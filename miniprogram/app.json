@@ -17,7 +17,8 @@
       "root": "package-content",
       "pages": [
         "article/list",
-        "article/detail"
+        "article/detail",
+        "webview/index"
       ]
     },
     {

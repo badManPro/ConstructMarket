@@ -7,6 +7,7 @@ export const ROUTES = {
   productDetail: "/package-catalog/product/detail",
   articleList: "/package-content/article/list",
   articleDetail: "/package-content/article/detail",
+  webview: "/package-content/webview/index",
   checkout: "/package-trade/checkout/index",
   paymentResult: "/package-trade/payment/result",
   orderList: "/package-trade/order/list",

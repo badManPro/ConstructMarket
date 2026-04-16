@@ -115,24 +115,160 @@ function flattenProductRecord(source: Record<string, unknown>) {
   };
 }
 
-function getBannerRoute(item: Record<string, unknown>): {
-  route: BannerCard["route"];
+const BANNER_ACCENTS = [
+  "linear-gradient(135deg, #ffedd5, #fff7ed)",
+  "linear-gradient(135deg, #dbeafe, #eff6ff)",
+  "linear-gradient(135deg, #dcfce7, #f0fdf4)",
+  "linear-gradient(135deg, #fce7f3, #fdf2f8)",
+];
+
+function getBannerLink(item: Record<string, unknown>): {
+  linkType: BannerCard["linkType"];
+  route?: BannerCard["route"];
   params?: Record<string, string>;
+  externalUrl?: string;
 } {
   const linkTypeCode = pickString(item, ["linkTypeCode"]).toUpperCase();
   const linkTargetValue = pickString(item, ["linkTargetValue"]);
   const keyword = pickString(item, ["keyword", "bannerTitle", "title"], "");
+  const normalizedTarget = linkTargetValue.replace(/^https?:\/\/[^/]+/i, "") || linkTargetValue;
 
-  if (linkTypeCode === "INTERNAL" && /category/i.test(linkTargetValue)) {
+  if (linkTypeCode === "EXTERNAL" && /^https?:\/\//i.test(linkTargetValue)) {
     return {
+      linkType: "external",
+      route: ROUTES.webview,
+      params: {
+        url: linkTargetValue,
+        title: pickString(item, ["bannerTitle", "title", "name"], "活动详情"),
+      },
+      externalUrl: linkTargetValue,
+    };
+  }
+
+  if (linkTypeCode !== "INTERNAL") {
+    return keyword
+      ? {
+          linkType: "internal",
+          route: ROUTES.searchResult,
+          params: { keyword },
+        }
+      : {
+          linkType: "none",
+        };
+  }
+
+  if (/^\/products(?:\/)?$/i.test(normalizedTarget)) {
+    return {
+      linkType: "internal",
+      route: ROUTES.searchResult,
+    };
+  }
+
+  const productDetailMatch =
+    normalizedTarget.match(/^\/products?\/([^/?#]+)/i) ??
+    normalizedTarget.match(/[?&](?:id|productId)=([^&#]+)/i);
+
+  if (productDetailMatch?.[1]) {
+    return {
+      linkType: "internal",
+      route: ROUTES.productDetail,
+      params: {
+        id: decodeURIComponent(productDetailMatch[1]),
+      },
+    };
+  }
+
+  const categoryMatch =
+    normalizedTarget.match(/^\/categories?\/([^/?#]+)/i) ??
+    normalizedTarget.match(/[?&]categoryId=([^&#]+)/i);
+
+  if (categoryMatch?.[1]) {
+    return {
+      linkType: "internal",
+      route: ROUTES.category,
+      params: {
+        categoryId: decodeURIComponent(categoryMatch[1]),
+      },
+    };
+  }
+
+  if (/category/i.test(normalizedTarget)) {
+    return {
+      linkType: "internal",
       route: ROUTES.category,
     };
   }
 
+  if (/article/i.test(normalizedTarget)) {
+    return {
+      linkType: "internal",
+      route: ROUTES.articleList,
+    };
+  }
+
   return {
+    linkType: "internal",
     route: ROUTES.searchResult,
     params: keyword ? { keyword } : undefined,
   };
+}
+
+function getBannerEyebrow(item: Record<string, unknown>, linkType: BannerCard["linkType"]) {
+  const explicit = pickString(item, ["eyebrow", "tag", "label"]);
+  if (explicit) {
+    return explicit;
+  }
+
+  if (linkType === "external") {
+    return "站外活动";
+  }
+
+  return "商城精选";
+}
+
+function getBannerActionText(
+  link: ReturnType<typeof getBannerLink>,
+  item: Record<string, unknown>,
+) {
+  const explicit = pickString(item, ["actionText", "buttonText"]);
+  if (explicit) {
+    return explicit;
+  }
+
+  if (link.linkType === "external") {
+    return "打开活动";
+  }
+
+  if (link.route === ROUTES.category) {
+    return "查看分类";
+  }
+
+  if (link.route === ROUTES.productDetail) {
+    return "查看商品";
+  }
+
+  return "立即查看";
+}
+
+function getBannerSubtitle(item: Record<string, unknown>, link: ReturnType<typeof getBannerLink>) {
+  const explicit = pickString(item, ["subtitle", "summary", "description", "bannerDesc"]);
+  if (explicit) {
+    return explicit;
+  }
+
+  if (link.linkType === "external") {
+    return "点击后将在小程序内打开活动页。";
+  }
+
+  if (link.route === ROUTES.searchResult) {
+    return "进入商品结果页继续浏览当前活动商品。";
+  }
+
+  if (link.route === ROUTES.category) {
+    return "进入对应分类页查看当前可售商品。";
+  }
+
+  return "查看当前 Banner 对应的活动入口。";
 }
 
 function mapSearchProduct(source: Record<string, unknown>, favoriteIds: string[]): SearchProduct {
@@ -166,20 +302,33 @@ function mapSearchProduct(source: Record<string, unknown>, favoriteIds: string[]
 }
 
 export function adaptBannerCards(input: unknown): BannerCard[] {
-  return extractArray(input).map((item, index) => {
-    const routeConfig = getBannerRoute(item);
+  return extractArray(input)
+    .filter(
+      (item) =>
+        pickNumber(item, ["publishStatus"], 1) === 1 && pickNumber(item, ["isDeleted"], 0) === 0,
+    )
+    .sort(
+      (left, right) =>
+        pickNumber(left, ["sortNo"], Number.MAX_SAFE_INTEGER) -
+        pickNumber(right, ["sortNo"], Number.MAX_SAFE_INTEGER),
+    )
+    .map((item, index) => {
+      const link = getBannerLink(item);
 
-    return {
-      id: pickString(item, ["id", "bannerId"], `banner-${index + 1}`),
-      eyebrow: pickString(item, ["eyebrow", "tag", "label", "linkTypeCode"], "精选推荐"),
-      title: pickString(item, ["title", "name", "bannerTitle"], "建材采购专题"),
-      subtitle: pickString(item, ["subtitle", "summary", "description", "bannerDesc"], "真实接口 Banner 数据"),
-      actionText: pickString(item, ["actionText", "buttonText"], "立即查看"),
-      accent: pickString(item, ["accent", "themeColor"], "linear-gradient(135deg, #f97316, #fb923c)"),
-      route: routeConfig.route,
-      params: routeConfig.params,
-    };
-  });
+      return {
+        id: pickString(item, ["id", "bannerId"], `banner-${index + 1}`),
+        eyebrow: getBannerEyebrow(item, link.linkType),
+        title: pickString(item, ["title", "name", "bannerTitle"], "建材采购专题"),
+        subtitle: getBannerSubtitle(item, link),
+        actionText: getBannerActionText(link, item),
+        accent: pickString(item, ["accent", "themeColor"], BANNER_ACCENTS[index % BANNER_ACCENTS.length]),
+        imageUrl: pickString(item, ["imageUrl", "bannerImageUrl", "coverImageUrl"], ""),
+        linkType: link.linkType,
+        route: link.route,
+        params: link.params,
+        externalUrl: link.externalUrl,
+      };
+    });
 }
 
 export function adaptCategoryShortcuts(input: unknown): CategoryShortcut[] {

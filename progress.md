@@ -411,3 +411,42 @@
   - `npm run build:miniapp`
   - `npm run test:node`
   - `npm run verify:source-runtime`
+
+### Follow-up Session: B 批接口接入与走查状态调整
+- 已按用户要求先跳过 A 批人工走查，但不标记完成；相关文档统一改为 `进行中（未走查）`
+- 已读取 live Swagger `app` OpenAPI，并确认 B 批关键 DTO/接口口径：
+  - `product/detail` 返回 `product + merchant + skuList`
+  - `product/specs` 返回对象包裹的 `specs[]`
+  - `merchant/detail` 的查询参数名为 `id`
+  - `user/cart` 新增请求体必须带 `merchantId + productId + skuCode + quantity`
+- 已完成 B 批代码接入：
+  - `miniprogram/api/modules/product.ts` 修正 `merchant/detail` 查询参数并补齐浏览埋点 query
+  - `miniprogram/api/modules/trade.ts` 新增真实加购接口
+  - `miniprogram/api/adapters/browse.ts` 补齐详情 DTO、规格 DTO、收藏记录 DTO、SKU 选项映射
+  - `miniprogram/services/browse.ts` 新增真实详情聚合、真实收藏列表、真实加购、真实浏览埋点与 mock fallback
+  - `miniprogram/services/support.ts`、`miniprogram/package-support/support/chat.ts` 让在线咨询发送优先提交真实留言接口，同时保留本地聊天壳子
+  - `miniprogram/package-catalog/product/detail.*` 改为异步读取真实详情，支持真实规格/SKU 选择、真实收藏、真实加购、真实浏览记录
+  - `miniprogram/package-profile/profile/favorite.ts` 改为真实收藏列表、真实取消收藏、真实快捷加购
+  - `miniprogram/pages/home/index.ts`、`miniprogram/package-catalog/search/result.ts`、`miniprogram/pages/category/index.ts` 的收藏动作统一收口到服务层
+- 已补充 Node 侧 smoke tests：
+  - 真实详情 DTO 聚合
+  - 真实收藏列表适配
+  - 真实加购 payload 与购物车计数
+- 已顺序执行并通过：
+  - `npm run typecheck`
+  - `npm run build:miniapp`
+  - `npm run test:node`
+  - `npm run verify:source-runtime`
+- 已回写文档：
+  - `docs/swagger-app-接口映射.md`
+  - `docs/handoff-status.md`
+  - `task_plan.md`
+  - `findings.md`
+
+### Follow-up Session: A/B 走查文档整理
+- 已新增汇总文档：`docs/plans/2026-04-17-ab-走查步骤与进度.md`
+- 已将 A、B 两批分散在批次计划和 Swagger 看板中的人工验证步骤、当前状态和回写规则收口到单一文档
+- 文档内已明确：
+  - A 批当前是 `11` 个已接入模块待走查，另有 `1` 个 `采购建议` 保持 `待接入`
+  - B 批按人工操作拆成更细的检查点，便于逐项记录，但回写总看板时仍按原 `7` 个模块口径统计
+  - DevTools 前置配置、token 使用要求、失败/阻塞判定口径，以及 `docs/swagger-app-接口映射.md` / `progress.md` 的回写顺序

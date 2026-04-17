@@ -16,6 +16,14 @@ export function createTradeApi(dependencies: TradeApiDependencies = {}) {
         config,
       });
     },
+    addCartItem(data: Record<string, unknown>) {
+      return apiRequest<Record<string, unknown>>({
+        path: "/v1/app/user/cart",
+        method: "POST",
+        data,
+        config,
+      });
+    },
     updateCartQuantity(cartItemId: string, quantity: number) {
       return apiRequest<void>({
         path: `/v1/app/user/cart/${cartItemId}/quantity`,

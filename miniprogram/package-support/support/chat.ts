@@ -1,5 +1,6 @@
 import { ROUTES } from "../../constants/routes";
 import { getProductDetail } from "../../mock/browse";
+import { createSupportService } from "../../services/support";
 import { createSupportReply, createSupportSessionMeta, createWelcomeMessages, supportQuickQuestions } from "../../mock/support";
 import type { ChatMessage, SupportQuickQuestion, SupportSessionMeta } from "../../types/models";
 import { navigateToRoute } from "../../utils/navigate";
@@ -10,6 +11,7 @@ import {
   getOrderById,
   getOrderByNo,
   getSupportChatMessages,
+  getUserProfile,
   patchSupportChatMessage,
 } from "../../utils/storage";
 
@@ -155,27 +157,48 @@ Page({
       return;
     }
 
-    this.scheduleReply(normalizedText);
+    void this.scheduleReply(normalizedText, nextMessages[nextMessages.length - 1]?.id ?? "");
   },
-  scheduleReply(messageText: string) {
+  async scheduleReply(messageText: string, messageId: string) {
     this.setData({
       pendingReply: true,
     });
 
-    setTimeout(() => {
-      const nextMessages = appendSupportChatMessage({
-        id: createMessageId("service"),
-        sender: "service",
-        text: createSupportReply(messageText, this.data.sessionMeta),
-        time: formatNowTime(),
-        status: "sent",
+    try {
+      const userProfile = getUserProfile();
+      await createSupportService().submitConsultMessage({
+        contactName: userProfile.companyName || userProfile.nickname,
+        mobile: userProfile.phone,
+        consultContentText: messageText,
       });
 
-      this.syncMessages(nextMessages);
+      setTimeout(() => {
+        const nextMessages = appendSupportChatMessage({
+          id: createMessageId("service"),
+          sender: "service",
+          text: createSupportReply(messageText, this.data.sessionMeta),
+          time: formatNowTime(),
+          status: "sent",
+        });
+
+        this.syncMessages(nextMessages);
+        this.setData({
+          pendingReply: false,
+        });
+      }, 320);
+    } catch {
+      patchSupportChatMessage(messageId, {
+        status: "failed",
+      });
+      this.syncMessages(getSupportChatMessages());
       this.setData({
         pendingReply: false,
       });
-    }, 320);
+      wx.showToast({
+        title: "留言发送失败，请重试",
+        icon: "none",
+      });
+    }
   },
   handleResend(event: WechatMiniprogram.Event) {
     const { id } = event.currentTarget.dataset as { id?: string };
@@ -194,7 +217,7 @@ Page({
     }
 
     this.syncMessages(getSupportChatMessages());
-    this.scheduleReply(current.text);
+    void this.scheduleReply(current.text, id);
   },
   handleOpenFaq() {
     navigateToRoute(ROUTES.supportFaq);

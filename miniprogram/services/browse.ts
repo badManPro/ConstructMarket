@@ -25,18 +25,23 @@ import {
   adaptBannerCards,
   adaptBrandOptions,
   adaptCategoryShortcuts,
+  adaptFavoriteProducts,
   adaptProductDetail,
   adaptSearchProducts,
 } from "../api/adapters/browse";
 import { createHomeApi, type HomeApi } from "../api/modules/home";
 import { createProductApi, type ProductApi } from "../api/modules/product";
 import { createProfileApi, type ProfileApi } from "../api/modules/profile";
+import { createTradeApi, type TradeApi } from "../api/modules/trade";
+import type { BrowseProductDetail, ProductSkuOption } from "../types/models";
+import { addCartItem, toggleFavoriteId } from "../utils/storage";
 
 type BrowseServiceDependencies = {
   config?: Partial<ApiConfig>;
   homeApi?: Partial<HomeApi>;
   productApi?: Partial<ProductApi>;
   profileApi?: Partial<ProfileApi>;
+  tradeApi?: Partial<TradeApi>;
 };
 
 type SearchRelatedCategory = {
@@ -135,6 +140,127 @@ function buildMockSearchFilterShell() {
     quantityOptions: minOrderFilterOptions,
     materialOptions: materialFilterOptions,
     filterState: { ...defaultSearchFilterState },
+  };
+}
+
+function buildMockFavoriteShellData(favoriteIds: string[]) {
+  return {
+    source: "mock" as const,
+    favoriteProducts: getFavoriteProducts(favoriteIds),
+  };
+}
+
+function countRemoteCartItems(input: unknown) {
+  return toRecordArray(input).reduce((total, item) => total + pickNumber(item, ["quantity"], 0), 0);
+}
+
+function findSelectedSkuOption(
+  product: Partial<BrowseProductDetail> & { skuId?: string },
+  selectedSkuCode?: string,
+) {
+  const skuOptions = Array.isArray(product.skuOptions)
+    ? product.skuOptions.filter((item): item is ProductSkuOption => Boolean(item?.skuCode))
+    : [];
+
+  if (!skuOptions.length) {
+    return null;
+  }
+
+  if (selectedSkuCode) {
+    const matched = skuOptions.find(
+      (item) => item.skuCode === selectedSkuCode || item.skuId === selectedSkuCode,
+    );
+    if (matched) {
+      return matched;
+    }
+  }
+
+  return skuOptions[0];
+}
+
+function buildCartSnapshotJson(params: {
+  product: Partial<BrowseProductDetail> & { id?: string; name?: string };
+  selectedSku: ProductSkuOption | null;
+  selectedSpecText: string;
+  quantity: number;
+}) {
+  const payload = {
+    productId: params.product.id ?? "",
+    productName: params.product.name ?? "",
+    skuCode: params.selectedSku?.skuCode ?? params.product.skuId ?? "",
+    specText: params.selectedSpecText,
+    quantity: params.quantity,
+  };
+
+  return JSON.stringify(payload);
+}
+
+function buildRemoteCartPayload(params: {
+  product: Partial<BrowseProductDetail> & {
+    id?: string;
+    name?: string;
+    merchantId?: string;
+    price?: number;
+    skuId?: string;
+  };
+  quantity: number;
+  selectedSkuCode?: string;
+  selectedSpecText?: string;
+  checked?: boolean;
+}) {
+  const merchantId = toRemoteId(params.product.merchantId ?? "");
+  const productId = toRemoteId(params.product.id ?? "");
+  const selectedSku = findSelectedSkuOption(params.product, params.selectedSkuCode);
+  const skuCode = params.selectedSkuCode || selectedSku?.skuCode || params.product.skuId || "";
+
+  if (merchantId === undefined || productId === undefined || !skuCode) {
+    throw new Error("缺少真实购物车接口所需的商品标识");
+  }
+
+  return {
+    merchantId,
+    productId,
+    skuCode,
+    quantity: params.quantity,
+    selectedFlag: params.checked === false ? 0 : 1,
+    unitPrice: selectedSku?.price ?? params.product.price ?? 0,
+    snapshotJson: buildCartSnapshotJson({
+      product: params.product,
+      selectedSku,
+      selectedSpecText: params.selectedSpecText ?? selectedSku?.displayText ?? "",
+      quantity: params.quantity,
+    }),
+  };
+}
+
+function buildMockCartItem(params: {
+  product: Partial<BrowseProductDetail> & {
+    id?: string;
+    name?: string;
+    cover?: string;
+    unit?: string;
+    minOrderQty?: number;
+    price?: number;
+    model?: string;
+    skuId?: string;
+  };
+  quantity: number;
+  selectedSpecText?: string;
+  selectedSkuCode?: string;
+}) {
+  return {
+    id: `${params.product.id ?? "product"}-${Date.now()}`,
+    productId: params.product.id ?? "",
+    skuId: params.selectedSkuCode || params.product.skuId || `${params.product.id ?? "product"}-sku`,
+    name: params.product.name ?? "建材商品",
+    cover: params.product.cover ?? "建材商品",
+    model: params.selectedSpecText ?? params.product.model ?? "默认规格",
+    price: params.product.price ?? 0,
+    unit: params.product.unit ?? "件",
+    quantity: params.quantity,
+    minOrderQty: params.product.minOrderQty ?? 1,
+    checked: true,
+    invalid: false,
   };
 }
 
@@ -401,11 +527,15 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
     ...createProfileApi({ config }),
     ...(dependencies.profileApi ?? {}),
   };
+  const tradeApi = {
+    ...createTradeApi({ config }),
+    ...(dependencies.tradeApi ?? {}),
+  };
 
   return {
-    async getHomePageData(favoriteIds: string[] = []) {
+    async getHomePageData(favoriteIds?: string[]) {
       if (!shouldUseRemote(config)) {
-        return buildMockHomePageData(favoriteIds);
+        return buildMockHomePageData(favoriteIds ?? getFavoriteIds());
       }
 
       try {
@@ -422,13 +552,13 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
           keywordSuggestions: hotSearchKeywords,
           banners: adaptBannerCards(banners),
           categoryNav: adaptCategoryShortcuts(categories),
-          campaignProducts: adaptSearchProducts(newArrivalProducts, favoriteIds),
-          hotProducts: adaptSearchProducts(hotRecommendProducts, favoriteIds),
+          campaignProducts: adaptSearchProducts(newArrivalProducts),
+          hotProducts: adaptSearchProducts(hotRecommendProducts),
           articleEntrances: adaptArticleEntrances(newsArticles),
         };
       } catch (error) {
         if (shouldAllowMockFallback(config)) {
-          return buildMockHomePageData(favoriteIds);
+          return buildMockHomePageData(favoriteIds ?? getFavoriteIds());
         }
 
         throw error;
@@ -442,21 +572,19 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
       filterState: SearchFilterState;
       favoriteIds?: string[];
     }) {
-      const favoriteIds = params.favoriteIds ?? getFavoriteIds();
-
       if (!shouldUseRemote(config)) {
         return {
           source: "mock" as const,
           productList: searchProducts({
             ...params,
-            favoriteIds,
+            favoriteIds: params.favoriteIds ?? getFavoriteIds(),
           }),
         };
       }
 
       try {
         const remoteList = await homeApi.searchProducts(buildRemoteSearchParams(params));
-        const remoteProducts = adaptSearchProducts(remoteList, favoriteIds);
+        const remoteProducts = adaptSearchProducts(remoteList);
 
         return {
           source: "remote" as const,
@@ -468,7 +596,7 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
             source: "mock" as const,
             productList: searchProducts({
               ...params,
-              favoriteIds,
+              favoriteIds: params.favoriteIds ?? getFavoriteIds(),
             }),
           };
         }
@@ -476,35 +604,62 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
         throw error;
       }
     },
-    async getProductPageData(productId: string, favoriteIds: string[] = getFavoriteIds()) {
+    async getProductPageData(productId: string, favoriteIds?: string[]) {
       if (!shouldUseRemote(config)) {
+        const localFavoriteIds = favoriteIds ?? getFavoriteIds();
         return {
           source: "mock" as const,
-          product: getProductDetail(productId, favoriteIds),
-          recommendedProducts: getRecommendedProducts(productId, favoriteIds),
+          product: getProductDetail(productId, localFavoriteIds),
+          recommendedProducts: getRecommendedProducts(productId, localFavoriteIds),
         };
       }
 
       try {
         const detail = await productApi.getProductDetail(productId);
-        const product = adaptProductDetail(
-          detail,
-          await productApi.getProductSpecs(productId),
-          {},
-          favoriteIds,
+        const detailRecord = isRecord(detail) ? detail : {};
+        const detailProduct = isRecord(detailRecord.product) ? detailRecord.product : {};
+        const merchantFromDetail = isRecord(detailRecord.merchant) ? detailRecord.merchant : {};
+        const merchantId = pickString(
+          merchantFromDetail,
+          ["id", "merchantId"],
+          pickString(detailProduct, ["merchantId"], ""),
         );
+
+        const [specs, merchant, recommendedList] = await Promise.all([
+          productApi.getProductSpecs(productId),
+          merchantId ? productApi.getMerchantDetail(merchantId).catch(() => merchantFromDetail) : merchantFromDetail,
+          detailProduct.categoryId
+            ? homeApi
+                .searchProducts({
+                  categoryId: detailProduct.categoryId,
+                  sortType: "sales_desc",
+                  pageIndex: 1,
+                  pageSize: 6,
+                })
+                .catch(() => null)
+            : Promise.resolve(null),
+        ]);
+
+        const product = adaptProductDetail(detailRecord, specs, merchant, []);
+        const fallbackRecommendations = getRecommendedProducts(productId, favoriteIds ?? []);
 
         return {
           source: "remote" as const,
-          product: product ?? getProductDetail(productId, favoriteIds),
-          recommendedProducts: getRecommendedProducts(productId, favoriteIds),
+          product: product ?? getProductDetail(productId, favoriteIds ?? []),
+          recommendedProducts:
+            recommendedList && product
+              ? adaptSearchProducts(recommendedList)
+                  .filter((item) => item.id !== product.id)
+                  .slice(0, 3)
+              : fallbackRecommendations,
         };
       } catch (error) {
         if (shouldAllowMockFallback(config)) {
+          const localFavoriteIds = favoriteIds ?? getFavoriteIds();
           return {
             source: "mock" as const,
-            product: getProductDetail(productId, favoriteIds),
-            recommendedProducts: getRecommendedProducts(productId, favoriteIds),
+            product: getProductDetail(productId, localFavoriteIds),
+            recommendedProducts: getRecommendedProducts(productId, localFavoriteIds),
           };
         }
 
@@ -513,28 +668,120 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
     },
     async toggleProductFavorite(productId: string, isFavorite: boolean) {
       if (!shouldUseRemote(config)) {
+        const nextFavorites = toggleFavoriteId(productId);
         return {
           source: "mock" as const,
-          nextIsFavorite: !isFavorite,
+          nextIsFavorite: nextFavorites.includes(productId),
         };
       }
 
-      if (isFavorite) {
-        await profileApi.removeProductFavorite(productId);
-      } else {
-        await profileApi.addProductFavorite(productId);
-      }
+      try {
+        if (isFavorite) {
+          await profileApi.removeProductFavorite(productId);
+        } else {
+          await profileApi.addProductFavorite(productId);
+        }
 
-      return {
-        source: "remote" as const,
-        nextIsFavorite: !isFavorite,
-      };
+        return {
+          source: "remote" as const,
+          nextIsFavorite: !isFavorite,
+        };
+      } catch (error) {
+        if (shouldAllowMockFallback(config)) {
+          const nextFavorites = toggleFavoriteId(productId);
+          return {
+            source: "mock" as const,
+            nextIsFavorite: nextFavorites.includes(productId),
+          };
+        }
+
+        throw error;
+      }
     },
-    async getCategoryShellData(categoryId: string, favoriteIds: string[] = getFavoriteIds()) {
+    async addProductToCart(params: {
+      product: Partial<BrowseProductDetail> & {
+        id?: string;
+        name?: string;
+        cover?: string;
+        unit?: string;
+        minOrderQty?: number;
+        price?: number;
+        model?: string;
+        skuId?: string;
+        merchantId?: string;
+      };
+      quantity: number;
+      selectedSkuCode?: string;
+      selectedSpecText?: string;
+      checked?: boolean;
+    }) {
       if (!shouldUseRemote(config)) {
         return {
           source: "mock" as const,
-          ...getCategoryPageData(categoryId, favoriteIds),
+          cartPreviewCount: addCartItem(
+            buildMockCartItem({
+              product: params.product,
+              quantity: params.quantity,
+              selectedSpecText: params.selectedSpecText,
+              selectedSkuCode: params.selectedSkuCode,
+            }),
+          ),
+        };
+      }
+
+      try {
+        const createdItem = await tradeApi.addCartItem(buildRemoteCartPayload(params));
+        const remoteCart = await tradeApi.getCart().catch(() => [createdItem]);
+
+        return {
+          source: "remote" as const,
+          cartPreviewCount: countRemoteCartItems(remoteCart),
+        };
+      } catch (error) {
+        if (shouldAllowMockFallback(config)) {
+          return {
+            source: "mock" as const,
+            cartPreviewCount: addCartItem(
+              buildMockCartItem({
+                product: params.product,
+                quantity: params.quantity,
+                selectedSpecText: params.selectedSpecText,
+                selectedSkuCode: params.selectedSkuCode,
+              }),
+            ),
+          };
+        }
+
+        throw error;
+      }
+    },
+    async recordProductBrowse(productId: string, browseSourceCode = "PRODUCT_DETAIL") {
+      if (!shouldUseRemote(config)) {
+        return {
+          source: "mock" as const,
+        };
+      }
+
+      try {
+        await productApi.addBrowseLog(productId, browseSourceCode);
+        return {
+          source: "remote" as const,
+        };
+      } catch (error) {
+        if (shouldAllowMockFallback(config)) {
+          return {
+            source: "mock" as const,
+          };
+        }
+
+        throw error;
+      }
+    },
+    async getCategoryShellData(categoryId: string, favoriteIds?: string[]) {
+      if (!shouldUseRemote(config)) {
+        return {
+          source: "mock" as const,
+          ...getCategoryPageData(categoryId, favoriteIds ?? getFavoriteIds()),
         };
       }
 
@@ -560,7 +807,6 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
             pageIndex: 1,
             pageSize: 6,
           }),
-          favoriteIds,
         );
 
         return {
@@ -575,18 +821,30 @@ export function createBrowseService(dependencies: BrowseServiceDependencies = {}
         if (shouldAllowMockFallback(config)) {
           return {
             source: "mock" as const,
-            ...getCategoryPageData(categoryId, favoriteIds),
+            ...getCategoryPageData(categoryId, favoriteIds ?? getFavoriteIds()),
           };
         }
 
         throw error;
       }
     },
-    async getFavoriteShellData(favoriteIds: string[] = getFavoriteIds()) {
-      return {
-        source: "mock" as const,
-        favoriteProducts: getFavoriteProducts(favoriteIds),
-      };
+    async getFavoriteShellData(favoriteIds?: string[]) {
+      if (!shouldUseRemote(config)) {
+        return buildMockFavoriteShellData(favoriteIds ?? getFavoriteIds());
+      }
+
+      try {
+        return {
+          source: "remote" as const,
+          favoriteProducts: adaptFavoriteProducts(await profileApi.getProductFavorites()),
+        };
+      } catch (error) {
+        if (shouldAllowMockFallback(config)) {
+          return buildMockFavoriteShellData(favoriteIds ?? getFavoriteIds());
+        }
+
+        throw error;
+      }
     },
     async getSearchFilterShell() {
       if (!shouldUseRemote(config)) {

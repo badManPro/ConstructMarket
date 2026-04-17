@@ -1,4 +1,19 @@
-<view wx:if="{{product}}" class="screen detail-screen">
+<view class="screen detail-screen">
+  <view wx:if="{{status === 'loading'}}" class="section-card empty-card">
+    <view class="empty-card__title">商品详情加载中</view>
+    <view class="empty-card__desc">正在读取真实商品详情、规格和店铺信息。</view>
+  </view>
+
+  <view wx:elif="{{status === 'error'}}" class="section-card empty-card">
+    <view class="empty-card__title">商品详情读取失败</view>
+    <view class="empty-card__desc">可重试当前商品详情，或先返回首页继续浏览。</view>
+    <view class="empty-card__actions">
+      <view class="empty-card__action empty-card__action--ghost" bindtap="handleGoHome">返回首页</view>
+      <view class="empty-card__action" bindtap="handleRetry">重新加载</view>
+    </view>
+  </view>
+
+  <block wx:elif="{{product}}">
   <view class="page-head">
     <view class="page-head__bar">
       <view class="page-head__icon" bindtap="handleGoBack">←</view>
@@ -93,4 +108,5 @@
     bindclose="closeSpecPopup"
     bindconfirm="handleSpecConfirm"
   />
+  </block>
 </view>

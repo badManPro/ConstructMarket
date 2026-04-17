@@ -3,7 +3,6 @@ import { defaultSearchFilterState } from "../../mock/browse";
 import { createBrowseService } from "../../services/browse";
 import type { FilterOption, SearchFilterState, SearchProduct } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
-import { getFavoriteIds, toggleFavoriteId } from "../../utils/storage";
 import { getPageStatusOverride, type PageStatus } from "../../utils/page";
 
 type SearchCategoryView = {
@@ -147,7 +146,6 @@ Page({
         categoryId: selectedCategoryId,
         sortOption: selectedSort,
         filterState,
-        favoriteIds: getFavoriteIds(),
       });
       const baseCategories = options.relatedCategories ?? this.data.relatedCategories;
       const relatedCategories = countCategories(baseCategories, result.productList);
@@ -241,15 +239,29 @@ Page({
     if (!id) return;
     navigateWithParams(ROUTES.productDetail, { id });
   },
-  handleFavoriteTap(
+  async handleFavoriteTap(
     event: WechatMiniprogram.Event & {
       detail?: { id?: string };
     },
   ) {
     const { id } = event.detail ?? {};
     if (!id) return;
-    toggleFavoriteId(id);
-    void this.refreshProductList();
+    const currentProduct = this.data.productList.find((item) => item.id === id);
+    if (!currentProduct) return;
+
+    try {
+      const result = await createBrowseService().toggleProductFavorite(id, currentProduct.isFavorite);
+      await this.refreshProductList();
+      wx.showToast({
+        title: result.nextIsFavorite ? "已加入收藏" : "已取消收藏",
+        icon: "none",
+      });
+    } catch {
+      wx.showToast({
+        title: "收藏操作失败",
+        icon: "none",
+      });
+    }
   },
   resetSearch() {
     const nextCategoryId = this.data.relatedCategories[0]?.id ?? "all";

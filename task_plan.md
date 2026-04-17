@@ -223,13 +223,18 @@ Phase C
   - `home` / `category` / `search/result` 已切到 `services/browse`
   - `search-products` 已按 Swagger 实际形态改为 `POST + query`
   - Node 侧红测与 smoke tests 已覆盖首页聚合、分类树、热销搜索和筛选壳子
+- 当前已完成 `B. 商品详情 / 收藏加购 / 浏览记录` 的代码接入与自动化验证：
+  - `package-catalog/product/detail.*` 已切到 `services/browse` 聚合真实详情、规格、商户和浏览埋点
+  - 首页、搜索结果、选型页、商品详情、收藏夹的收藏动作已统一走 `services/browse.toggleProductFavorite`
+  - 收藏夹已切真实收藏列表，详情页和收藏夹加购已切真实购物车接口
+  - 已通过 `npm run typecheck`、`npm run build:miniapp`、`npm run test:node`、`npm run verify:source-runtime`
 - 当前阻断项：
-  - `A 批 DevTools Smoke Checklist` 仍未完成
-  - 下次开始任何新实现前，必须先提醒用户完成或明确跳过这轮走查，不能直接进入 `B. 商品详情 / 收藏加购 / 浏览记录`
+  - `A`、`B` 两批的 DevTools 人工走查都尚未完成
+  - 用户已明确本轮先跳过走查，因此这两批只能保持 `进行中（未走查）`，不能提前标 `已完成`
 - 当前下一步：
-  1. 按 `docs/plans/2026-04-15-api-integration-batches.md` 中的 `A 批 DevTools Smoke Checklist（2026-04-16）` 完成人工走查
-  2. 将走查结果回写到 `progress.md`
-  3. 若走查通过，再把 A 批改成 `已完成`，并进入 `B. 商品详情 / 收藏加购 / 浏览记录`
+  1. 继续进入 `C. 购物车 / 地址 / 发票基础能力`
+  2. 在后续节点评估时补做 `A`、`B` 批微信开发者工具走查
+  3. 仅在补齐走查结果后，再把对应批次改成 `已完成`
 
 ## Follow-up Task: mall-web 对齐走查与代理修正
 

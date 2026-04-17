@@ -12,6 +12,14 @@ function createTradeApi(dependencies = {}) {
                 config,
             });
         },
+        addCartItem(data) {
+            return (0, request_1.apiRequest)({
+                path: "/v1/app/user/cart",
+                method: "POST",
+                data,
+                config,
+            });
+        },
         updateCartQuantity(cartItemId, quantity) {
             return (0, request_1.apiRequest)({
                 path: `/v1/app/user/cart/${cartItemId}/quantity`,

@@ -11,7 +11,7 @@ import {
   supportServiceTime,
 } from "../mock/support";
 import { createSupportApi, type SupportApi } from "../api/modules/support";
-import { getApiConfig, type ApiConfig } from "../api/config";
+import { getApiConfig, shouldAllowMockFallback, shouldUseRemote, type ApiConfig } from "../api/config";
 import { adaptUploadResult } from "../api/adapters/support";
 
 type SupportServiceDependencies = {
@@ -63,7 +63,26 @@ export function createSupportService(dependencies: SupportServiceDependencies = 
       };
     },
     async submitConsultMessage(payload: Record<string, unknown>) {
-      return supportApi.postConsultMessage(payload);
+      if (!shouldUseRemote(config)) {
+        return {
+          source: "mock" as const,
+        };
+      }
+
+      try {
+        await supportApi.postConsultMessage(payload);
+        return {
+          source: "remote" as const,
+        };
+      } catch (error) {
+        if (shouldAllowMockFallback(config)) {
+          return {
+            source: "mock" as const,
+          };
+        }
+
+        throw error;
+      }
     },
     async uploadEvidence(payload: Record<string, unknown>) {
       return adaptUploadResult(await supportApi.uploadFile(payload));

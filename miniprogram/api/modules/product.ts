@@ -7,6 +7,10 @@ type ProductApiDependencies = {
 
 export function createProductApi(dependencies: ProductApiDependencies = {}) {
   const config = dependencies.config;
+  const buildBrowsePath = (productId: string, browseSourceCode?: string) =>
+    browseSourceCode
+      ? `/v1/app/user/browse/${productId}?browseSourceCode=${encodeURIComponent(browseSourceCode)}`
+      : `/v1/app/user/browse/${productId}`;
 
   return {
     getProductDetail(productId: string) {
@@ -17,18 +21,16 @@ export function createProductApi(dependencies: ProductApiDependencies = {}) {
           productId,
         },
         config,
-        requireAuth: false,
       });
     },
     getProductSpecs(productId: string) {
-      return apiRequest<unknown[]>({
+      return apiRequest<Record<string, unknown>>({
         path: "/v1/app/product/specs",
         method: "GET",
         data: {
           productId,
         },
         config,
-        requireAuth: false,
       });
     },
     getMerchantDetail(merchantId: string) {
@@ -36,15 +38,14 @@ export function createProductApi(dependencies: ProductApiDependencies = {}) {
         path: "/v1/app/merchant/detail",
         method: "GET",
         data: {
-          merchantId,
+          id: merchantId,
         },
         config,
-        requireAuth: false,
       });
     },
-    addBrowseLog(productId: string) {
-      return apiRequest<void>({
-        path: `/v1/app/user/browse/${productId}`,
+    addBrowseLog(productId: string, browseSourceCode?: string) {
+      return apiRequest<Record<string, unknown>>({
+        path: buildBrowsePath(productId, browseSourceCode),
         method: "POST",
         config,
       });

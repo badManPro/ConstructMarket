@@ -9,6 +9,8 @@ const browse_2 = require("../api/adapters/browse");
 const home_1 = require("../api/modules/home");
 const product_1 = require("../api/modules/product");
 const profile_1 = require("../api/modules/profile");
+const trade_1 = require("../api/modules/trade");
+const storage_2 = require("../utils/storage");
 const CATEGORY_ICON_TONES = [
     "linear-gradient(135deg, #ffe7d8, #fff4eb)",
     "linear-gradient(135deg, #dff4f0, #f2fbf9)",
@@ -86,6 +88,79 @@ function buildMockSearchFilterShell() {
         quantityOptions: browse_1.minOrderFilterOptions,
         materialOptions: browse_1.materialFilterOptions,
         filterState: { ...browse_1.defaultSearchFilterState },
+    };
+}
+function buildMockFavoriteShellData(favoriteIds) {
+    return {
+        source: "mock",
+        favoriteProducts: (0, browse_1.getFavoriteProducts)(favoriteIds),
+    };
+}
+function countRemoteCartItems(input) {
+    return toRecordArray(input).reduce((total, item) => total + pickNumber(item, ["quantity"], 0), 0);
+}
+function findSelectedSkuOption(product, selectedSkuCode) {
+    const skuOptions = Array.isArray(product.skuOptions)
+        ? product.skuOptions.filter((item) => Boolean(item?.skuCode))
+        : [];
+    if (!skuOptions.length) {
+        return null;
+    }
+    if (selectedSkuCode) {
+        const matched = skuOptions.find((item) => item.skuCode === selectedSkuCode || item.skuId === selectedSkuCode);
+        if (matched) {
+            return matched;
+        }
+    }
+    return skuOptions[0];
+}
+function buildCartSnapshotJson(params) {
+    const payload = {
+        productId: params.product.id ?? "",
+        productName: params.product.name ?? "",
+        skuCode: params.selectedSku?.skuCode ?? params.product.skuId ?? "",
+        specText: params.selectedSpecText,
+        quantity: params.quantity,
+    };
+    return JSON.stringify(payload);
+}
+function buildRemoteCartPayload(params) {
+    const merchantId = toRemoteId(params.product.merchantId ?? "");
+    const productId = toRemoteId(params.product.id ?? "");
+    const selectedSku = findSelectedSkuOption(params.product, params.selectedSkuCode);
+    const skuCode = params.selectedSkuCode || selectedSku?.skuCode || params.product.skuId || "";
+    if (merchantId === undefined || productId === undefined || !skuCode) {
+        throw new Error("缺少真实购物车接口所需的商品标识");
+    }
+    return {
+        merchantId,
+        productId,
+        skuCode,
+        quantity: params.quantity,
+        selectedFlag: params.checked === false ? 0 : 1,
+        unitPrice: selectedSku?.price ?? params.product.price ?? 0,
+        snapshotJson: buildCartSnapshotJson({
+            product: params.product,
+            selectedSku,
+            selectedSpecText: params.selectedSpecText ?? selectedSku?.displayText ?? "",
+            quantity: params.quantity,
+        }),
+    };
+}
+function buildMockCartItem(params) {
+    return {
+        id: `${params.product.id ?? "product"}-${Date.now()}`,
+        productId: params.product.id ?? "",
+        skuId: params.selectedSkuCode || params.product.skuId || `${params.product.id ?? "product"}-sku`,
+        name: params.product.name ?? "建材商品",
+        cover: params.product.cover ?? "建材商品",
+        model: params.selectedSpecText ?? params.product.model ?? "默认规格",
+        price: params.product.price ?? 0,
+        unit: params.product.unit ?? "件",
+        quantity: params.quantity,
+        minOrderQty: params.product.minOrderQty ?? 1,
+        checked: true,
+        invalid: false,
     };
 }
 function ensureBrandOptions(options, fallback) {
@@ -290,10 +365,14 @@ function createBrowseService(dependencies = {}) {
         ...(0, profile_1.createProfileApi)({ config }),
         ...(dependencies.profileApi ?? {}),
     };
+    const tradeApi = {
+        ...(0, trade_1.createTradeApi)({ config }),
+        ...(dependencies.tradeApi ?? {}),
+    };
     return {
-        async getHomePageData(favoriteIds = []) {
+        async getHomePageData(favoriteIds) {
             if (!(0, config_1.shouldUseRemote)(config)) {
-                return buildMockHomePageData(favoriteIds);
+                return buildMockHomePageData(favoriteIds ?? (0, storage_1.getFavoriteIds)());
             }
             try {
                 const [banners, categories, newArrivalProducts, hotRecommendProducts, newsArticles] = await Promise.all([
@@ -308,32 +387,31 @@ function createBrowseService(dependencies = {}) {
                     keywordSuggestions: browse_1.hotSearchKeywords,
                     banners: (0, browse_2.adaptBannerCards)(banners),
                     categoryNav: (0, browse_2.adaptCategoryShortcuts)(categories),
-                    campaignProducts: (0, browse_2.adaptSearchProducts)(newArrivalProducts, favoriteIds),
-                    hotProducts: (0, browse_2.adaptSearchProducts)(hotRecommendProducts, favoriteIds),
+                    campaignProducts: (0, browse_2.adaptSearchProducts)(newArrivalProducts),
+                    hotProducts: (0, browse_2.adaptSearchProducts)(hotRecommendProducts),
                     articleEntrances: (0, browse_2.adaptArticleEntrances)(newsArticles),
                 };
             }
             catch (error) {
                 if ((0, config_1.shouldAllowMockFallback)(config)) {
-                    return buildMockHomePageData(favoriteIds);
+                    return buildMockHomePageData(favoriteIds ?? (0, storage_1.getFavoriteIds)());
                 }
                 throw error;
             }
         },
         async searchProductsPage(params) {
-            const favoriteIds = params.favoriteIds ?? (0, storage_1.getFavoriteIds)();
             if (!(0, config_1.shouldUseRemote)(config)) {
                 return {
                     source: "mock",
                     productList: (0, browse_1.searchProducts)({
                         ...params,
-                        favoriteIds,
+                        favoriteIds: params.favoriteIds ?? (0, storage_1.getFavoriteIds)(),
                     }),
                 };
             }
             try {
                 const remoteList = await homeApi.searchProducts(buildRemoteSearchParams(params));
-                const remoteProducts = (0, browse_2.adaptSearchProducts)(remoteList, favoriteIds);
+                const remoteProducts = (0, browse_2.adaptSearchProducts)(remoteList);
                 return {
                     source: "remote",
                     productList: refineSearchProducts(remoteProducts, params),
@@ -345,36 +423,61 @@ function createBrowseService(dependencies = {}) {
                         source: "mock",
                         productList: (0, browse_1.searchProducts)({
                             ...params,
-                            favoriteIds,
+                            favoriteIds: params.favoriteIds ?? (0, storage_1.getFavoriteIds)(),
                         }),
                     };
                 }
                 throw error;
             }
         },
-        async getProductPageData(productId, favoriteIds = (0, storage_1.getFavoriteIds)()) {
+        async getProductPageData(productId, favoriteIds) {
             if (!(0, config_1.shouldUseRemote)(config)) {
+                const localFavoriteIds = favoriteIds ?? (0, storage_1.getFavoriteIds)();
                 return {
                     source: "mock",
-                    product: (0, browse_1.getProductDetail)(productId, favoriteIds),
-                    recommendedProducts: (0, browse_1.getRecommendedProducts)(productId, favoriteIds),
+                    product: (0, browse_1.getProductDetail)(productId, localFavoriteIds),
+                    recommendedProducts: (0, browse_1.getRecommendedProducts)(productId, localFavoriteIds),
                 };
             }
             try {
                 const detail = await productApi.getProductDetail(productId);
-                const product = (0, browse_2.adaptProductDetail)(detail, await productApi.getProductSpecs(productId), {}, favoriteIds);
+                const detailRecord = isRecord(detail) ? detail : {};
+                const detailProduct = isRecord(detailRecord.product) ? detailRecord.product : {};
+                const merchantFromDetail = isRecord(detailRecord.merchant) ? detailRecord.merchant : {};
+                const merchantId = pickString(merchantFromDetail, ["id", "merchantId"], pickString(detailProduct, ["merchantId"], ""));
+                const [specs, merchant, recommendedList] = await Promise.all([
+                    productApi.getProductSpecs(productId),
+                    merchantId ? productApi.getMerchantDetail(merchantId).catch(() => merchantFromDetail) : merchantFromDetail,
+                    detailProduct.categoryId
+                        ? homeApi
+                            .searchProducts({
+                            categoryId: detailProduct.categoryId,
+                            sortType: "sales_desc",
+                            pageIndex: 1,
+                            pageSize: 6,
+                        })
+                            .catch(() => null)
+                        : Promise.resolve(null),
+                ]);
+                const product = (0, browse_2.adaptProductDetail)(detailRecord, specs, merchant, []);
+                const fallbackRecommendations = (0, browse_1.getRecommendedProducts)(productId, favoriteIds ?? []);
                 return {
                     source: "remote",
-                    product: product ?? (0, browse_1.getProductDetail)(productId, favoriteIds),
-                    recommendedProducts: (0, browse_1.getRecommendedProducts)(productId, favoriteIds),
+                    product: product ?? (0, browse_1.getProductDetail)(productId, favoriteIds ?? []),
+                    recommendedProducts: recommendedList && product
+                        ? (0, browse_2.adaptSearchProducts)(recommendedList)
+                            .filter((item) => item.id !== product.id)
+                            .slice(0, 3)
+                        : fallbackRecommendations,
                 };
             }
             catch (error) {
                 if ((0, config_1.shouldAllowMockFallback)(config)) {
+                    const localFavoriteIds = favoriteIds ?? (0, storage_1.getFavoriteIds)();
                     return {
                         source: "mock",
-                        product: (0, browse_1.getProductDetail)(productId, favoriteIds),
-                        recommendedProducts: (0, browse_1.getRecommendedProducts)(productId, favoriteIds),
+                        product: (0, browse_1.getProductDetail)(productId, localFavoriteIds),
+                        recommendedProducts: (0, browse_1.getRecommendedProducts)(productId, localFavoriteIds),
                     };
                 }
                 throw error;
@@ -382,27 +485,96 @@ function createBrowseService(dependencies = {}) {
         },
         async toggleProductFavorite(productId, isFavorite) {
             if (!(0, config_1.shouldUseRemote)(config)) {
+                const nextFavorites = (0, storage_2.toggleFavoriteId)(productId);
                 return {
                     source: "mock",
+                    nextIsFavorite: nextFavorites.includes(productId),
+                };
+            }
+            try {
+                if (isFavorite) {
+                    await profileApi.removeProductFavorite(productId);
+                }
+                else {
+                    await profileApi.addProductFavorite(productId);
+                }
+                return {
+                    source: "remote",
                     nextIsFavorite: !isFavorite,
                 };
             }
-            if (isFavorite) {
-                await profileApi.removeProductFavorite(productId);
+            catch (error) {
+                if ((0, config_1.shouldAllowMockFallback)(config)) {
+                    const nextFavorites = (0, storage_2.toggleFavoriteId)(productId);
+                    return {
+                        source: "mock",
+                        nextIsFavorite: nextFavorites.includes(productId),
+                    };
+                }
+                throw error;
             }
-            else {
-                await profileApi.addProductFavorite(productId);
-            }
-            return {
-                source: "remote",
-                nextIsFavorite: !isFavorite,
-            };
         },
-        async getCategoryShellData(categoryId, favoriteIds = (0, storage_1.getFavoriteIds)()) {
+        async addProductToCart(params) {
             if (!(0, config_1.shouldUseRemote)(config)) {
                 return {
                     source: "mock",
-                    ...(0, category_1.getCategoryPageData)(categoryId, favoriteIds),
+                    cartPreviewCount: (0, storage_2.addCartItem)(buildMockCartItem({
+                        product: params.product,
+                        quantity: params.quantity,
+                        selectedSpecText: params.selectedSpecText,
+                        selectedSkuCode: params.selectedSkuCode,
+                    })),
+                };
+            }
+            try {
+                const createdItem = await tradeApi.addCartItem(buildRemoteCartPayload(params));
+                const remoteCart = await tradeApi.getCart().catch(() => [createdItem]);
+                return {
+                    source: "remote",
+                    cartPreviewCount: countRemoteCartItems(remoteCart),
+                };
+            }
+            catch (error) {
+                if ((0, config_1.shouldAllowMockFallback)(config)) {
+                    return {
+                        source: "mock",
+                        cartPreviewCount: (0, storage_2.addCartItem)(buildMockCartItem({
+                            product: params.product,
+                            quantity: params.quantity,
+                            selectedSpecText: params.selectedSpecText,
+                            selectedSkuCode: params.selectedSkuCode,
+                        })),
+                    };
+                }
+                throw error;
+            }
+        },
+        async recordProductBrowse(productId, browseSourceCode = "PRODUCT_DETAIL") {
+            if (!(0, config_1.shouldUseRemote)(config)) {
+                return {
+                    source: "mock",
+                };
+            }
+            try {
+                await productApi.addBrowseLog(productId, browseSourceCode);
+                return {
+                    source: "remote",
+                };
+            }
+            catch (error) {
+                if ((0, config_1.shouldAllowMockFallback)(config)) {
+                    return {
+                        source: "mock",
+                    };
+                }
+                throw error;
+            }
+        },
+        async getCategoryShellData(categoryId, favoriteIds) {
+            if (!(0, config_1.shouldUseRemote)(config)) {
+                return {
+                    source: "mock",
+                    ...(0, category_1.getCategoryPageData)(categoryId, favoriteIds ?? (0, storage_1.getFavoriteIds)()),
                 };
             }
             try {
@@ -423,7 +595,7 @@ function createBrowseService(dependencies = {}) {
                     sortType: "sales_desc",
                     pageIndex: 1,
                     pageSize: 6,
-                }), favoriteIds);
+                }));
                 return {
                     source: "remote",
                     rootCategories: remoteCategories,
@@ -437,17 +609,28 @@ function createBrowseService(dependencies = {}) {
                 if ((0, config_1.shouldAllowMockFallback)(config)) {
                     return {
                         source: "mock",
-                        ...(0, category_1.getCategoryPageData)(categoryId, favoriteIds),
+                        ...(0, category_1.getCategoryPageData)(categoryId, favoriteIds ?? (0, storage_1.getFavoriteIds)()),
                     };
                 }
                 throw error;
             }
         },
-        async getFavoriteShellData(favoriteIds = (0, storage_1.getFavoriteIds)()) {
-            return {
-                source: "mock",
-                favoriteProducts: (0, browse_1.getFavoriteProducts)(favoriteIds),
-            };
+        async getFavoriteShellData(favoriteIds) {
+            if (!(0, config_1.shouldUseRemote)(config)) {
+                return buildMockFavoriteShellData(favoriteIds ?? (0, storage_1.getFavoriteIds)());
+            }
+            try {
+                return {
+                    source: "remote",
+                    favoriteProducts: (0, browse_2.adaptFavoriteProducts)(await profileApi.getProductFavorites()),
+                };
+            }
+            catch (error) {
+                if ((0, config_1.shouldAllowMockFallback)(config)) {
+                    return buildMockFavoriteShellData(favoriteIds ?? (0, storage_1.getFavoriteIds)());
+                }
+                throw error;
+            }
         },
         async getSearchFilterShell() {
             if (!(0, config_1.shouldUseRemote)(config)) {

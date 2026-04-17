@@ -218,6 +218,16 @@
 - 这意味着本轮改造重点不应是强行复制 web 布局，而是把接口来源、商品信息口径和分类字段对齐到 web，再在小程序 tab 场景下做信息重组
 - 下一步调研必须覆盖 3 层：
   - web 页面层：`Products.vue` 实际展示哪些字段
+
+## Follow-up Findings: B 批真实接口实现
+- 当前 Swagger `app` 文档里，`/v1/app/product/detail` 实际返回 `product + merchant + skuList` 组合 DTO，而不是单一扁平商品对象
+- `/v1/app/product/specs` 的真实结构是 `specs[]` 包裹在对象里，规格值字段为 `specValue`
+- `/v1/app/merchant/detail` 的查询参数名是 `id`，不是 `merchantId`
+- `/v1/app/user/cart` 的新增请求体需要 `merchantId + productId + skuCode + quantity`；仅有页面侧的 `skuId` 概念不足以直接加购，必须先把详情页规格选择和真实 `skuCode` 对齐
+- 首页公共商品流可以匿名访问，但真实商品详情接口在未带 token 的 live 请求下会返回 `401`；因此 B 批实现必须默认支持“带开发 token 联调，缺 token 时在 hybrid 模式 fallback 到 mock”
+- 收藏列表接口 `GET /v1/app/user/favorite/product-favorites` 返回的不是纯商品列表，而是“收藏记录 + 嵌套 product + skuList”；页面不能直接吃 DTO，必须先在 adapter 层拍平成当前 `SearchProduct`
+- `consult-messages` 适合在 B 批只做“发送留言”这一小段：把聊天输入提交到真实接口，同时继续保留本地欢迎语、自动回复和失败重发；不要提前把 F 批会话历史一起卷进来
+- 当前用户已明确：A、B 两批先跳过微信开发者工具人工走查，因此文档状态应保持 `进行中`，并显式写明 `未走查`
   - web 数据层：`api/index.ts`、`stores/products.ts`、类型定义怎样组织请求和返回
   - 小程序数据层：`pages/category/index.ts`、`services/browse.ts`、`api/adapters/browse.ts` 当前怎么组装分类页数据
 

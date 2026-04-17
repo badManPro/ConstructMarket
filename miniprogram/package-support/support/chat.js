@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const routes_1 = require("../../constants/routes");
 const browse_1 = require("../../mock/browse");
-const support_1 = require("../../mock/support");
+const support_1 = require("../../services/support");
+const support_2 = require("../../mock/support");
 const navigate_1 = require("../../utils/navigate");
 const page_1 = require("../../utils/page");
 const storage_1 = require("../../utils/storage");
@@ -21,9 +22,9 @@ function stripFailureFlag(text) {
 Page({
     data: {
         status: "loading",
-        sessionMeta: (0, support_1.createSupportSessionMeta)({}),
+        sessionMeta: (0, support_2.createSupportSessionMeta)({}),
         messages: [],
-        quickQuestions: support_1.supportQuickQuestions,
+        quickQuestions: support_2.supportQuickQuestions,
         draftInput: "",
         scrollIntoView: "",
         pendingReply: false,
@@ -41,7 +42,7 @@ Page({
             const order = (0, storage_1.getOrderById)(options.orderId) ?? (0, storage_1.getOrderByNo)(orderNo);
             orderNo = order?.orderNo ?? orderNo;
         }
-        const sessionMeta = (0, support_1.createSupportSessionMeta)({
+        const sessionMeta = (0, support_2.createSupportSessionMeta)({
             source: options.source,
             productName,
             orderNo,
@@ -67,7 +68,7 @@ Page({
             return;
         }
         try {
-            const messages = (0, storage_1.getSupportChatMessages)((0, support_1.createWelcomeMessages)(sessionMeta));
+            const messages = (0, storage_1.getSupportChatMessages)((0, support_2.createWelcomeMessages)(sessionMeta));
             this.syncMessages(messages);
             this.setData({
                 status: messages.length ? "ready" : "empty",
@@ -133,25 +134,46 @@ Page({
             });
             return;
         }
-        this.scheduleReply(normalizedText);
+        void this.scheduleReply(normalizedText, nextMessages[nextMessages.length - 1]?.id ?? "");
     },
-    scheduleReply(messageText) {
+    async scheduleReply(messageText, messageId) {
         this.setData({
             pendingReply: true,
         });
-        setTimeout(() => {
-            const nextMessages = (0, storage_1.appendSupportChatMessage)({
-                id: createMessageId("service"),
-                sender: "service",
-                text: (0, support_1.createSupportReply)(messageText, this.data.sessionMeta),
-                time: formatNowTime(),
-                status: "sent",
+        try {
+            const userProfile = (0, storage_1.getUserProfile)();
+            await (0, support_1.createSupportService)().submitConsultMessage({
+                contactName: userProfile.companyName || userProfile.nickname,
+                mobile: userProfile.phone,
+                consultContentText: messageText,
             });
-            this.syncMessages(nextMessages);
+            setTimeout(() => {
+                const nextMessages = (0, storage_1.appendSupportChatMessage)({
+                    id: createMessageId("service"),
+                    sender: "service",
+                    text: (0, support_2.createSupportReply)(messageText, this.data.sessionMeta),
+                    time: formatNowTime(),
+                    status: "sent",
+                });
+                this.syncMessages(nextMessages);
+                this.setData({
+                    pendingReply: false,
+                });
+            }, 320);
+        }
+        catch {
+            (0, storage_1.patchSupportChatMessage)(messageId, {
+                status: "failed",
+            });
+            this.syncMessages((0, storage_1.getSupportChatMessages)());
             this.setData({
                 pendingReply: false,
             });
-        }, 320);
+            wx.showToast({
+                title: "留言发送失败，请重试",
+                icon: "none",
+            });
+        }
     },
     handleResend(event) {
         const { id } = event.currentTarget.dataset;
@@ -168,7 +190,7 @@ Page({
             return;
         }
         this.syncMessages((0, storage_1.getSupportChatMessages)());
-        this.scheduleReply(current.text);
+        void this.scheduleReply(current.text, id);
     },
     handleOpenFaq() {
         (0, navigate_1.navigateToRoute)(routes_1.ROUTES.supportFaq);

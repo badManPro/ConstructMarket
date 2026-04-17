@@ -8,20 +8,20 @@
 | Swagger 配置 | `http://106.15.108.65:8085/api/v3/api-docs/swagger-config` |
 | 用户端 OpenAPI | `http://106.15.108.65:8085/api/v3/api-docs/app` |
 | 管理端 OpenAPI | `http://106.15.108.65:8085/api/v3/api-docs/plat` |
-| 文档最近更新时间 | `2026-04-15` |
+| 文档最近更新时间 | `2026-04-17` |
 | 当前小程序页面数 | `22` 个页面路由 |
 | 用户端接口数 | `63` 个 |
 | 管理端接口数 | `164` 个 |
 | 联调前置批 `S0` | `已完成` |
 | 当前真实接口对接进度 | `0 / 58` 个页面模块已完成真实接口接入 |
-| 当前进度拆分 | `37` 待接入，`11` 进行中，`1` 前端待补，`9` 后端阻塞 |
-| 当前推荐起手批次 | `A. 首页 / 选型 / 搜索结果（进行中）` |
+| 当前进度拆分 | `26` 待接入，`22` 进行中，`1` 前端待补，`9` 后端阻塞 |
+| 当前推荐起手批次 | `C. 购物车 / 地址 / 发票基础能力（待接入）` |
 
 > 说明：
 > 1. 当前仓库是用户端微信小程序，只需要承接 `app` 分组。
 > 2. `plat` 分组属于后台/管理端接口，当前仓库没有管理后台页面，因此不纳入本轮接入范围。
 > 3. 当前已完成 `S0` 联调前置基座：`api/config`、`api/request`、`api/modules/*`、`api/adapters/*`、`services/*` 已落库，并补齐了 Node 侧 smoke tests。
-> 4. A 批代码已落库并通过自动化验证，但尚未完成微信开发者工具人工走查，因此当前统一标记为 `进行中`，暂不提前改成 `已完成`。
+> 4. A、B 批代码已落库并通过自动化验证；按当前安排先跳过微信开发者工具人工走查，因此统一标记为 `进行中（未走查）`，暂不提前改成 `已完成`。
 > 5. 后续每完成一批接口对接，优先更新第 1、3、4 节；第 7 节只作为接口索引，不作为真实进度看板。
 
 ## 2. 维护规则与状态定义
@@ -32,6 +32,7 @@
 2. 如果该模块导致某个批次完成数变化，同步更新第 3 节批次看板。
 3. 如果对接过程中确认 Swagger 新增接口、删除接口或命名变化，再回写第 4、5、6、7 节。
 4. 只有在“页面不再读取本地 Mock，并至少完成一次功能自测”后，才能把状态改成 `已完成`。
+5. 若本轮明确“先跳过走查”，则在说明列写明 `未走查`，状态继续保持 `进行中`。
 
 | 状态 | 含义 |
 | --- | --- |
@@ -48,11 +49,11 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | S0 | 联调前置基座 | 1 | `1/1 已完成` | `api/config`、`api/request`、`api/modules/*`、`api/adapters/*`、`services/*` | 无 | 0 |
 | A | 首页 / 选型 / 搜索结果 | 12 | `0/12 已完成`，`11` 进行中，`1` 待接入 | `home/banners`、`home/categories`、`home/new-arrival-products`、`home/hot-recommend-products`、`home/news-articles`、`home/search-products`、`dict/*` | `采购建议` 仍待切 `news/page` | 1 |
-| B | 商品详情 / 收藏加购 / 浏览记录 | 7 | `0/7 已完成`，`7` 待接入 | `product/detail`、`product/specs`、`merchant/detail`、`favorite/*`、`user/cart`、`user/browse/*`、`consult-messages` | 无 | 2 |
+| B | 商品详情 / 收藏加购 / 浏览记录 | 7 | `0/7 已完成`，`7` 进行中 | `product/detail`、`product/specs`、`merchant/detail`、`favorite/*`、`user/cart`、`user/browse/*`、`consult-messages` | 无 | 2 |
 | C | 购物车 / 地址 / 发票基础能力 | 10 | `0/10 已完成`，`10` 待接入 | `user/cart*`、`user/address*`、`user/invoice/titles*`、`user/invoice/records*` | 无 | 3 |
 | D | 下单 / 支付结果 / 订单域 | 10 | `0/10 已完成`，`7` 待接入，`3` 后端阻塞 | `user/orders`、`user/orders/detail`、`user/orders/pay`、`confirm-receipt`、`after-sale` | 优惠券接口、支付方式配置接口、创建订单接口 | 4 |
 | E | 个人中心 | 9 | `0/9 已完成`，`6` 待接入，`1` 前端待补，`2` 后端阻塞 | `favorite/product-favorites`、`user/info`、`user/home-page`、`user/address`、`user/invoice/records` | 优惠券接口、实名认证 UI | 5 |
-| F | 资讯 / 客服 / 投诉建议 | 10 | `0/10 已完成`，`6` 待接入，`4` 后端阻塞 | `news/page`、`consult-messages`、`file/upload`、`user/orders*` | 资讯详情接口、FAQ 接口、在线客服会话接口、客服入口配置接口 | 6 |
+| F | 资讯 / 客服 / 投诉建议 | 10 | `0/10 已完成`，`1` 进行中，`5` 待接入，`4` 后端阻塞 | `news/page`、`consult-messages`、`file/upload`、`user/orders*` | 资讯详情接口、FAQ 接口、在线客服会话接口、客服入口配置接口 | 6 |
 
 ## 4. 页面与模块对接总表
 
@@ -65,10 +66,10 @@
 
 | 页面 | 路由 | 模块 | 建议对接接口 | 接口条件 | 对接进度 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 首页 | `pages/home/index` | Banner 轮播 | `GET /v1/app/home/banners` | 可直接对接 | `进行中` | 已切到 `services/browse`，Banner 数据来自真实接口，待 DevTools 走查 |
-| 首页 | `pages/home/index` | 快捷选型 / 分类导航 | `GET /v1/app/home/categories` | 可直接对接 | `进行中` | 已和选型页共用真实分类树，待 DevTools 走查 |
-| 首页 | `pages/home/index` | 尖货榜单 / 新品区 | `GET /v1/app/home/new-arrival-products` | 可直接对接 | `进行中` | 已适配 `{ product, skuList }` 嵌套 DTO，待 DevTools 走查 |
-| 首页 | `pages/home/index` | 热门商品推荐 | `GET /v1/app/home/hot-recommend-products` | 可直接对接 | `进行中` | 已切真实推荐流，待 DevTools 走查 |
+| 首页 | `pages/home/index` | Banner 轮播 | `GET /v1/app/home/banners` | 可直接对接 | `进行中` | 已切到 `services/browse`，Banner 数据来自真实接口，当前未走查 |
+| 首页 | `pages/home/index` | 快捷选型 / 分类导航 | `GET /v1/app/home/categories` | 可直接对接 | `进行中` | 已和选型页共用真实分类树，当前未走查 |
+| 首页 | `pages/home/index` | 尖货榜单 / 新品区 | `GET /v1/app/home/new-arrival-products` | 可直接对接 | `进行中` | 已适配 `{ product, skuList }` 嵌套 DTO，当前未走查 |
+| 首页 | `pages/home/index` | 热门商品推荐 | `GET /v1/app/home/hot-recommend-products` | 可直接对接 | `进行中` | 已切真实推荐流，当前未走查 |
 | 首页 | `pages/home/index` | 搜索跳转 | `POST /v1/app/home/search-products` | 可直接对接 | `进行中` | 首页仍只负责带词跳转，结果页已切到真实搜索接口 |
 | 首页 | `pages/home/index` | 建材资讯入口 | `GET /v1/app/home/news-articles`、`POST /v1/app/news/page` | 可组合对接 | `进行中` | 首页入口已改读 `home/news-articles` 分组返回，列表页仍待后续新闻域联调 |
 | 选型 | `pages/category/index` | 一级类目 / 二级类目 | `GET /v1/app/home/categories` | 可直接对接 | `进行中` | 左右结构已切到真实分类树，元数据文案改为通用生成态 |
@@ -77,13 +78,13 @@
 | 搜索结果 | `package-catalog/search/result` | 搜索、排序、筛选结果 | `POST /v1/app/home/search-products` | 可直接对接 | `进行中` | 已切真实搜索；价格区间走服务端，`minOrder/material` 暂由前端兼容细筛 |
 | 搜索结果 | `package-catalog/search/result` | 更多类目抽屉 | `GET /v1/app/home/categories` | 可直接对接 | `进行中` | 抽屉数据已来自真实分类树，并保留子类目 ID 透传 |
 | 搜索结果 | `package-catalog/search/result` | 筛选项枚举 | `GET /v1/app/dict/simple-list`、`GET /v1/app/dict/tree-list` | 可组合对接 | `进行中` | 已接入字典接口并保留 mock fallback，待根据真实字典值补精确映射 |
-| 商品详情 | `package-catalog/product/detail` | 商品主信息 | `GET /v1/app/product/detail` | 可直接对接 | `待接入` | 包含图集、标题、价格、起订量、服务说明 |
-| 商品详情 | `package-catalog/product/detail` | 店铺信息 | `GET /v1/app/merchant/detail` | 可直接对接 | `待接入` | 承接当前“店铺信息”卡片 |
-| 商品详情 | `package-catalog/product/detail` | 规格参数 | `GET /v1/app/product/specs` | 可直接对接 | `待接入` | 对应规格弹层和商品参数区 |
-| 商品详情 | `package-catalog/product/detail` | 收藏 / 取消收藏 | `POST /v1/app/user/favorite/product-favorites/{productId}`、`DELETE /v1/app/user/favorite/product-favorites/{productId}` | 可直接对接 | `待接入` | 首页、搜索页、详情页、收藏页统一复用 |
-| 商品详情 | `package-catalog/product/detail` | 加入购物车 | `POST /v1/app/user/cart` | 可直接对接 | `待接入` | 当前按钮行为与接口动作一致 |
-| 商品详情 | `package-catalog/product/detail` | 浏览记录 | `POST /v1/app/user/browse/{productId}` | 可直接对接 | `待接入` | 建议在详情页 `onLoad/onShow` 时补记 |
-| 商品详情 | `package-catalog/product/detail` | 在线咨询入口 | `POST /v1/app/consult-messages` | 可组合对接 | `待接入` | 当前可先接入“发送留言”，完整会话仍看客服域缺口 |
+| 商品详情 | `package-catalog/product/detail` | 商品主信息 | `GET /v1/app/product/detail` | 可直接对接 | `进行中` | 已切到 `services/browse` 聚合详情 DTO，当前未走查 |
+| 商品详情 | `package-catalog/product/detail` | 店铺信息 | `GET /v1/app/merchant/detail` | 可直接对接 | `进行中` | 已按真实 `id` 查询商户详情并回填店铺卡，当前未走查 |
+| 商品详情 | `package-catalog/product/detail` | 规格参数 | `GET /v1/app/product/specs` | 可直接对接 | `进行中` | 已按真实 `specs[]` 适配规格分组与 SKU 选项，当前未走查 |
+| 商品详情 | `package-catalog/product/detail` | 收藏 / 取消收藏 | `POST /v1/app/user/favorite/product-favorites/{productId}`、`DELETE /v1/app/user/favorite/product-favorites/{productId}` | 可直接对接 | `进行中` | 首页、搜索页、选型页、详情页、收藏页已统一经由服务层切换，当前未走查 |
+| 商品详情 | `package-catalog/product/detail` | 加入购物车 | `POST /v1/app/user/cart` | 可直接对接 | `进行中` | 详情页加入购物车已改走真实接口并回刷购物车预览数，当前未走查 |
+| 商品详情 | `package-catalog/product/detail` | 浏览记录 | `POST /v1/app/user/browse/{productId}` | 可直接对接 | `进行中` | 详情页进入时已补记浏览埋点，当前未走查 |
+| 商品详情 | `package-catalog/product/detail` | 在线咨询入口 | `POST /v1/app/consult-messages` | 可组合对接 | `进行中` | 详情页仍进入在线咨询页，但聊天页发送消息已接真实留言接口，当前未走查 |
 | 建材资讯 | `package-content/article/list` | 分类 Tab / 资讯列表 | `POST /v1/app/news/page` | 可直接对接 | `待接入` | 列表页主接口 |
 | 资讯详情 | `package-content/article/detail` | 正文内容 | 缺少 `news detail` 类接口 | 缺接口 | `后端阻塞` | 目前只有列表接口，没有独立资讯详情接口 |
 | 资讯详情 | `package-content/article/detail` | 相关推荐 | `POST /v1/app/news/page` | 可组合对接 | `待接入` | 可按同分类再拉一页列表做兜底推荐 |
@@ -107,9 +108,9 @@
 | 发票中心 | `package-profile/profile/invoice` | 可开票订单 | `POST /v1/app/user/orders`、`GET /v1/app/user/orders/detail` | 可组合对接 | `待接入` | 没有独立“可开票订单”接口，需要从订单域筛选 |
 | 收货地址 | `package-profile/profile/address/list` | 地址列表 / 默认地址 / 删除 | `GET /v1/app/user/address`、`DELETE /v1/app/user/address/{addressId}` | 可直接对接 | `待接入` | 默认地址字段随列表返回 |
 | 地址编辑 | `package-profile/profile/address/edit` | 新增 / 编辑地址 | `POST /v1/app/user/address`、`PUT /v1/app/user/address/{addressId}` | 可直接对接 | `待接入` | 与当前表单能力一致 |
-| 收藏夹 | `package-profile/profile/favorite` | 收藏商品列表 | `GET /v1/app/user/favorite/product-favorites` | 可直接对接 | `待接入` | 当前列表页可直接切换到接口数据 |
-| 收藏夹 | `package-profile/profile/favorite` | 取消收藏 | `DELETE /v1/app/user/favorite/product-favorites/{productId}` | 可直接对接 | `待接入` | 与现有取消动作一致 |
-| 收藏夹 | `package-profile/profile/favorite` | 快捷加购 | `POST /v1/app/user/cart` | 可直接对接 | `待接入` | 当前“快捷加购”不依赖额外接口 |
+| 收藏夹 | `package-profile/profile/favorite` | 收藏商品列表 | `GET /v1/app/user/favorite/product-favorites` | 可直接对接 | `进行中` | 收藏夹已切真实收藏列表，并保留 mock fallback，当前未走查 |
+| 收藏夹 | `package-profile/profile/favorite` | 取消收藏 | `DELETE /v1/app/user/favorite/product-favorites/{productId}` | 可直接对接 | `进行中` | 取消收藏已统一走服务层真实接口，当前未走查 |
+| 收藏夹 | `package-profile/profile/favorite` | 快捷加购 | `POST /v1/app/user/cart` | 可直接对接 | `进行中` | 快捷加购已改走真实购物车接口并回刷角标，当前未走查 |
 | 优惠券 | `package-profile/profile/coupon` | 可用券 / 不可用券 / 选择使用 | 缺少 `coupon list/select` 类接口 | 缺接口 | `后端阻塞` | 整页暂无可接接口 |
 | 个人信息 | `package-profile/profile/info` | 当前用户资料读取 / 更新 | `GET /v1/app/user/info`、`PUT /v1/app/user/info` | 可直接对接 | `待接入` | 当前表单结构能直接落接口 |
 | 个人信息 | `package-profile/profile/info` | 实名认证 | `POST /v1/app/user/real-auth` | 可直接对接 | `前端待补` | Swagger 已有接口，但当前页面还没有实名认证 UI 模块 |
@@ -117,7 +118,7 @@
 | 我的 | `pages/profile/index` | 收藏数 / 发票数 / 地址数汇总 | `GET /v1/app/user/favorite/product-favorites`、`POST /v1/app/user/invoice/records`、`GET /v1/app/user/address` | 可组合对接 | `待接入` | 当前首页摘要卡可由多个接口聚合 |
 | 我的 | `pages/profile/index` | 优惠券入口 | 缺少 `coupon list` 类接口 | 缺接口 | `后端阻塞` | 入口已保留，但详情页仍只能本地 Mock |
 | 客服系统 | `package-support/support/index` | 客服入口卡片 | 暂无专用接口 | 缺接口 | `后端阻塞` | 当前服务入口说明和卡片都是前端静态数据 |
-| 在线咨询 | `package-support/support/chat` | 发送咨询消息 | `POST /v1/app/consult-messages` | 可部分对接 | `待接入` | 可先把“发送消息 / 留言”改成真实接口提交 |
+| 在线咨询 | `package-support/support/chat` | 发送咨询消息 | `POST /v1/app/consult-messages` | 可部分对接 | `进行中` | 已改为优先提交真实留言接口，同时保留本地会话壳子与自动回复，当前未走查 |
 | 在线咨询 | `package-support/support/chat` | 会话历史、客服回复、重发 | 缺少 `chat session/history/reply` 类接口 | 缺接口 | `后端阻塞` | 整页核心链路仍需 Mock |
 | 常见问题 | `package-support/support/faq` | FAQ 分类 / 问题列表 | 缺少 `faq list` 类接口 | 缺接口 | `后端阻塞` | 整页暂无可接接口 |
 | 投诉建议 | `package-support/support/complaint` | 提交投诉建议 | `POST /v1/app/consult-messages` | 可组合对接 | `待接入` | 可将投诉建议也落为咨询留言 |

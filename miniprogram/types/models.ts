@@ -13,6 +13,7 @@ export type ProductCard = {
   spuId: string;
   skuId: string;
   brandId?: string;
+  merchantId?: string;
   name: string;
   cover: string;
   brand: string;
@@ -31,11 +32,24 @@ export type ProductCard = {
   isFavorite: boolean;
 };
 
+export type ProductSkuOption = {
+  skuId: string;
+  skuCode: string;
+  name: string;
+  displayText: string;
+  optionValues: string[];
+  imageUrl: string;
+  price: number;
+  originalPrice?: number;
+  stock?: number;
+};
+
 export type ProductDetail = ProductCard & {
   gallery: string[];
   subtitle: string;
   description: string;
   specGroups: Array<{ groupName: string; options: string[] }>;
+  skuOptions?: ProductSkuOption[];
   selectedSpecText: string;
   params: Array<{ key: string; value: string }>;
   serviceTags: string[];

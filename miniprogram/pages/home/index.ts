@@ -2,7 +2,6 @@ import { ROUTES } from "../../constants/routes";
 import { createBrowseService } from "../../services/browse";
 import type { ArticleEntrance, BannerCard, CategoryShortcut, SearchProduct } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
-import { getFavoriteIds, toggleFavoriteId } from "../../utils/storage";
 import { getPageStatusOverride, type PageStatus } from "../../utils/page";
 
 type HomeCategoryItem = CategoryShortcut & {
@@ -64,7 +63,7 @@ Page({
     }
 
     try {
-      const homeData = await createBrowseService().getHomePageData(getFavoriteIds());
+      const homeData = await createBrowseService().getHomePageData();
       const hasContent =
         homeData.banners.length ||
         homeData.categoryNav.length ||
@@ -120,19 +119,33 @@ Page({
     if (!id) return;
     navigateWithParams(ROUTES.productDetail, { id });
   },
-  handleFavoriteTap(
+  async handleFavoriteTap(
     event: WechatMiniprogram.Event & {
       detail?: { id?: string };
     },
   ) {
     const { id } = event.detail ?? {};
     if (!id) return;
-    const favoriteIds = toggleFavoriteId(id);
-    void this.hydrateHomeSections();
-    wx.showToast({
-      title: favoriteIds.includes(id) ? "已加入收藏" : "已取消收藏",
-      icon: "none",
-    });
+
+    const currentProduct =
+      this.data.campaignProducts.find((item) => item.id === id) ??
+      this.data.hotProducts.find((item) => item.id === id);
+
+    if (!currentProduct) return;
+
+    try {
+      const result = await createBrowseService().toggleProductFavorite(id, currentProduct.isFavorite);
+      await this.hydrateHomeSections();
+      wx.showToast({
+        title: result.nextIsFavorite ? "已加入收藏" : "已取消收藏",
+        icon: "none",
+      });
+    } catch {
+      wx.showToast({
+        title: "收藏操作失败",
+        icon: "none",
+      });
+    }
   },
   handleArticleTap(event: WechatMiniprogram.Event) {
     const { route, params } = event.currentTarget.dataset as {

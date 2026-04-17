@@ -5,6 +5,7 @@ import type {
   BrandFilterOption,
   BrowseProductDetail,
   CategoryShortcut,
+  ProductSkuOption,
   SearchProduct,
 } from "../../types/models";
 
@@ -91,11 +92,97 @@ function pickStringArray(source: Record<string, unknown>, keys: string[], fallba
   return fallback;
 }
 
-function flattenProductRecord(source: Record<string, unknown>) {
-  const product = isRecord(source.product) ? source.product : source;
-  const skuList = Array.isArray(source.skuList)
+function parseJsonRecord(value: unknown) {
+  if (isRecord(value)) {
+    return value;
+  }
+
+  if (typeof value !== "string" || !value.trim()) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return isRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function uniqueStrings(values: string[]) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function stripHtmlTags(input: string) {
+  return input
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractSkuList(source: Record<string, unknown>) {
+  return Array.isArray(source.skuList)
     ? source.skuList.filter((item): item is Record<string, unknown> => isRecord(item))
     : [];
+}
+
+function extractSpecSnapshot(source: Record<string, unknown>) {
+  const snapshot = isRecord(source.specSnapshot) ? source.specSnapshot : parseJsonRecord(source.specJson);
+  return snapshot && isRecord(snapshot) ? snapshot : null;
+}
+
+function getSkuOptionValues(source: Record<string, unknown>) {
+  const snapshot = extractSpecSnapshot(source);
+  const items = snapshot ? extractArray(snapshot.specs) : [];
+
+  return items
+    .sort(
+      (left, right) =>
+        pickNumber(left, ["sortNo"], Number.MAX_SAFE_INTEGER) -
+        pickNumber(right, ["sortNo"], Number.MAX_SAFE_INTEGER),
+    )
+    .map((item) => pickString(item, ["specValue", "value", "name"], ""))
+    .filter(Boolean);
+}
+
+function getSkuDisplayText(source: Record<string, unknown>) {
+  const snapshot = extractSpecSnapshot(source);
+  const displayText = snapshot ? pickString(snapshot, ["displayText"], "") : "";
+
+  if (displayText) {
+    return displayText;
+  }
+
+  const optionValues = getSkuOptionValues(source);
+  return optionValues.join(" / ") || pickString(source, ["skuName"], "默认规格");
+}
+
+function adaptSkuOptions(input: Record<string, unknown>): ProductSkuOption[] {
+  return extractSkuList(input).flatMap((item) => {
+    const skuCode = pickString(item, ["skuCode", "id"], "");
+    if (!skuCode) {
+      return [];
+    }
+
+    return [
+      {
+        skuId: pickString(item, ["id", "skuCode"], skuCode),
+        skuCode,
+        name: pickString(item, ["skuName"], skuCode),
+        displayText: getSkuDisplayText(item),
+        optionValues: getSkuOptionValues(item),
+        imageUrl: pickString(item, ["imageUrl"], ""),
+        price: pickNumber(item, ["salePrice"], 0),
+        originalPrice: pickNumber(item, ["marketPrice"], 0) || undefined,
+        stock: pickNumber(item, ["stockQty"], 0) || undefined,
+      },
+    ];
+  });
+}
+
+function flattenProductRecord(source: Record<string, unknown>) {
+  const product = isRecord(source.product) ? source.product : source;
+  const skuList = extractSkuList(source);
   const primarySku = skuList[0] ?? {};
   const brandInfo = isRecord(product.brandInfo) ? product.brandInfo : {};
   const categoryInfo = isRecord(product.categoryInfo) ? product.categoryInfo : {};
@@ -107,10 +194,12 @@ function flattenProductRecord(source: Record<string, unknown>) {
     brandName: pickString(brandInfo, ["brandName", "name"], ""),
     categoryName: pickString(categoryInfo, ["categoryName", "name"], ""),
     categoryCode: pickString(categoryInfo, ["categoryCode"], pickString(source, ["categoryCode"], "")),
-    skuId: pickString(primarySku, ["id", "skuCode"], pickString(source, ["skuId"], "")),
+    merchantId: pickString(product, ["merchantId"], pickString(primarySku, ["merchantId"], pickString(source, ["merchantId"], ""))),
+    skuId: pickString(primarySku, ["skuCode", "id"], pickString(source, ["skuCode", "skuId"], "")),
     skuName: pickString(primarySku, ["skuName"], ""),
     imageUrl: pickString(primarySku, ["imageUrl"], pickString(product, ["coverImageUrl", "imageUrl"], "")),
     salePrice: pickNumber(primarySku, ["salePrice"], pickNumber(product, ["salePrice"], 0)),
+    marketPrice: pickNumber(primarySku, ["marketPrice"], pickNumber(product, ["marketPrice"], 0)),
     salesQty: pickNumber(primarySku, ["salesQty"], pickNumber(product, ["salesQty"], 0)),
     stockQty: pickNumber(primarySku, ["stockQty"], pickNumber(product, ["stockQty"], 0)),
   };
@@ -285,6 +374,7 @@ function mapSearchProduct(source: Record<string, unknown>, favoriteIds: string[]
     spuId: pickString(record, ["spuId", "productSpuId", "productSpuNo"], id),
     skuId: pickString(record, ["skuId", "defaultSkuId", "skuCode"], `${id}-sku`),
     brandId: pickString(record, ["brandId"], pickString(brandInfo, ["id", "brandCode"], "")),
+    merchantId: pickString(record, ["merchantId"], ""),
     name: pickString(record, ["name", "productName", "title"], "建材商品"),
     cover: pickString(record, ["cover", "coverUrl", "coverImageUrl", "imageUrl", "image"], "建材商品"),
     brand: pickString(record, ["brand", "brandName"], "ConstructMarket"),
@@ -362,6 +452,18 @@ export function adaptSearchProducts(input: unknown, favoriteIds: string[] = []):
   return extractArray(input).map((item) => mapSearchProduct(item, favoriteIds));
 }
 
+export function adaptFavoriteProducts(input: unknown): SearchProduct[] {
+  return extractArray(input)
+    .sort(
+      (left, right) =>
+        Date.parse(pickString(right, ["createdAt"], "")) - Date.parse(pickString(left, ["createdAt"], "")),
+    )
+    .map((item) => ({
+      ...mapSearchProduct(item, []),
+      isFavorite: true,
+    }));
+}
+
 export function adaptBrandOptions(input: unknown): BrandFilterOption[] {
   return extractArray(input)
     .map((item) => {
@@ -424,30 +526,68 @@ export function adaptProductDetail(
   }
 
   const product = mapSearchProduct(detail, favoriteIds);
-  const merchant = isRecord(merchantInput) ? merchantInput : {};
-  const specs = extractArray(specsInput).map((item, index) => ({
-    groupName: pickString(item, ["groupName", "name"], `规格组 ${index + 1}`),
-    options: pickStringArray(item, ["options", "values"], []),
+  const detailMerchant = isRecord(detail.merchant) ? detail.merchant : {};
+  const merchant = isRecord(merchantInput) ? merchantInput : detailMerchant;
+  const specGroupsInput =
+    isRecord(specsInput) && Array.isArray(specsInput.specs) ? specsInput.specs : specsInput;
+  const specs = extractArray(specGroupsInput).map((item, index) => ({
+    groupName: pickString(item, ["specName", "groupName", "name"], `规格组 ${index + 1}`),
+    options: extractArray(item.values)
+      .sort(
+        (left, right) =>
+          pickNumber(left, ["sortNo"], Number.MAX_SAFE_INTEGER) -
+          pickNumber(right, ["sortNo"], Number.MAX_SAFE_INTEGER),
+      )
+      .map((valueItem) => pickString(valueItem, ["specValue", "value", "name"], ""))
+      .filter(Boolean),
   }));
+  const skuOptions = adaptSkuOptions(detail);
+  const serviceTags = uniqueStrings([
+    ...pickStringArray(detail, ["serviceTags", "tags", "tagNames"]),
+    ...pickStringArray(merchant, ["merchantTags"]),
+  ]);
+  const fallbackParams = uniqueStrings([
+    product.brand ? `品牌:${product.brand}` : "",
+    product.categoryName ? `分类:${product.categoryName}` : "",
+    skuOptions[0]?.skuCode ? `SKU:${skuOptions[0].skuCode}` : "",
+  ]).map((item) => {
+    const [key, value] = item.split(":");
+    return {
+      key,
+      value,
+    };
+  });
+  const freightAmount = pickNumber(detail, ["freightAmount"], 0);
 
   return {
     ...product,
-    gallery: pickStringArray(detail, ["gallery", "images", "albums"], [product.cover]),
-    subtitle: pickString(detail, ["subtitle", "sellingPoint"], product.name),
-    description: pickString(detail, ["description", "summary"], "真实接口商品详情"),
+    gallery: pickStringArray(detail, ["gallery", "images", "albums"], []).length
+      ? pickStringArray(detail, ["gallery", "images", "albums"])
+      : pickStringArray(isRecord(detail.product) ? detail.product : detail, ["imageAlbum"], [product.cover]),
+    subtitle: pickString(detail, ["subtitle", "sellingPoint"], "") ||
+      pickString(isRecord(detail.product) ? detail.product : detail, ["productSubtitle", "subtitle", "sellingPoint"], product.name),
+    description: stripHtmlTags(
+      pickString(detail, ["detailContent", "description", "summary"], "") ||
+        pickString(isRecord(detail.product) ? detail.product : detail, ["detailContent", "description", "summary"], "真实接口商品详情"),
+    ),
     specGroups: specs.length ? specs : [{ groupName: "规格", options: [product.model] }],
-    selectedSpecText: pickString(detail, ["selectedSpecText"], "请选择规格"),
-    params: extractArray(detail.params).map((item) => ({
-      key: pickString(item, ["key", "name"], "参数"),
-      value: pickString(item, ["value", "text"], "-"),
-    })),
-    serviceTags: pickStringArray(detail, ["serviceTags", "tags"], []),
+    skuOptions,
+    selectedSpecText: skuOptions.length === 1 ? skuOptions[0].displayText : "请选择规格",
+    params: extractArray(detail.params).length
+      ? extractArray(detail.params).map((item) => ({
+          key: pickString(item, ["key", "name"], "参数"),
+          value: pickString(item, ["value", "text"], "-"),
+        }))
+      : fallbackParams,
+    serviceTags: serviceTags.length ? serviceTags : product.tags,
     shopInfo: {
       shopId: pickString(merchant, ["shopId", "merchantId", "id"], "shop-unknown"),
-      shopName: pickString(merchant, ["shopName", "merchantName", "name"], "建材商户"),
-      score: pickNumber(merchant, ["score", "rate"], 4.8),
+      shopName: pickString(merchant, ["shopName", "merchantName", "merchantShortName", "name"], "建材商户"),
+      score: pickNumber(merchant, ["score", "ratingScore", "rate"], 4.8),
     },
-    deliveryDesc: pickString(detail, ["deliveryDesc", "deliveryDescription"], "请以商家发货说明为准"),
+    deliveryDesc:
+      pickString(detail, ["deliveryDesc", "deliveryDescription"], "") ||
+      (freightAmount > 0 ? `预计运费 ¥${freightAmount}，请以下单页最终金额为准。` : "请以商家发货说明为准"),
     recommendedIds: pickStringArray(detail, ["recommendedIds"], []),
   };
 }

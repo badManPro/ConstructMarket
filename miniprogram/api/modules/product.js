@@ -4,6 +4,9 @@ exports.createProductApi = createProductApi;
 const request_1 = require("../request");
 function createProductApi(dependencies = {}) {
     const config = dependencies.config;
+    const buildBrowsePath = (productId, browseSourceCode) => browseSourceCode
+        ? `/v1/app/user/browse/${productId}?browseSourceCode=${encodeURIComponent(browseSourceCode)}`
+        : `/v1/app/user/browse/${productId}`;
     return {
         getProductDetail(productId) {
             return (0, request_1.apiRequest)({
@@ -13,7 +16,6 @@ function createProductApi(dependencies = {}) {
                     productId,
                 },
                 config,
-                requireAuth: false,
             });
         },
         getProductSpecs(productId) {
@@ -24,7 +26,6 @@ function createProductApi(dependencies = {}) {
                     productId,
                 },
                 config,
-                requireAuth: false,
             });
         },
         getMerchantDetail(merchantId) {
@@ -32,15 +33,14 @@ function createProductApi(dependencies = {}) {
                 path: "/v1/app/merchant/detail",
                 method: "GET",
                 data: {
-                    merchantId,
+                    id: merchantId,
                 },
                 config,
-                requireAuth: false,
             });
         },
-        addBrowseLog(productId) {
+        addBrowseLog(productId, browseSourceCode) {
             return (0, request_1.apiRequest)({
-                path: `/v1/app/user/browse/${productId}`,
+                path: buildBrowsePath(productId, browseSourceCode),
                 method: "POST",
                 config,
             });

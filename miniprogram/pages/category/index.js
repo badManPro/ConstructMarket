@@ -4,7 +4,6 @@ const routes_1 = require("../../constants/routes");
 const browse_1 = require("../../mock/browse");
 const browse_2 = require("../../services/browse");
 const navigate_1 = require("../../utils/navigate");
-const storage_1 = require("../../utils/storage");
 const page_1 = require("../../utils/page");
 function countCategories(baseCategories, productList) {
     const parentMap = new Map(baseCategories
@@ -224,7 +223,6 @@ Page({
                 selectedBrandIds,
                 sortOption: selectedSort,
                 filterState,
-                favoriteIds: (0, storage_1.getFavoriteIds)(),
             });
             const relatedCategories = countCategories(options.relatedCategories ?? this.data.relatedCategories, result.productList);
             const brandOptions = buildBrandOptions((options.brandOptions ?? this.data.brandOptions).map(({ id, name }) => ({ id, name })), selectedBrandIds);
@@ -363,12 +361,27 @@ Page({
             return;
         (0, navigate_1.navigateWithParams)(routes_1.ROUTES.productDetail, { id });
     },
-    handleFavoriteTap(event) {
+    async handleFavoriteTap(event) {
         const { id } = event.detail ?? {};
         if (!id)
             return;
-        (0, storage_1.toggleFavoriteId)(id);
-        void this.refreshProductList();
+        const currentProduct = this.data.productList.find((item) => item.id === id);
+        if (!currentProduct)
+            return;
+        try {
+            const result = await (0, browse_2.createBrowseService)().toggleProductFavorite(id, currentProduct.isFavorite);
+            await this.refreshProductList();
+            wx.showToast({
+                title: result.nextIsFavorite ? "已加入收藏" : "已取消收藏",
+                icon: "none",
+            });
+        }
+        catch {
+            wx.showToast({
+                title: "收藏操作失败",
+                icon: "none",
+            });
+        }
     },
     handleRetry() {
         this.setData({

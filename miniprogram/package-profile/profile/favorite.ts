@@ -1,9 +1,9 @@
 import { ROUTES } from "../../constants/routes";
-import { getFavoriteProducts } from "../../mock/browse";
+import { createBrowseService } from "../../services/browse";
 import type { SearchProduct } from "../../types/models";
 import { navigateToRoute, navigateWithParams } from "../../utils/navigate";
 import { getPageStatusOverride, type PageStatus } from "../../utils/page";
-import { addCartItem, getCartCount, getFavoriteIds, toggleFavoriteId } from "../../utils/storage";
+import { getCartCount } from "../../utils/storage";
 
 Page({
   data: {
@@ -26,7 +26,7 @@ Page({
       this.hydrateFavorites();
     }
   },
-  hydrateFavorites(override: PageStatus | null = null) {
+  async hydrateFavorites(override: PageStatus | null = null) {
     if (override === "loading") {
       this.setData({
         status: "loading",
@@ -44,7 +44,7 @@ Page({
     }
 
     try {
-      const favorites = getFavoriteProducts(getFavoriteIds());
+      const favorites = (await createBrowseService().getFavoriteShellData()).favoriteProducts;
 
       this.setData({
         status: favorites.length ? "ready" : "empty",
@@ -87,46 +87,55 @@ Page({
       id,
     });
   },
-  handleToggleFavorite(event: WechatMiniprogram.Event) {
-    const { id } = event.currentTarget.dataset as { id?: string };
-    if (!id) return;
-
-    toggleFavoriteId(id);
-    this.hydrateFavorites();
-    wx.showToast({
-      title: "已取消收藏",
-      icon: "none",
-    });
-  },
-  handleQuickAdd(event: WechatMiniprogram.Event) {
+  async handleToggleFavorite(event: WechatMiniprogram.Event) {
     const { id } = event.currentTarget.dataset as { id?: string };
     if (!id) return;
 
     const product = this.data.favorites.find((item) => item.id === id);
     if (!product) return;
 
-    const cartPreviewCount = addCartItem({
-      id: `${product.id}-${Date.now()}`,
-      productId: product.id,
-      skuId: product.skuId,
-      name: product.name,
-      cover: product.cover,
-      model: product.model,
-      price: product.price,
-      unit: product.unit,
-      quantity: product.minOrderQty,
-      minOrderQty: product.minOrderQty,
-      checked: true,
-      invalid: false,
-    });
+    try {
+      await createBrowseService().toggleProductFavorite(id, product.isFavorite);
+      await this.hydrateFavorites();
+      wx.showToast({
+        title: "已取消收藏",
+        icon: "none",
+      });
+    } catch {
+      wx.showToast({
+        title: "取消收藏失败",
+        icon: "none",
+      });
+    }
+  },
+  async handleQuickAdd(event: WechatMiniprogram.Event) {
+    const { id } = event.currentTarget.dataset as { id?: string };
+    if (!id) return;
 
-    this.setData({
-      cartPreviewCount,
-    });
+    const product = this.data.favorites.find((item) => item.id === id);
+    if (!product) return;
 
-    wx.showToast({
-      title: "已加入购物车",
-      icon: "success",
-    });
+    try {
+      const result = await createBrowseService().addProductToCart({
+        product,
+        quantity: product.minOrderQty,
+        selectedSkuCode: product.skuId,
+        selectedSpecText: product.specText || product.model,
+      });
+
+      this.setData({
+        cartPreviewCount: result.cartPreviewCount,
+      });
+
+      wx.showToast({
+        title: "已加入购物车",
+        icon: "success",
+      });
+    } catch {
+      wx.showToast({
+        title: "加购失败",
+        icon: "none",
+      });
+    }
   },
 });

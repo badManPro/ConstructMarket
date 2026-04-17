@@ -47,7 +47,25 @@ function createSupportService(dependencies = {}) {
             };
         },
         async submitConsultMessage(payload) {
-            return supportApi.postConsultMessage(payload);
+            if (!(0, config_1.shouldUseRemote)(config)) {
+                return {
+                    source: "mock",
+                };
+            }
+            try {
+                await supportApi.postConsultMessage(payload);
+                return {
+                    source: "remote",
+                };
+            }
+            catch (error) {
+                if ((0, config_1.shouldAllowMockFallback)(config)) {
+                    return {
+                        source: "mock",
+                    };
+                }
+                throw error;
+            }
         },
         async uploadEvidence(payload) {
             return (0, support_3.adaptUploadResult)(await supportApi.uploadFile(payload));
